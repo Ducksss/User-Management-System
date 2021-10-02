@@ -1,7 +1,5 @@
-# Uji-Matcha-Store
-
-# Note
-Open for collab
+# User-Management-System
+For ESDE and ESDE
 
 # Installation:
 To run this project, make sure to download and run the SQL, followed by cloning this repository. Be sure to input your information in a .ENV file as well as the database.
