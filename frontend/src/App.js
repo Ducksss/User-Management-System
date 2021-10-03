@@ -134,6 +134,10 @@ export default function App(props) {
         <Route path="/guide">
           <MainLandingPage />
         </Route>
+
+        <Route path="/" >
+          <PricingPage />
+        </Route>
       </Switch>
     </Router>
   );
