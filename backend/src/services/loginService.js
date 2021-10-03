@@ -15,7 +15,7 @@ module.exports.authenticateUser = (email, callback) => {
                                 `SELECT 
                                     * 
                                 FROM 
-                                    sp_shop.users 
+                                user_management_system.users 
                                 WHERE 
                                     email = ?
                                 `;

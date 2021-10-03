@@ -19,7 +19,7 @@ import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { useForm } from 'react-hook-form';
 import { useHistory } from "react-router-dom";
-import { Formik } from 'formik';
+import { Formik, Form } from 'formik';
 import ClipLoader from "react-spinners/ClipLoader";
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
@@ -48,7 +48,7 @@ const SocialButton = styled.a`
 const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
 const DividerText = tw.div`leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform -translate-y-1/2 absolute inset-x-0 top-1/2 bg-transparent`;
 
-const Form = tw.form`mx-auto max-w-xs`;
+// const Form = tw.form`mx-auto max-w-xs`;
 const Input = tw.input`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5 first:mt-0`;
 const SubmitButton = styled.button`
   ${tw`mt-5 tracking-wide font-semibold bg-primary-500 text-gray-100 w-full py-4 rounded-lg hover:bg-primary-900 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none`}
@@ -99,16 +99,50 @@ export default function Signup() {
   // Team's Defined Variables
   const history = useHistory();
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+
+  const validationSchema = Yup.object({
+    firstName: Yup.string()
+      .max(15, 'Must be 15 characters or less')
+      .required('Your first name is required'),
+    lastName: Yup.string()
+      .max(20, 'Must be 20 characters or less')
+      .required('Your last name is required'),
+    email: Yup.string()
+      .email('Invalid email address')
+      .required('Your email is required')
+      .test('Unique Email', 'Email already in use', // <- key, message
+        function (value, context) {
+          return new Promise((resolve, reject) => {
+            axios.get(`http://localhost:8003/api/u/user/${value}/available`)
+              .then((res) => {
+                resolve(true)
+              })
+              .catch((error) => {
+                if (error.response.data.content === "The email has already been taken.") {
+                  resolve(false);
+                }
+              })
+          })
+        }
+      ),
+    contactNumber: Yup.string()
+      .required('Your contact number is required'),
+    password: Yup.string()
+      .required('Your password is required')
+      .min(5, "Your password must be minimally 5 characters long!"),
+    passwordConfirmation: Yup.string()
+      .required('You need to confirm your password')
+      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
+  })
 
   const registerUserInformation = (values) => {
     axios
       .post(`${config.baseUrl}/u/user/create-account`, {
+        firstName: values.firstName,
+        lastName: values.lastName,
         email: values.email,
-        username: values.username,
         password: values.password,
-        contact: values.contact,
-        address: values.address
+        contact: values.contactNumber,
       })
       .then((results) => {
         history.push({
@@ -148,57 +182,12 @@ export default function Signup() {
                     email: '',
                     contactNumber: '',
                     password: '',
-                    acceptedTerms: false, // added for our checkbox
-                    jobType: '', // added for our select
+                    passwordConfirmation: '',
                   }}
-                  validationSchema={Yup.object({
-                    firstName: Yup.string()
-                      .max(15, 'Must be 15 characters or less')
-                      .required('Your first name is required'),
-                    lastName: Yup.string()
-                      .max(20, 'Must be 20 characters or less')
-                      .required('Your last name is required'),
-                    email: Yup.string()
-                      .email('Invalid email address')
-                      .required('Your email is required')
-                      .test('Unique Email', 'Email already in use', // <- key, message
-                        function (value, context) {
-                          return new Promise((resolve, reject) => {
-                            axios.get(`http://localhost:8003/api/u/user/${value}/available`)
-                              .then((res) => {
-                                resolve(true)
-                              })
-                              .catch((error) => {
-                                if (error.response.data.content === "The email has already been taken.") {
-                                  resolve(false);
-                                }
-                              })
-                          })
-                        }
-                      ),
-                    contactNumber: Yup.string()
-                      .required('Your contact number is required'),
-                    password: Yup.string()
-                      .required('Your password is required')
-                      .min(5, "Your password must be minimally 5 characters long!"),
-                    passwordConfirmation: Yup.string()
-                      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
-                    acceptedTerms: Yup.boolean()
-                      .required('Required')
-                      .oneOf([true], 'You must accept the terms and conditions.'),
-                    jobType: Yup.string()
-                      .oneOf(
-                        ['designer', 'development', 'product', 'other'],
-                        'Invalid Job Type'
-                      )
-                      .required('Required'),
-                  })}
                   validateOnChange={false}
-                  onSubmit={(values, { setSubmitting }) => {
-                    setTimeout(() => {
-                      alert(JSON.stringify(values, null, 2));
-                      setSubmitting(false);
-                    }, 400);
+                  validationSchema={validationSchema}
+                  onSubmit={(values) => {
+                    registerUserInformation(values);
                   }}
                 >
                   {({
@@ -208,12 +197,11 @@ export default function Signup() {
                     handleChange,
                     handleBlur,
                     handleSubmit,
-                    isSubmitting,
                     /* and other goodies */
                   }) => (
-                    <Form onSubmit={handleSubmit}>
+                    <Form css={[tw`mx-auto max-w-xs`]} >
                       {/** First Name */}
-                      <Input
+                      < Input
                         type="text"
                         name="firstName"
                         onChange={handleChange}

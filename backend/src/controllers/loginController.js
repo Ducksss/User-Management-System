@@ -14,13 +14,11 @@ exports.processUserLogin = async (req, res) => {
     const { email, password } = req.body;
     try {
         // Checking for invalid credentials
-        console.log("Here is still successful - 1")
         let results = await loginService.authenticateUser(email).catch((error) => {
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
         });
 
         // Checking for invalid credentials
-        console.log("Here is still successful - 2")
         if ((password == null) || (results[0] == null)) {
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
         }
