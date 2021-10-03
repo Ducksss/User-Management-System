@@ -1,14 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
+
+// styling 
+import styled from "styled-components";
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { Container as ContainerBase } from "components/misc/Layouts";
-import tw from "twin.macro";
-import styled from "styled-components";
-import { css } from "styled-components/macro"; //eslint-disable-line
-import illustration from "images/signup-illustration.svg";
+
+// icons
 import logo from "images/logo.svg";
 import googleIconImageSrc from "images/google-icon.png";
+import illustration from "images/signup-illustration.svg";
 import twitterIconImageSrc from "images/twitter-icon.png";
 import { ReactComponent as SignUpIcon } from "feather-icons/dist/icons/user-plus.svg";
+
+// imports
+import axios from "axios";
+import * as Yup from "yup";
+import config from "../Config.js";
+import tw, { css } from "twin.macro";
+import { useForm } from 'react-hook-form';
+import { useHistory } from "react-router-dom";
+import { Formik, useField } from 'formik';
+import ClipLoader from "react-spinners/ClipLoader";
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
 const Content = tw.div`max-w-screen-xl m-0 sm:mx-20 sm:my-16 bg-white text-gray-900 shadow sm:rounded-lg flex justify-center flex-1`;
@@ -53,11 +65,11 @@ const IllustrationImage = styled.div`
   ${tw`m-12 xl:m-16 w-full max-w-lg bg-contain bg-center bg-no-repeat`}
 `;
 
-export default ({
-  logoLinkUrl = "#",
-  illustrationImageSrc = illustration,
-  headingText = "Sign Up For Treact",
-  socialButtons = [
+export default function Signup() {
+  const logoLinkUrl = "#";
+  const illustrationImageSrc = illustration;
+  const headingText = "Sign Up For Treact";
+  const socialButtons = [
     {
       iconImageSrc: googleIconImageSrc,
       text: "Sign Up With Google",
@@ -68,68 +80,105 @@ export default ({
       text: "Sign Up With Twitter",
       url: "https://twitter.com"
     }
-  ],
-  submitButtonText = "Sign Up",
-  SubmitButtonIcon = SignUpIcon,
-  tosUrl = "#",
-  privacyPolicyUrl = "#",
-  signInUrl = "#"
-}) => (
-  <AnimationRevealPage>
-    <Container>
-      <Content>
-        <MainContainer>
-          <LogoLink href={logoLinkUrl}>
-            <LogoImage src={logo} />
-          </LogoLink>
-          <MainContent>
-            <Heading>{headingText}</Heading>
-            <FormContainer>
-              <SocialButtonsContainer>
-                {socialButtons.map((socialButton, index) => (
-                  <SocialButton key={index} href={socialButton.url}>
-                    <span className="iconContainer">
-                      <img src={socialButton.iconImageSrc} className="icon" alt="" />
-                    </span>
-                    <span className="text">{socialButton.text}</span>
-                  </SocialButton>
-                ))}
-              </SocialButtonsContainer>
-              <DividerTextContainer>
-                <DividerText>Or Sign up with your e-mail</DividerText>
-              </DividerTextContainer>
-              <Form>
-                <Input type="email" placeholder="Email" />
-                <Input type="password" placeholder="Password" />
-                <SubmitButton type="submit">
-                  <SubmitButtonIcon className="icon" />
-                  <span className="text">{submitButtonText}</span>
-                </SubmitButton>
-                <p tw="mt-6 text-xs text-gray-600 text-center">
-                  I agree to abide by treact's{" "}
-                  <a href={tosUrl} tw="border-b border-gray-500 border-dotted">
-                    Terms of Service
-                  </a>{" "}
-                  and its{" "}
-                  <a href={privacyPolicyUrl} tw="border-b border-gray-500 border-dotted">
-                    Privacy Policy
-                  </a>
-                </p>
+  ];
+  const submitButtonText = "Sign Up";
+  const SubmitButtonIcon = SignUpIcon;
+  const tosUrl = "#";
+  const privacyPolicyUrl = "#";
+  const signInUrl = "http://localhost:3004/login";
 
-                <p tw="mt-8 text-sm text-gray-600 text-center">
-                  Already have an account?{" "}
-                  <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
-                    Sign In
-                  </a>
-                </p>
-              </Form>
-            </FormContainer>
-          </MainContent>
-        </MainContainer>
-        <IllustrationContainer>
-          <IllustrationImage imageSrc={illustrationImageSrc} />
-        </IllustrationContainer>
-      </Content>
-    </Container>
-  </AnimationRevealPage>
-);
+  // Team's Defined Variables
+  const history = useHistory();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+
+  const registerUserInformation = (values) => {
+    axios
+      .post(`${config.baseUrl}/u/user/create-account`, {
+        email: values.email,
+        username: values.username,
+        password: values.password,
+        contact: values.contact,
+        address: values.address
+      })
+      .then((results) => {
+        history.push({
+          pathname: "/login",
+          state: "success"
+        });
+      })
+      .catch((error) => {
+        if (error.response.data.description === "Invalid Credentials.") {
+          console.log("Please key in a your valid credentials")
+        }
+
+        if (error.response.data.description === "Internal error") {
+          console.log("Please contact an administrator for help!")
+        }
+      })
+      .finally(() => {
+        setIsSubmitted(false);
+      })
+  }
+
+  const onSubmit = data => {
+    const { email, password } = data
+    console.log(email, password)
+  };
+
+  return (
+    <AnimationRevealPage>
+      <Container>
+        <Content>
+          <MainContainer>
+            <LogoLink href={logoLinkUrl}>
+              <LogoImage src={logo} />
+            </LogoLink>
+            <MainContent>
+              <Heading>{headingText}</Heading>
+              <FormContainer>
+                <Form onSubmit={handleSubmit(onSubmit)}>
+                  <Input type="email" placeholder="Email" {...register("email", { required: "Your email is required" })} />
+                  {errors.email && <p className={errorMessages}>{errors.email.message}</p>}
+
+                  <Input type="password" placeholder="Password" {...register("password", { required: true })} />
+
+                  <SubmitButton type="submit">
+                    <SubmitButtonIcon className="icon" />
+                    <span className="text">{submitButtonText}</span>
+                  </SubmitButton>
+                  <p tw="mt-6 text-xs text-gray-600 text-center">
+                    I agree to abide by treact's{" "}
+                    <a href={tosUrl} tw="border-b border-gray-500 border-dotted">
+                      Terms of Service
+                    </a>{" "}
+                    and its{" "}
+                    <a href={privacyPolicyUrl} tw="border-b border-gray-500 border-dotted">
+                      Privacy Policy
+                    </a>
+                  </p>
+
+                  <p tw="mt-8 text-sm text-gray-600 text-center">
+                    Already have an account?{" "}
+                    <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
+                      Sign In
+                    </a>
+                  </p>
+                </Form>
+              </FormContainer>
+            </MainContent>
+          </MainContainer>
+          <IllustrationContainer>
+            <IllustrationImage imageSrc={illustrationImageSrc} />
+          </IllustrationContainer>
+        </Content>
+      </Container>
+    </AnimationRevealPage>
+  );
+}
+
+let errorMessages = {
+  color: "red",
+  fontSize: "12px",
+  paddingLeft: "0.8rem"
+}
