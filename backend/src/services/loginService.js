@@ -11,13 +11,19 @@ module.exports.authenticateUser = (email, callback) => {
                 resolve(err);
             } else {
                 try {
-                    let query =
-                                `SELECT 
-                                    * 
+                    let query =`
+                                SELECT 
+                                    first_name, 
+                                    last_name, 
+                                    email, 
+                                    privilege, 
+                                    password_hash, 
+                                    login_attempt 
                                 FROM 
-                                user_management_system.users 
-                                WHERE 
-                                    email = ?
+                                    user_management_system.users as users, 
+                                    user_management_system.logins as logins 
+                                where 
+                                    users.user_guid = logins.user_guid;
                                 `;
                     connection.query(query, [email], (err, result) => {
                         if (err) {

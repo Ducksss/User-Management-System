@@ -24,28 +24,29 @@ exports.processUserLogin = async (req, res) => {
         }
 
         // Checking for banned user
-        console.log("Here is still successful - 3")
         if (results[0].status == 1) {
             return res.status(401).send(codes(401, 'Banned.'));
         }
 
-        if (bcrypt.compareSync(password, results[0].password)) {
+        if (results[0].login_attempt == 10) {
+            return res.status(401).send(codes(401, 'Locked Out.'));
+        }
+
+        if (bcrypt.compareSync(password, results[0].password_hash)) {
             let data = {
-                userid: results[0].user_id,
-                displayName: results[0].username,
+                displayName: results[0].firstName + " " + results[0].lastName,
                 email: results[0].email,
                 token: jwt.sign({
-                    userId: results[0].user_id,
+                    user_guid: results[0].user_guid,
                     email: results[0].email,
-                    type: results[0].type
+                    privilege: results[0].privilege
                 },
                     config.JWTKey, {
                     expiresIn: 86400 //Expires in 24 hrs
                 })
             };
 
-            console.log("Here is still successful - 4")
-            // console.log(data)
+            console.log(data)
             return res.status(200).send(data);
         } else {
             return res.status(401).send(codes(401, 'Login failed.'));

@@ -17,10 +17,9 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
-import { useForm } from "react-hook-form";
+import { Formik, Form } from 'formik';
 import { useHistory } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 import { Container as ContainerBase } from "components/misc/Layouts";
 
@@ -50,7 +49,6 @@ const SocialButton = styled.a`
 const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
 const DividerText = tw.div`leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform -translate-y-1/2 absolute inset-x-0 top-1/2 bg-transparent`;
 
-const Form = tw.form`mx-auto max-w-xs`;
 const Input = tw.input`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5 first:mt-0`;
 const SubmitButton = styled.button`
   ${tw`mt-5 tracking-wide font-semibold bg-primary-500 text-gray-100 w-full py-4 rounded-lg hover:bg-primary-900 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none`}
@@ -91,6 +89,13 @@ export default function Login() {
 
   // Team's Defined Variables
   const history = useHistory();
+  const LoginSchema = Yup.object({
+    email: Yup.string()
+      .email("Invalid email address format")
+      .required("Please enter your email address!"),
+    password: Yup.string()
+      .required('Your password is required')
+  });
   const [isSubmitted, setIsSubmitted] = React.useState(false);
 
   const Toast = Swal.mixin({
@@ -152,27 +157,54 @@ export default function Login() {
             <MainContent>
               <Heading>{headingText}</Heading>
               <FormContainer>
-                {/* <SocialButtonsContainer>
-                  {socialButtons.map((socialButton, index) => (
-                    <SocialButton key={index} href={socialButton.url}>
-                      <span className="iconContainer">
-                        <img src={socialButton.iconImageSrc} className="icon" alt="" />
-                      </span>
-                      <span className="text">{socialButton.text}</span>
-                    </SocialButton>
-                  ))}
-                </SocialButtonsContainer> */}
-                {/* <DividerTextContainer>
-                  <DividerText>Or Sign in with your e-mail</DividerText>
-                </DividerTextContainer> */}
-                <Form>
-                  <Input type="email" placeholder="Email" />
-                  <Input type="password" placeholder="Password" />
-                  <SubmitButton type="submit">
-                    <SubmitButtonIcon className="icon" />
-                    <span className="text">{submitButtonText}</span>
-                  </SubmitButton>
-                </Form>
+                <Formik
+                  initialValues={{
+                    email: '',
+                    password: ''
+                  }}
+                  validateOnChange={false}
+                  validationSchema={LoginSchema}
+                  onSubmit={(values) => {
+                    validateLogininformation(values);
+                  }}
+                >
+                  {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    /* and other goodies */
+                  }) => (
+                    <Form css={[tw.form`mx-auto max-w-xs`]}>
+                      <Input
+                        type="email"
+                        name="email"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.email}
+                        placeholder="email"
+                      />
+                      {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
+
+                      <Input
+                        type="password"
+                        name="password"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.password}
+                        placeholder="password"
+                      />
+                      {(errors.password && touched.password) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.password}</span>}
+
+                      <SubmitButton type="submit">
+                        <SubmitButtonIcon className="icon" />
+                        <span className="text">{submitButtonText}</span>
+                      </SubmitButton>
+                    </Form>
+                  )}
+                </Formik>
                 <p tw="mt-6 text-xs text-gray-600 text-center">
                   <a href={forgotPasswordUrl} tw="border-b border-gray-500 border-dotted">
                     Forgot Password ?

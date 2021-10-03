@@ -17,10 +17,10 @@ import axios from "axios";
 import * as Yup from "yup";
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
-import { useForm } from 'react-hook-form';
-import { useHistory } from "react-router-dom";
 import { Formik, Form } from 'formik';
+import { useHistory } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
+import PasswordStrengthBar from 'react-password-strength-bar';
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
 const Content = tw.div`max-w-screen-xl m-0 sm:mx-20 sm:my-16 bg-white text-gray-900 shadow sm:rounded-lg flex justify-center flex-1`;
@@ -30,23 +30,6 @@ const LogoImage = tw.img`h-12 mx-auto`;
 const MainContent = tw.div`mt-12 flex flex-col items-center`;
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold`;
 const FormContainer = tw.div`w-full flex-1 mt-8`;
-
-const SocialButtonsContainer = tw.div`flex flex-col items-center`;
-const SocialButton = styled.a`
-  ${tw`w-full max-w-xs font-semibold rounded-lg py-3 border text-gray-900 bg-gray-100 hocus:bg-gray-200 hocus:border-gray-400 flex items-center justify-center transition-all duration-300 focus:outline-none focus:shadow-outline text-sm mt-5 first:mt-0`}
-  .iconContainer {
-    ${tw`bg-white p-2 rounded-full`}
-  }
-  .icon {
-    ${tw`w-4`}
-  }
-  .text {
-    ${tw`ml-4`}
-  }
-`;
-
-const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
-const DividerText = tw.div`leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform -translate-y-1/2 absolute inset-x-0 top-1/2 bg-transparent`;
 
 // const Form = tw.form`mx-auto max-w-xs`;
 const Input = tw.input`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5 first:mt-0`;
@@ -197,6 +180,7 @@ export default function Signup() {
                     handleChange,
                     handleBlur,
                     handleSubmit,
+                    isSubmitting
                     /* and other goodies */
                   }) => (
                     <Form css={[tw`mx-auto max-w-xs`]} >
@@ -244,6 +228,7 @@ export default function Signup() {
                       />
                       {(errors.contactNumber && touched.contactNumber) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.contactNumber}</span>}
 
+                      {/**Password */}
                       <Input
                         type="password"
                         name="password"
@@ -252,8 +237,12 @@ export default function Signup() {
                         value={values.password}
                         placeholder="password"
                       />
+                      <PasswordStrengthBar
+                        password={values.password}
+                      />
                       {(errors.password && touched.password) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.password}</span>}
 
+                      {/**Password Confirmation*/}
                       <Input
                         type="password"
                         name="passwordConfirmation"
