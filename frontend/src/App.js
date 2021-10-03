@@ -104,8 +104,6 @@ import SignupPage from "pages/Signup.js";
 import ComponentRenderer from "ComponentRenderer.js";
 import MainLandingPage from "MainLandingPage.js";
 import ThankYouPage from "ThankYouPage.js";
-import TrialTest from "./pages/TrialTest"
-
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 export default function App(props) {
@@ -115,9 +113,6 @@ export default function App(props) {
   return (
     <Router {...props}>
       <Switch>
-        <Route path="/testing">
-          <TrialTest />
-        </Route>
 
         <Route path='/login'>
           <LoginPage />

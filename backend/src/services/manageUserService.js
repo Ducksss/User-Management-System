@@ -129,7 +129,7 @@ module.exports.getEmail = (email) => {
                 let query = `SELECT 
                                 email 
                             FROM 
-                                sp_shop.users 
+                                user_management_system.users 
                             where 
                                 email = ?;
                             `;

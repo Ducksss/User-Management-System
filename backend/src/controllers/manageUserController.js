@@ -53,7 +53,6 @@ exports.verifyRole = async (req, res, next) => {
 
 exports.checkDuplicateEmails = async (req, res, next) => {
     try {
-        console.log("TRIAL")
         let { email } = req.params;
         let results = await manageUsers.getEmail(email);
 
