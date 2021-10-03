@@ -94,9 +94,9 @@ import { css } from "styled-components/macro"; //eslint-disable-line
 /* Inner Pages */
 // import LoginPage from "pages/Login.js";
 // import SignupPage from "pages/Signup.js";
-// import PricingPage from "pages/Pricing.js";
+import PricingPage from "pages/Pricing.js";
 // import AboutUsPage from "pages/AboutUs.js";
-// import ContactUsPage from "pages/ContactUs.js";
+import ContactUsPage from "pages/ContactUs.js";
 // import BlogIndexPage from "pages/BlogIndex.js";
 // import TermsOfServicePage from "pages/TermsOfService.js";
 // import PrivacyPolicyPage from "pages/PrivacyPolicy.js";
@@ -121,12 +121,19 @@ export default function App() {
         <Route path="/components/:type/:name">
           <ComponentRenderer />
         </Route>
+        <Route path="/pricing">
+          <PricingPage />
+        </Route>
+        <Route path="/contact">
+          <ContactUsPage />
+        </Route>
         <Route path="/thank-you">
           <ThankYouPage />
         </Route>
         <Route path="/">
           <MainLandingPage />
         </Route>
+        
       </Switch>
     </Router>
   );
