@@ -1,10 +1,11 @@
 // imports
+const qrcode = require('qrcode');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
-const moment = require("moment-timezone");
-const config = require('../config/config');
+const speakeasy = require('speakeasy');
 const nodeMailer = require('nodemailer');
-const { codes } = require('../config/codes')
+const config = require('../config/config');
+const { codes } = require('../config/codes');
 
 // services
 const manageUsers = require('../services/manageUserService')
@@ -18,6 +19,12 @@ const transporter = nodeMailer.createTransport({
     }
 })
 
+const secret = speakeasy.generateSecret({
+    name: "User Management System",
+    period: 5
+})
+
+//checks for duplicate emails before user registration
 exports.checkDuplicateEmails = async (req, res, next) => {
     try {
         let { email } = req.params;
@@ -57,6 +64,9 @@ exports.addUser = async (req, res, next) => {
             });
         let { user_guid } = results[0]
         let hashedPassword = await bcrypt.hash(password, 10);
+
+        let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
+        console.log(qrcodeURL)
         await manageUsers.addUserLogin(user_guid, hashedPassword)
             .catch((error) => {
                 console.log(error)
