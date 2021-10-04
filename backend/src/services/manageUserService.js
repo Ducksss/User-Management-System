@@ -31,6 +31,7 @@ module.exports.getEmail = (email) => {
 
 // adding user information to the database
 module.exports.addUser = (firstName, lastName, email, contact, privilege, UTCDateFormat) => {
+    
     return new Promise((resolve, reject) => {
         pool.getConnection(async (err, connection) => {
             if (err) {

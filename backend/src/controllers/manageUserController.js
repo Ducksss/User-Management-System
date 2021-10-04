@@ -5,6 +5,7 @@ const moment = require("moment-timezone");
 const config = require('../config/config');
 const nodeMailer = require('nodemailer');
 const { codes } = require('../config/codes')
+const { validationResult } = require('express-validator');
 
 // services
 const manageUsers = require('../services/manageUserService')
@@ -37,6 +38,12 @@ exports.checkDuplicateEmails = async (req, res, next) => {
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
         let { firstName, lastName, email, password, contact, privilege } = req.body;
 
         // guard statement
