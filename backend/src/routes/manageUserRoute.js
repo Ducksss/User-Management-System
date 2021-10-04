@@ -7,6 +7,6 @@ exports.route = router => {
     router.get('/api/u/user/:email/available', manageUserController.checkDuplicateEmails);
 
     // with middlewear
-    router.post('/api/u/user/create-account', manageUserController.addUser);
-    router.get('/api/u/user/role', middlewares.isLoggedIn, validators.validateAddUser, manageUserController.verifyRole);
+    router.post('/api/u/user/create-account',validators.validateAddUser(), manageUserController.addUser);
+    router.get('/api/u/user/role', middlewares.isLoggedIn, manageUserController.verifyRole);
 }
