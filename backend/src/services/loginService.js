@@ -12,13 +12,14 @@ module.exports.authenticateUser = (email, callback) => {
             } else {
                 try {
                     let query =`
-                                SELECT 
-                                    first_name, 
-                                    last_name, 
-                                    email, 
-                                    privilege, 
-                                    password_hash, 
-                                    login_attempt 
+                                SELECT
+                                    users.user_guid,
+                                    users.first_name, 
+                                    users.last_name, 
+                                    users.email, 
+                                    users.privilege, 
+                                    logins.password_hash, 
+                                    logins.login_attempt 
                                 FROM 
                                     user_management_system.users as users, 
                                     user_management_system.logins as logins 

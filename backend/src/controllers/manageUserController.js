@@ -17,12 +17,7 @@ const transporter = nodeMailer.createTransport({
         user: config.GMAIL_USER,
         pass: config.GMAIL_PASS,
     }
-})
-
-const secret = speakeasy.generateSecret({
-    name: "User Management System",
-    period: 5
-})
+});
 
 //checks for duplicate emails before user registration
 exports.checkDuplicateEmails = async (req, res, next) => {
@@ -65,8 +60,6 @@ exports.addUser = async (req, res, next) => {
         let { user_guid } = results[0]
         let hashedPassword = await bcrypt.hash(password, 10);
 
-        let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
-        console.log(qrcodeURL)
         await manageUsers.addUserLogin(user_guid, hashedPassword)
             .catch((error) => {
                 console.log(error)
@@ -85,6 +78,27 @@ exports.verifyRole = async (req, res, next) => {
         let results = await manageUsers.getRole(userId);
 
         return res.status(200).send(codes(200, null, results));
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
+}
+
+// generating 2FA QRCode
+exports.generate2FA = async (req, res, next) => {
+    try {
+        let { user_guid } = req;
+
+        let secret = speakeasy.generateSecret({
+            name: "User Management System",
+            length: 20,
+            period: 5
+        });
+
+        await manageUsers.add2FA(user_guid, secret.base32)
+        let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
+
+        return res.status(200).send(codes(200, { qrcodeURL: qrcodeURL }));
     } catch (error) {
         console.log(error)
         return res.status(500).send(codes(500));

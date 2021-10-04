@@ -88,6 +88,38 @@ module.exports.addUserLogin = (user_guid, password_hash) => {
     })
 };
 
+module.exports.add2FA = (user_guid, secret) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection(async (err, connection) => {
+            if (err) {
+                reject(err);
+            } else {
+                try {
+                    //stores current into repository of history
+                    let query = `INSERT INTO user_management_system.verifications(
+                                    verification_guid, user_guid, secret, 
+                                    verification_attempt, type, created_at
+                                ) 
+                                VALUES 
+                                    (UUID(), ?, ?, 0, 0, UTC_TIMESTAMP())
+                                `;
+                    connection.query(query, [user_guid, secret], (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            console.log(results)
+                            resolve(results);
+                        }
+                        connection.release();
+                    });
+                } catch (error) {
+                    reject(error);
+                }
+            }
+        });
+    })
+}
+
 // for dynamically displaying header functionality
 module.exports.isLoggedIn = (userId, email) => {
     return new Promise((resolve, reject) => {
