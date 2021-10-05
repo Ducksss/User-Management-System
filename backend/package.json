@@ -12,6 +12,7 @@
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
     "express-form-data": "^2.0.16",
+    "express-rate-limit": "^5.4.0",
     "express-validator": "^6.12.2",
     "faker": "^5.5.3",
     "jsonwebtoken": "^8.5.1",
