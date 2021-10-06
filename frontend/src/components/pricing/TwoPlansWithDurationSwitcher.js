@@ -13,7 +13,6 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Form } from "react-bootstrap";
 import {CardElement, useStripe, useElements} from '@stripe/react-stripe-js';
-import { Containera } from './Container';
 import "./styles.css";
 const HeaderContainer = tw.div`w-full flex flex-col items-center`;
 const Subheading = tw(SubheadingBase)`mb-4`;
@@ -328,12 +327,6 @@ export default ({
       </form>
     );
   };
-  const triggerText = 'Open form';
-  const onSubmit = (event) => {
-    event.preventDefault(event);
-    console.log(event.target.name.value);
-    console.log(event.target.email.value);
-  };
   return (
     <Container>
       <ContentWithPaddingXl>
@@ -344,9 +337,8 @@ export default ({
           <Elements stripe={stripePromise}>
             <Form />
             <CheckoutForm />
-            
           </Elements>
-          <Containera triggerText={triggerText} onSubmit={onSubmit} />
+          
           <PlanDurationSwitcher>
             {planDurations.map((planDuration, index) => (
               <SwitchButton active={activeDurationIndex === index} key={index} onClick={() => setActiveDurationIndex(index)}>{planDuration.switcherText}</SwitchButton>
