@@ -12,7 +12,8 @@ import { useForm } from "react-hook-form";
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Form } from "react-bootstrap";
-import {CardElement, useStripe, useElements} from '@stripe/react-stripe-js';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import CheckoutForma from "./CheckoutForm";
 import "./styles.css";
 const HeaderContainer = tw.div`w-full flex flex-col items-center`;
 const Subheading = tw(SubheadingBase)`mb-4`;
@@ -133,13 +134,13 @@ export default ({
       }
     }
   };
-  
+
   const CardField = ({ onChange }) => (
     <div className="FormRow">
       <CardElement options={CARD_OPTIONS} onChange={onChange} />
     </div>
   );
-  
+
   const Field = ({
     label,
     id,
@@ -166,7 +167,7 @@ export default ({
       />
     </div>
   );
-  
+
   const SubmitButton = ({ processing, error, children, disabled }) => (
     <button
       className={`SubmitButton ${error ? "SubmitButton--error" : ""}`}
@@ -176,7 +177,7 @@ export default ({
       {processing ? "Processing..." : children}
     </button>
   );
-  
+
   const ErrorMessage = ({ children }) => (
     <div className="ErrorMessage" role="alert">
       <svg width="16" height="16" viewBox="0 0 17 17">
@@ -192,7 +193,7 @@ export default ({
       {children}
     </div>
   );
-  
+
   const ResetButton = ({ onClick }) => (
     <button type="button" className="ResetButton" onClick={onClick}>
       <svg width="32px" height="32px" viewBox="0 0 32 32">
@@ -216,40 +217,40 @@ export default ({
       phone: "",
       name: ""
     });
-  
+    // Stripe stuff
     const handleSubmit = async (event) => {
       event.preventDefault();
-  
+
       if (!stripe || !elements) {
         // Stripe.js has not loaded yet. Make sure to disable
         // form submission until Stripe.js has loaded.
         return;
       }
-  
+
       if (error) {
         elements.getElement("card").focus();
         return;
       }
-  
+
       if (cardComplete) {
         setProcessing(true);
       }
-  
+
       const payload = await stripe.createPaymentMethod({
         type: "card",
         card: elements.getElement(CardElement),
         billing_details: billingDetails
       });
-  
+
       setProcessing(false);
-  
+
       if (payload.error) {
         setError(payload.error);
       } else {
         setPaymentMethod(payload.paymentMethod);
       }
     };
-  
+
     const reset = () => {
       setError(null);
       setProcessing(false);
@@ -260,7 +261,7 @@ export default ({
         name: ""
       });
     };
-  
+
     return paymentMethod ? (
       <div className="Result">
         <div className="ResultTitle" role="alert">
@@ -334,11 +335,21 @@ export default ({
           {subheading && <Subheading>{subheading}</Subheading>}
           <Heading>{heading}</Heading>
           {description && <Description>{description}</Description>}
-          <Elements stripe={stripePromise}>
-            <Form />
-            <CheckoutForm />
-          </Elements>
-          
+          <div className="App">
+            <div className="product">
+              <img
+                src="https://images.pexels.com/photos/18105/pexels-photo.jpg?auto=compress"
+                alt="laptop"
+                style={{ width: "100%", height: "auto" }}
+              />
+              <div>
+                <Elements stripe={stripePromise}>
+                  <CheckoutForma />
+                </Elements>
+              </div>
+            </div>
+          </div>
+
           <PlanDurationSwitcher>
             {planDurations.map((planDuration, index) => (
               <SwitchButton active={activeDurationIndex === index} key={index} onClick={() => setActiveDurationIndex(index)}>{planDuration.switcherText}</SwitchButton>
