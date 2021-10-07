@@ -90,7 +90,7 @@ module.exports.addUserLogin = (user_guid, password_hash) => {
 };
 
 // for dynamically displaying header functionality
-module.exports.isLoggedIn = (userId, email) => {
+module.exports.isLoggedIn = (user_guid, email) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -98,14 +98,14 @@ module.exports.isLoggedIn = (userId, email) => {
             } else {
                 try {
                     let query = `SELECT 
-                                    user_id 
+                                    user_guid 
                                 FROM 
-                                    sp_shop.users 
+                                    user_management_system.users
                                 where 
-                                    user_id = ? 
+                                    user_guid = ? 
                                     and email = ?;
                                 `;
-                    connection.query(query, [userId, email], (err, results) => {
+                    connection.query(query, [user_guid, email], (err, results) => {
                         if (err) {
                             console.log(err)
                             reject(err)
