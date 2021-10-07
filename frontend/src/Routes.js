@@ -104,6 +104,7 @@ import SignupPage from "pages/Signup.js";
 import ComponentRenderer from "ComponentRenderer.js";
 import MainLandingPage from "MainLandingPage.js";
 import ThankYouPage from "ThankYouPage.js";
+import Account from 'pages/Account.js'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 export default function App(props) {
@@ -133,6 +134,10 @@ export default function App(props) {
 
         <Route path="/guide">
           <MainLandingPage />
+        </Route>
+
+        <Route path='/account'>
+          <Account />  
         </Route>
 
         <Route path="/" >
