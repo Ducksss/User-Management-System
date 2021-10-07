@@ -48,7 +48,6 @@ exports.addUser = async (req, res, next) => {
         // adding user info
         await manageUsers.addUser(firstName, lastName, email, contact, privilege)
             .catch((error) => {
-                console.log(error)
                 return res.status(401).send(codes(500, 'Internal error.'));
             });
 
@@ -59,8 +58,9 @@ exports.addUser = async (req, res, next) => {
             });
         let { user_guid } = results[0]
         let hashedPassword = await bcrypt.hash(password, 10);
+        let secret = speakeasy.generateSecret({ length: 20, });
 
-        await manageUsers.addUserLogin(user_guid, hashedPassword)
+        await manageUsers.addUserLogin(user_guid, hashedPassword, secret.base32)
             .catch((error) => {
                 console.log(error)
                 return res.status(401).send(codes(500, 'Internal error.'));
@@ -89,12 +89,9 @@ exports.generate2FA = async (req, res, next) => {
     try {
         let { user_guid } = req;
 
-        let secret = speakeasy.generateSecret({
-            name: "User Management System",
-            length: 20,
-            period: 5
-        });
+        let secret = speakeasy.generateSecret({ length: 20, });
 
+        console.log(secret.base32)
         await manageUsers.add2FA(user_guid, secret.base32)
         let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
 

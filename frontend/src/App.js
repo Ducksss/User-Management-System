@@ -88,7 +88,7 @@ import { css } from "styled-components/macro"; //eslint-disable-line
 // import AgencyLandingPage from "demos/AgencyLandingPage.js";
 // import SaaSProductLandingPage from "demos/SaaSProductLandingPage.js";
 // import RestaurantLandingPage from "demos/RestaurantLandingPage.js";
-// import ServiceLandingPage from "demos/ServiceLandingPage.js";
+import ServiceLandingPage from "demos/ServiceLandingPage.js";
 // import HostingCloudLandingPage from "demos/HostingCloudLandingPage.js";
 
 /* Inner Pages */
@@ -104,6 +104,8 @@ import SignupPage from "pages/Signup.js";
 import ComponentRenderer from "ComponentRenderer.js";
 import MainLandingPage from "MainLandingPage.js";
 import ThankYouPage from "ThankYouPage.js";
+
+import BeginPasswordReset from "pages/BeginPasswordReset"
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 export default function App(props) {
@@ -121,6 +123,10 @@ export default function App(props) {
           <SignupPage />
         </Route>
 
+        <Route path="/account/begin_password_reset">
+          <BeginPasswordReset />
+        </Route>
+
         <Route path="/components/:type/:subtype/:name">
           <ComponentRenderer />
         </Route>
@@ -136,7 +142,7 @@ export default function App(props) {
         </Route>
 
         <Route path="/" >
-          <PricingPage />
+          <ServiceLandingPage />
         </Route>
       </Switch>
     </Router>

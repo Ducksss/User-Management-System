@@ -9,11 +9,10 @@ exports.isLoggedIn = async (req, res, next) => {
     if (!auth) return res.status(400).send(codes(400, 'Invalid Request'));
 
     try {
-        console.log(auth)
         let token = auth.split(' ')[1];
-        let { userId, email } = jwt.verify(token, config.JWTKey);
+        let { user_guid, email } = jwt.verify(token, config.JWTKey);
 
-        let getLoggedInData = await manageUserService.isLoggedIn(userId, email);
+        let getLoggedInData = await manageUserService.isLoggedIn(user_guid, email);
         if (getLoggedInData.length == 1) {
             let getSuspendedAccount = await manageUserService.isSuspended(userId);
             if (getSuspendedAccount[0].status == 0) {

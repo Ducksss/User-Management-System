@@ -10,8 +10,9 @@ import { Container, ContentWithVerticalPadding } from "components/misc/Layouts.j
 import { ReactComponent as CheckboxIcon } from "feather-icons/dist/icons/check-circle.svg";
 import { ReactComponent as QuotesLeftIconBase } from "images/quotes-l.svg"
 import { ReactComponent as SvgDecoratorBlob1 } from "images/dot-pattern.svg"
+import Header from '../headers/light'
 
-const Header = tw(HeaderBase)`max-w-none`;
+// const Header = tw(HeaderBase)`max-w-none`;
 const Row = tw.div`flex flex-col lg:flex-row justify-between items-center lg:pt-16 max-w-screen-2xl mx-auto sm:px-8`;
 const Column = tw.div``;
 const TextColumn = tw(Column)`mr-auto lg:mr-0 max-w-lg lg:max-w-xl xl:max-w-2xl`;
@@ -58,13 +59,10 @@ export default ({
       <NavLink href="/#">Blog</NavLink>
       <NavLink href="/#">Pricing</NavLink>
       <NavLink href="/#">Contact Us</NavLink>
-      <NavLink href="/#">Testimonials</NavLink>
-    </NavLinks>,
-    <NavLinks key={2}>
-      <NavLink href="/#" tw="lg:ml-12!">
+      <NavLink href="http://localhost:3004/login" tw="lg:ml-12!">
         Login
       </NavLink>
-      <PrimaryLink css={buttonRoundedCss} href="/#">
+      <PrimaryLink css={buttonRoundedCss} href="http://localhost:3004/signup">
         Sign Up
       </PrimaryLink>
     </NavLinks>
@@ -95,7 +93,7 @@ export default ({
                 <Image src={imageSrc} />
                 {imageDecoratorBlob && <ImageDecoratorBlob />}
                 <Testimonial>
-                  <QuotesLeftIcon/>
+                  <QuotesLeftIcon />
                   <Quote>{testimonial.quote}</Quote>
                   <CustomerName>{testimonial.customerName}</CustomerName>
                   <CustomerCompany>{testimonial.customerCompany}</CustomerCompany>

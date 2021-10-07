@@ -11,7 +11,7 @@ module.exports.authenticateUser = (email, callback) => {
                 resolve(err);
             } else {
                 try {
-                    let query =`
+                    let query = `
                                 SELECT
                                     users.user_guid,
                                     users.first_name, 
@@ -19,12 +19,13 @@ module.exports.authenticateUser = (email, callback) => {
                                     users.email, 
                                     users.privilege, 
                                     logins.password_hash, 
-                                    logins.login_attempt 
+                                    logins.login_attempt
                                 FROM 
                                     user_management_system.users as users, 
                                     user_management_system.logins as logins 
                                 where 
-                                    users.user_guid = logins.user_guid;
+                                    users.user_guid = logins.user_guid
+                                    AND users.email = ?;
                                 `;
                     connection.query(query, [email], (err, result) => {
                         if (err) {

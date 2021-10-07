@@ -33,23 +33,23 @@ exports.processUserLogin = async (req, res, next) => {
         }
 
         if (bcrypt.compareSync(password, results[0].password_hash)) {
-            req.user_guid = results[0].user_guid;
-            next();
-            // let data = {
-            //     displayName: results[0].firstName + " " + results[0].lastName,
-            //     email: results[0].email,
-            //     token: jwt.sign({
-            //         user_guid: results[0].user_guid,
-            //         email: results[0].email,
-            //         privilege: results[0].privilege
-            //     },
-            //         config.JWTKey, {
-            //         expiresIn: 86400 //Expires in 24 hrs
-            //     })
-            // };
+            // req.user_guid = results[0].user_guid;
+            // next();
+            let data = {
+                displayName: results[0].firstName + " " + results[0].lastName,
+                email: results[0].email,
+                token: jwt.sign({
+                    user_guid: results[0].user_guid,
+                    email: results[0].email,
+                    privilege: results[0].privilege
+                },
+                    config.JWTKey, {
+                    expiresIn: 86400 //Expires in 24 hrs
+                })
+            };
 
-            // console.log(data)
-            // return res.status(200).send(data);
+            console.log(data)
+            return res.status(200).send(data);
         } else {
             return res.status(401).send(codes(401, 'Login failed.'));
         }
