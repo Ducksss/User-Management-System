@@ -2,8 +2,21 @@ import React, { useDebugValue } from "react";
 import { ElementsConsumer, CardElement } from "@stripe/react-stripe-js";
 import axios from "axios";
 import CardSection from "./CardSection";
-
+import Swal from "sweetalert2";
+let Toast = Swal.mixin({
+  toast: true,
+  position: "top",
+  showConfirmButton: false,
+  showCloseButton: true,
+  timer: 1500,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.addEventListener("mouseenter", Swal.stopTimer);
+    toast.addEventListener("mouseleave", Swal.resumeTimer);
+  },
+});
 class CheckoutForm extends React.Component {
+  
   handleSubmit = async event => {
     event.preventDefault();
     console.log(event.target.name)
@@ -24,7 +37,6 @@ class CheckoutForm extends React.Component {
       console.log(result.error.message);
     } else {
         //Backend api
-        alert(result.token.id)
         axios.post(`http://localhost:8003/api/u/pricing/subscribe`, {
           token : result.token.id,
           amount : "$1",
@@ -32,7 +44,11 @@ class CheckoutForm extends React.Component {
 
         })
             .then((response) => {
-                
+              Toast.fire({
+                icon: "success",
+                title: "Success!",
+                text: "Item has successfully been bought",
+              });
             })
             .catch((error) => {
                 
@@ -51,8 +67,6 @@ class CheckoutForm extends React.Component {
           <h4 name="product_price" value="hi" className="product-price">$999</h4>
         </label>
           <CardSection />
-          <input type="password" name="password" placeholder="Password" />
-          
           <button disabled={!this.props.stripe} className="btn-pay">
             Buy Now
           </button>
