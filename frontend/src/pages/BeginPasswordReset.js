@@ -56,20 +56,11 @@ const IllustrationImage = styled.div`
   ${tw`m-12 xl:m-16 w-full max-w-sm bg-contain bg-center bg-no-repeat`}
 `;
 
-export default function BeginPasswordReset() {
-    // Pre Defined Variables
-    const submitButtonText = "Search";
-
-    const logoLinkUrl = "http://localhost:3004/";
-    const illustrationImageSrc = illustration;
-    const forgotPasswordUrl = "#";
-    const signupUrl = "http://localhost:3004/register";
-
-    // Team's Defined Variables
-    const ref = useRef(null);
+const StepOne = ({ setMessage, setCurrentStep }) => {
+    // const ref = useRef(null);
     const history = useHistory();
+    const signupUrl = "http://localhost:3004/register";
     const [isSubmitted, setIsSubmitted] = React.useState(false);
-    const [message, setMessage] = React.useState({ color: "", wording: "" })
 
     const Toast = Swal.mixin({
         toast: true,
@@ -83,9 +74,9 @@ export default function BeginPasswordReset() {
         }
     });
 
-    const handleClick = () => {
-        ref.current.showAlert()
-    };
+    // const handleClick = () => {
+    //     ref.current.showAlert()
+    // };
 
     const ResetPasswordSchema = Yup.object({
         email: Yup.string()
@@ -105,30 +96,99 @@ export default function BeginPasswordReset() {
                 });
             })
             .catch((error) => {
-                handleClick();
-
-                if (error.response.data.code === 401) {
-                    Toast.fire({
-                        icon: 'error',
-                        title: `Please key in a your valid credentials.`
-                    })
-
-                    setMessage({ color: "red", message: "The email you have provided does not exist!" })
-                }
-
+                // handleClick();
                 if (error.response.data.code === 500) {
                     Toast.fire({
                         icon: 'error',
                         title: `Please contact an administrator for help!`
                     })
 
-                    setMessage({ color: "red", message: "Please contact an administrator for help!" })
+                    // setMessage({ color: "red", message: "Please contact an administrator for help!" })
                 }
             })
             .finally(() => {
+                setMessage("");
+                setCurrentStep(1);
                 setIsSubmitted(false);
             })
     }
+
+    return (
+        <Formik
+            initialValues={{
+                email: '',
+            }}
+            validateOnChange={false}
+            validationSchema={ResetPasswordSchema}
+            onSubmit={(values) => {
+                searchUserExists(values);
+            }}
+        >
+            {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                /* and other goodies */
+            }) => (
+                <Form css={[tw.form`mx-auto max-w-xs`]}>
+                    <Input
+                        type="email"
+                        name="email"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.email}
+                        placeholder="email"
+                    />
+                    {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
+
+                    <SubmitButton type="submit">
+                        <SearchOutline color="white" />
+                        <span className="text">Search</span>
+                    </SubmitButton>
+
+                    <p tw="mt-8 text-sm text-gray-600 text-center">
+                        Dont have an account?{" "}
+                        <a href={signupUrl} tw="border-b border-gray-500 border-dotted">
+                            Sign Up
+                        </a>
+                    </p>
+                    {/* <Alert
+                        ref={ref}
+                    /> */}
+                </Form>
+            )}
+        </Formik>
+    )
+}
+
+const StepTwo = () => {
+    return (
+        <div>
+            If we found an account associated with that username, we've sent password reset instructions to the primary email address on the account.
+            <DividerText>
+                Still having trouble logging in? Contact Support.
+            </DividerText>
+        </div>
+    )
+}
+
+export default function BeginPasswordReset() {
+    // Pre Defined Variables
+    const illustrationImageSrc = illustration;
+    const logoLinkUrl = "http://localhost:3004/";
+
+    // Team's Defined Variable
+    const [currentStep, setCurrentStep] = React.useState(0);
+    const [message, setMessage] = React.useState("To reset your password, please provide your Twilio SendGrid username.")
+    const steps = [
+        <StepOne
+            setMessage={setMessage}
+            setCurrentStep={setCurrentStep}
+        />,
+        <StepTwo />]
 
     return (
         <AnimationRevealPage>
@@ -141,49 +201,11 @@ export default function BeginPasswordReset() {
                             </LogoLink>
                             <MainContent>
                                 <Heading>Reset Password</Heading>
-                                <Subheading css={[tw`text-center`]}>To reset your password, please provide your UMD System email.</Subheading>
+                                <Subheading css={[tw`text-center`]}>
+                                    {message}
+                                </Subheading>
                                 <FormContainer>
-                                    <Formik
-                                        initialValues={{
-                                            email: '',
-                                        }}
-                                        validateOnChange={false}
-                                        validationSchema={ResetPasswordSchema}
-                                        onSubmit={(values) => {
-                                            searchUserExists(values);
-                                        }}
-                                    >
-                                        {({
-                                            values,
-                                            errors,
-                                            touched,
-                                            handleChange,
-                                            handleBlur,
-                                            handleSubmit,
-                                            /* and other goodies */
-                                        }) => (
-                                            <Form css={[tw.form`mx-auto max-w-xs`]}>
-                                                <Input
-                                                    type="email"
-                                                    name="email"
-                                                    onChange={handleChange}
-                                                    onBlur={handleBlur}
-                                                    value={values.email}
-                                                    placeholder="email"
-                                                />
-                                                {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
-
-                                                <SubmitButton type="submit">
-                                                    <SearchOutline color="white" />
-                                                    <span className="text">{submitButtonText}</span>
-                                                </SubmitButton>
-
-                                                <Alert
-                                                    ref={ref}
-                                                />
-                                            </Form>
-                                        )}
-                                    </Formik>
+                                    {[steps[currentStep]]}
                                 </FormContainer>
                             </MainContent>
                         </div>
@@ -193,6 +215,6 @@ export default function BeginPasswordReset() {
                     </IllustrationContainer>
                 </Content>
             </Container>
-        </AnimationRevealPage>
+        </AnimationRevealPage >
     )
 }
