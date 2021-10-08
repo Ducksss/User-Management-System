@@ -9,6 +9,7 @@
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^13.1.5",
     "axios": "^0.21.4",
+    "bootstrap": "^5.1.2",
     "feather-icons": "^4.28.0",
     "formik": "^2.2.9",
     "framer-motion": "^4.1.5",
@@ -16,6 +17,7 @@
     "react": "^17.0.2",
     "react-anchor-link-smooth-scroll": "^1.0.12",
     "react-bootstrap": "^1.6.3",
+    "react-bootstrap-icons": "^1.5.0",
     "react-dom": "^17.0.2",
     "react-form-hook": "0.0.1",
     "react-github-btn": "^1.2.0",
@@ -28,6 +30,7 @@
     "react-scripts": "4.0.3",
     "react-slick": "^0.28.1",
     "react-spinners": "^0.11.0",
+    "sass": "^1.42.1",
     "slick-carousel": "^1.8.1",
     "styled-components": "^5.2.3",
     "sweetalert2": "^11.1.6",
@@ -66,5 +69,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "postcss": "^8.3.9"
   }
 }
