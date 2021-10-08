@@ -24,27 +24,27 @@ export default function AccountDetails(props) {
         info: {
             title:'Personal Info',
             data: {
-                name: '',
-                email: '',
-                phone: ''
+                Name: '',
+                Email: '',
+                Phone: ''
             }
         },
         username: {
             title: 'Username',
             data: {
-                username: 'Chai'
+                Username: 'Chai'
             }
         },
         password: {
             title: 'Password',
             data: {
-                password: ''
+                Password: ''
             }
         },
         timezone: {
             title: 'Timezone',
             data: {
-                timezone: ''
+                Timezone: ''
             }
         }
     })

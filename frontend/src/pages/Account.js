@@ -1,7 +1,5 @@
 import React, {useState} from 'react'
-import tw, { css } from "twin.macro";
-import { Toast, swalWithBootstrapButtons } from '../shared/swal';
-import { Container as ContainerBase } from "components/misc/Layouts";
+import tw from "twin.macro";
 import styled from "styled-components";
 
 //pages
@@ -53,6 +51,7 @@ export default function Account() {
 
                 {activeTab == tab[0] ? <AccountDetails/> : <Billing/>}
             </MainContainer>
+            <Footer/>
         </AnimationRevealPage>
         </>
     )
