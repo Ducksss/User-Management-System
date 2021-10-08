@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 // styling 
+import "../styles/globalStyles.css"
 import styled from "styled-components";
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { Container as ContainerBase } from "components/misc/Layouts";
@@ -17,8 +18,8 @@ import axios from "axios";
 import * as Yup from "yup";
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
-import { Formik, Form } from 'formik';
 import { useHistory } from "react-router-dom";
+import { Formik, Form, useField } from 'formik';
 import ClipLoader from "react-spinners/ClipLoader";
 import PasswordStrengthBar from 'react-password-strength-bar';
 
@@ -57,22 +58,30 @@ const IllustrationImage = styled.div`
   ${tw`m-12 xl:m-16 w-full max-w-lg bg-contain bg-center bg-no-repeat`}
 `;
 
+const MyTextInput = ({ label, ...props }) => {
+  // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
+  // which we can spread on <input> and alse replace ErrorMessage entirely.
+  const [field, meta] = useField(props);
+
+  return (
+    <div css={[tw`mt-6`]}>
+      <label htmlFor={props.id || props.name} css={[tw`font-bold`]}>{label}</label>
+      <input css={[tw`w-full px-6 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white focus:border-solid focus:border-blue-400 first:mt-0 invalid:border-solid invalid:border-red-500 `]} {...field} {...props} />
+      {field.name === "password" ? (
+        <PasswordStrengthBar
+          password={meta.value}
+        />) : (null)}
+      {meta.touched && meta.error ? (
+        <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
+      ) : null}
+    </div>
+  );
+};
+
 export default function Signup() {
   const logoLinkUrl = "#";
   const illustrationImageSrc = illustration;
   const headingText = "Sign Up For Treact";
-  const socialButtons = [
-    {
-      iconImageSrc: googleIconImageSrc,
-      text: "Sign Up With Google",
-      url: "https://google.com"
-    },
-    {
-      iconImageSrc: twitterIconImageSrc,
-      text: "Sign Up With Twitter",
-      url: "https://twitter.com"
-    }
-  ];
   const submitButtonText = "Sign Up";
   const SubmitButtonIcon = SignUpIcon;
   const tosUrl = "#";
@@ -93,7 +102,7 @@ export default function Signup() {
     email: Yup.string()
       .email('Invalid email address')
       .required('Your email is required')
-      .test('Unique Email', 'Email already in use', // <- key, message
+      .test('Unique Email', 'The email has already been taken', // <- key, message
         function (value, context) {
           return new Promise((resolve, reject) => {
             axios.get(`http://localhost:8003/api/u/user/${value}/available`)
@@ -173,109 +182,73 @@ export default function Signup() {
                     registerUserInformation(values);
                   }}
                 >
-                  {({
-                    values,
-                    errors,
-                    touched,
-                    handleChange,
-                    handleBlur,
-                    handleSubmit,
-                    isSubmitting
-                    /* and other goodies */
-                  }) => (
-                    <Form css={[tw`mx-auto max-w-xs`]} >
-                      {/** First Name */}
-                      < Input
-                        type="text"
-                        name="firstName"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.firstName}
-                        placeholder="First name"
-                      />
-                      {(errors.firstName && touched.firstName) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.firstName}</span>}
 
-                      {/** Last Name */}
-                      <Input
-                        type="text"
-                        name="lastName"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.lastName}
-                        placeholder="Last name"
-                      />
-                      {(errors.lastName && touched.lastName) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.lastName}</span>}
+                  <Form css={[tw`mx-auto max-w-xs`]} >
+                    {/** First Name */}
+                    <MyTextInput
+                      label="First Name"
+                      name="firstName"
+                      type="text"
+                      placeholder="Jane"
+                    />
 
-                      {/**Email */}
-                      <Input
-                        type="email"
-                        name="email"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.email}
-                        placeholder="email"
-                      />
-                      {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
+                    <MyTextInput
+                      label="Last Name"
+                      name="lastName"
+                      type="text"
+                      placeholder="Doe"
+                    />
 
-                      {/**Contact Number */}
-                      <Input
-                        type="text"
-                        name="contactNumber"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.contactNumber}
-                        placeholder="Contact number"
-                      />
-                      {(errors.contactNumber && touched.contactNumber) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.contactNumber}</span>}
+                    <MyTextInput
+                      label="Email"
+                      name="email"
+                      type="email"
+                      placeholder="JaneDoe@gmail.com"
+                    />
 
-                      {/**Password */}
-                      <Input
-                        type="password"
-                        name="password"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.password}
-                        placeholder="password"
-                      />
-                      <PasswordStrengthBar
-                        password={values.password}
-                      />
-                      {(errors.password && touched.password) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.password}</span>}
+                    <MyTextInput
+                      label="Contact number"
+                      name="contactNumber"
+                      type="text"
+                      placeholder="+6596472290"
+                    />
 
-                      {/**Password Confirmation*/}
-                      <Input
-                        type="password"
-                        name="passwordConfirmation"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.passwordConfirmation}
-                        placeholder="Confirm Password"
-                      />
-                      {(errors.passwordConfirmation && touched.passwordConfirmation) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.passwordConfirmation}</span>}
+                    <MyTextInput
+                      label="Password"
+                      name="password"
+                      type="password"
+                      placeholder="Password"
+                    />
 
-                      <SubmitButton type="submit">
-                        <SubmitButtonIcon className="icon" />
-                        <span className="text">{submitButtonText}</span>
-                      </SubmitButton>
-                      <p tw="mt-6 text-xs text-gray-600 text-center">
-                        I agree to abide by treact's{" "}
-                        <a href={tosUrl} tw="border-b border-gray-500 border-dotted">
-                          Terms of Service
-                        </a>{" "}
-                        and its{" "}
-                        <a href={privacyPolicyUrl} tw="border-b border-gray-500 border-dotted">
-                          Privacy Policy
-                        </a>
-                      </p>
+                    <MyTextInput
+                      label="Confirm password"
+                      name="passwordConfirmation"
+                      type="password"
+                      placeholder="Password"
+                    />
 
-                      <p tw="mt-8 text-sm text-gray-600 text-center">
-                        Already have an account?{" "}
-                        <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
-                          Sign In
-                        </a>
-                      </p>
-                    </Form>
-                  )}
+                    <SubmitButton type="submit">
+                      <SubmitButtonIcon className="icon" />
+                      <span className="text">{submitButtonText}</span>
+                    </SubmitButton>
+                    <p tw="mt-6 text-xs text-gray-600 text-center">
+                      I agree to abide by treact's{" "}
+                      <a href={tosUrl} tw="border-b border-gray-500 border-dotted">
+                        Terms of Service
+                      </a>{" "}
+                      and its{" "}
+                      <a href={privacyPolicyUrl} tw="border-b border-gray-500 border-dotted">
+                        Privacy Policy
+                      </a>
+                    </p>
+
+                    <p tw="mt-8 text-sm text-gray-600 text-center">
+                      Already have an account?{" "}
+                      <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
+                        Sign In
+                      </a>
+                    </p>
+                  </Form>
                 </Formik>
               </FormContainer>
             </MainContent>
@@ -287,10 +260,4 @@ export default function Signup() {
       </Container>
     </AnimationRevealPage >
   );
-}
-
-let errorMessages = {
-  color: "red",
-  fontSize: "12px",
-  paddingLeft: "0.8rem"
 }

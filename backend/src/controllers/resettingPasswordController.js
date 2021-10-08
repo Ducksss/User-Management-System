@@ -49,9 +49,11 @@ exports.generateOTP = async (req, res, next) => {
                     email: email,
                     verificationCode: verificationCode
                 },
-                config.JWTKey, {
-                expiresIn: 600
-            })
+                config.JWTKey,
+                {
+                    expiresIn: 1000
+                }
+            )
         };
 
         transporter.sendMail({
@@ -329,9 +331,10 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
     try {
         const { token, incomingPassword } = req.body;
         const { user_guid } = jwt.verify(token, config.JWTKey);
-        const { currentPassword, oldPassword1, oldPassword2 } = await resettingPasswordService.retriveUserPasswordHistory(user_guid).then((error) => {
-            return res.status(404).send(codes(404));
-        })
+        const { currentPassword, oldPassword1, oldPassword2 } = await resettingPasswordService.retriveUserPasswordHistory(user_guid)
+            .catch((error) => {
+                return res.status(404).send(codes(404));
+            })
 
         await bcrypt.compare(incomingPassword, currentPassword)
             .then((result) => {

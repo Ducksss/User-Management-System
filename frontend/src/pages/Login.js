@@ -124,6 +124,7 @@ const StepOne = () => {
         email: '',
         password: ''
       }}
+      validateOnBlur
       validateOnChange={false}
       validationSchema={LoginSchema}
       onSubmit={(values) => {
@@ -231,7 +232,7 @@ const StepTwo = () => {
 export default function Login() {
   // Pre Defined Variables
   const logoLinkUrl = "http://localhost:3004/";
-  const signupUrl = "http://localhost:3004/register";
+  const signupUrl = "http://localhost:3004/signup";
   const forgotPasswordUrl = "http://localhost:3004/account/begin_password_reset";
 
   const illustrationImageSrc = illustration;

@@ -57,9 +57,12 @@ const IllustrationImage = styled.div`
 `;
 
 const StepOne = ({ setMessage, setCurrentStep }) => {
+    // links
+    const signupUrl = "http://localhost:3004/signup";
+    const forgotPasswordUrl = "http://localhost:3004/account/begin_password_reset";
+
     // const ref = useRef(null);
     const history = useHistory();
-    const signupUrl = "http://localhost:3004/register";
     const [isSubmitted, setIsSubmitted] = React.useState(false);
 
     const Toast = Swal.mixin({
@@ -148,7 +151,11 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                         <SearchOutline color="white" />
                         <span className="text">Search</span>
                     </SubmitButton>
-
+                    <p tw="mt-6 text-xs text-gray-600 text-center">
+                        <a href={forgotPasswordUrl} tw="border-b border-gray-500 border-dotted">
+                            Forgot Password ?
+                        </a>
+                    </p>
                     <p tw="mt-8 text-sm text-gray-600 text-center">
                         Dont have an account?{" "}
                         <a href={signupUrl} tw="border-b border-gray-500 border-dotted">

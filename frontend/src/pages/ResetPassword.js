@@ -18,7 +18,7 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
-import { Formik, Form } from 'formik';
+import { Formik, Form, Field, FastField } from 'formik';
 import { SearchOutline } from 'react-ionicons'
 import { useHistory } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -78,10 +78,11 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
     const ResetPasswordSchema = Yup.object({
         password: Yup.string()
             .required('Your password is required')
-            .min(16, "Must have at least 16 characters.")
+            .min(12, "Must have at least 12 characters.")
             .test('Unique Password', 'New password can\'t be your new password.', // <- key, message
-                function (value) {
+                function (value, context) {
                     return new Promise((resolve, reject) => {
+                        console.log(context)
                         axios.post(`http://localhost:8003/api/u/user/reset-password/verify-password-uniqueness`, {
                             token: token[0],
                             incomingPassword: value
@@ -132,10 +133,12 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
 
     return (
         <Formik
-            initialValues={{
-                password: '',
-                passwordConfirmation: ''
-            }}
+            initialValues={
+                {
+                    password: '',
+                    passwordConfirmation: ''
+                }
+            }
             validateOnChange={false}
             validationSchema={ResetPasswordSchema}
             onSubmit={(values) => {

@@ -78,7 +78,7 @@ module.exports.retriveUserPasswordHistory = (user_guid) => {
                     if (err) {
                         reject(err)
                     } else {
-                        resolve(results)
+                        resolve(results[0])
                     }
                     connection.release()
                 })
