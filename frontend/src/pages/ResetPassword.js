@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 
 // styling
 import styled from "styled-components";
@@ -22,6 +22,7 @@ import { Formik, Form } from 'formik';
 import { SearchOutline } from 'react-ionicons'
 import { useHistory } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
+import PasswordStrengthBar from 'react-password-strength-bar';
 import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 
 import { Alert } from "../components/misc/Alert";
@@ -57,9 +58,9 @@ const IllustrationImage = styled.div`
 `;
 
 const StepOne = ({ setMessage, setCurrentStep }) => {
-    // const ref = useRef(null);
     const history = useHistory();
     const signupUrl = "http://localhost:3004/register";
+    const token = window.location.href.split("/").slice(-1);
     const [isSubmitted, setIsSubmitted] = React.useState(false);
 
     const Toast = Swal.mixin({
@@ -74,19 +75,35 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
         }
     });
 
-    // const handleClick = () => {
-    //     ref.current.showAlert()
-    // };
-
     const ResetPasswordSchema = Yup.object({
-        email: Yup.string()
-            .email("Invalid email address format")
-            .required("Please enter your email address!")
+        password: Yup.string()
+            .required('Your password is required')
+            .min(16, "Must have at least 16 characters.")
+            .test('Unique Password', 'New password can\'t be your new password.', // <- key, message
+                function (value) {
+                    return new Promise((resolve, reject) => {
+                        axios.post(`http://localhost:8003/api/u/user/reset-password/verify-password-uniqueness`, {
+                            token: token[0],
+                            incomingPassword: value
+                        })
+                            .then((res) => {
+                                resolve(true)
+                            })
+                            .catch((error) => {
+                                if (error.response.data.code === 403) {
+                                    resolve(false);
+                                }
+                            })
+                    })
+                }
+            ),
+        passwordConfirmation: Yup.string()
+            .required('You need to confirm your password')
+            .oneOf([Yup.ref('password'), null], 'Passwords must match'),
     });
 
     const searchUserExists = (values) => {
         setIsSubmitted(true);
-
         axios
             .post(`${config.baseUrl}/u/user/begin-reset-password/${values.email}`)
             .then((results) => {
@@ -116,7 +133,8 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
     return (
         <Formik
             initialValues={{
-                email: '',
+                password: '',
+                passwordConfirmation: ''
             }}
             validateOnChange={false}
             validationSchema={ResetPasswordSchema}
@@ -135,14 +153,27 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
             }) => (
                 <Form css={[tw.form`mx-auto max-w-xs`]}>
                     <Input
-                        type="email"
-                        name="email"
+                        type="password"
+                        name="password"
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        value={values.email}
-                        placeholder="email"
+                        value={values.password}
+                        placeholder="password"
                     />
-                    {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
+                    <PasswordStrengthBar
+                        password={values.password}
+                    />
+                    {(errors.password && touched.password) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.password}</span>}
+
+                    <Input
+                        type="password"
+                        name="passwordConfirmation"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.passwordConfirmation}
+                        placeholder="Confirm password"
+                    />
+                    {(errors.passwordConfirmation && touched.passwordConfirmation) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.passwordConfirmation}</span>}
 
                     <SubmitButton type="submit">
                         <SearchOutline color="white" />
@@ -179,7 +210,23 @@ const StepTwo = () => {
     )
 }
 
-export default function BeginPasswordReset() {
+export default function ResetPassword() {
+    const history = useHistory();
+    const token = window.location.href.split("/").slice(-1);
+    React.useEffect(() => {
+        axios
+            .post(`${config.baseUrl}/u/user/reset-password/verify-reset-token`, {
+                token: token[0]
+            })
+            .catch((error) => {
+                if (error.response.data.code === 401) {
+                    history.push("/")
+                    // redirect the user to some error page such as the one on sendgrid
+                }
+                console.log(error.response)
+            })
+    })
+
     // Pre Defined Variables
     const illustrationImageSrc = illustration;
     const logoLinkUrl = "http://localhost:3004/";

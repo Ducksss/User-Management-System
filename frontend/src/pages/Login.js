@@ -231,22 +231,11 @@ const StepTwo = () => {
 export default function Login() {
   // Pre Defined Variables
   const logoLinkUrl = "http://localhost:3004/";
+  const signupUrl = "http://localhost:3004/register";
+  const forgotPasswordUrl = "http://localhost:3004/account/begin_password_reset";
+
   const illustrationImageSrc = illustration;
   const headingText = "Sign In To UMS";
-  const socialButtons = [
-    {
-      iconImageSrc: googleIconImageSrc,
-      text: "Sign In With Google",
-      url: "https://google.com"
-    },
-    {
-      iconImageSrc: twitterIconImageSrc,
-      text: "Sign In With Twitter",
-      url: "https://twitter.com"
-    }
-  ];
-  const forgotPasswordUrl = "#";
-  const signupUrl = "http://localhost:3004/register";
 
   // Team's Defined Variables
   const history = useHistory();

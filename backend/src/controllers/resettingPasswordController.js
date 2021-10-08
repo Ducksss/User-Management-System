@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const speakeasy = require("speakeasy");
 const nodeMailer = require('nodemailer');
-const moment = require("moment-timezone");
+const moment = require("moment");
 const config = require("../config/config");
 const { codes } = require('../config/codes');
 
@@ -22,31 +22,45 @@ let transporter = nodeMailer.createTransport({
 
 exports.generateOTP = async (req, res, next) => {
     try {
-        const { email } = req.params
+        const { email } = req.params;
         const userInformation = await loginService.authenticateUser(email)
             .catch((error) => {
-                console.log(error)
-                return res.status(401).send(codes(401, 'Insertion of OTP has failed'))
+                console.log(error);
+                return res.status(401).send(codes(401, 'Insertion of OTP has failed'));
             });
 
-        console.log(userInformation)
+        // if no user, break and don't send any email
         if (userInformation.length != 1) {
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
         }
 
-        const token = Math.floor(100000 + Math.random() * 900000);
         const { first_name, last_name, user_guid } = userInformation[0];
-        await resettingPasswordService.insertVerificationCode(user_guid, token)
+        const verificationCode = Math.floor(100000 + Math.random() * 900000);
+        await resettingPasswordService.insertVerificationCode(user_guid, verificationCode)
             .catch((error) => {
-                console.log(error)
+                console.log(error);
+                return res.status(401).send(codes(401, 'Insertion of OTP has failed'));
             })
+
+        const data = {
+            token: jwt.sign(
+                {
+                    user_guid: user_guid,
+                    email: email,
+                    verificationCode: verificationCode
+                },
+                config.JWTKey, {
+                expiresIn: 600
+            })
+        };
 
         transporter.sendMail({
             //Insert admin email here
-            from: 'Automated User Management system <noreply@UserManagementSystem.com>',
+            from: 'User Management System <noreply@UMS.com>',
             to: `${email}`,
-            subject: 'OTP Code from UMS',
-            html: `<div>
+            subject: 'Your UMS password reset request',
+            html: `
+                <div>
                     <center class="m_4493907587022712475wrapper">
                         <div>
                             <table cellpadding="0" cellspacing="0" border="0" width="100%" class="m_4493907587022712475wrapper"
@@ -63,6 +77,7 @@ exports.generateOTP = async (req, res, next) => {
                                                                 <tbody>
                                                                     <tr>
                                                                         <td>
+                
                                                                             <table width="100%" cellpadding="0" cellspacing="0"
                                                                                 border="0" style="width:100%;max-width:600px"
                                                                                 align="center">
@@ -144,6 +159,9 @@ exports.generateOTP = async (req, res, next) => {
                                                                                                             bgcolor=""
                                                                                                             role="module-content">
                                                                                                             <div>
+                                                                                                                <div style="font-family:inherit;text-align:start">
+                                                                                                                    <span style="border-top-width:0px;border-right-width:0px;border-bottom-width:0px;border-left-width:0px;border-top-style:initial;border-right-style:initial;border-bottom-style:initial;border-left-style:initial;border-top-color:initial;border-right-color:initial;border-bottom-color:initial;border-left-color:initial;margin-top:0px;margin-right:0px;margin-bottom:10px;margin-left:0px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;outline-color:initial;outline-style:initial;outline-width:0px;font-weight:400;vertical-align:baseline;color:#252a2e;font-family:-apple-system,&quot;.SFNSDisplay-Regular&quot;,&quot;Helvetica Neue&quot;,Helvetica,Arial,sans-serif;font-style:normal;font-variant-ligatures:normal;font-variant-caps:normal;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;background-color:rgb(255,255,255);text-decoration-style:initial;text-decoration-color:initial;font-size:16px">Dear ${first_name + " " + last_name},</span>
+                                                                                                                </div>
                                                                                                                 <div
                                                                                                                     style="font-family:inherit;text-align:start">
                                                                                                                     <br></div>
@@ -151,44 +169,52 @@ exports.generateOTP = async (req, res, next) => {
                                                                                                                     style="font-family:inherit;text-align:inherit">
                                                                                                                     <span
                                                                                                                         style="border-top-width:0px;border-right-width:0px;border-bottom-width:0px;border-left-width:0px;border-top-style:initial;border-right-style:initial;border-bottom-style:initial;border-left-style:initial;border-top-color:initial;border-right-color:initial;border-bottom-color:initial;border-left-color:initial;margin-top:0px;margin-right:0px;margin-bottom:10px;margin-left:0px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;outline-color:initial;outline-style:initial;outline-width:0px;font-weight:400;vertical-align:baseline;color:#252a2e;font-family:-apple-system,&quot;.SFNSDisplay-Regular&quot;,&quot;Helvetica Neue&quot;,Helvetica,Arial,sans-serif;font-style:normal;font-variant-ligatures:normal;font-variant-caps:normal;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;background-color:rgb(255,255,255);text-decoration-style:initial;text-decoration-color:initial;font-size:16px">
-                                                                                                                        You requested a password reset, please use the confirmation code below to complete the process. If you didn't make this request, ignore this email.
+                                                                                                                        A request has been received to change the password for your UMS account.
                                                                                                                     </span>
                                                                                                                 </div>
-                                                                                                                <div
-                                                                                                                    style="font-family:inherit;text-align:inherit">
-                                                                                                                    <br></div>
-                                                                                                                <div></div>
+                                                                                                                <div style="font-family:inherit;text-align:inherit">
+                                                                                                                <br></div>
+                                                                                                            <div
+                                                                                                                style="font-family:inherit;text-align:inherit">
+                                                                                                                <span
+                                                                                                                    style="border-top-width:0px;border-right-width:0px;border-bottom-width:0px;border-left-width:0px;border-top-style:initial;border-right-style:initial;border-bottom-style:initial;border-left-style:initial;border-top-color:initial;border-right-color:initial;border-bottom-color:initial;border-left-color:initial;margin-top:0px;margin-right:0px;margin-bottom:10px;margin-left:0px;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px;outline-color:initial;outline-style:initial;outline-width:0px;font-weight:400;vertical-align:baseline;color:#252a2e;font-family:-apple-system,&quot;.SFNSDisplay-Regular&quot;,&quot;Helvetica Neue&quot;,Helvetica,Arial,sans-serif;font-style:normal;font-variant-ligatures:normal;font-variant-caps:normal;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;background-color:rgb(255,255,255);text-decoration-style:initial;text-decoration-color:initial;font-size:16px"></span>
                                                                                                             </div>
-                                                                                                        </td>
-                                                                                                    </tr>
-                                                                                                </tbody>
-                                                                                            </table>
-                                                                                            <table border="0" cellpadding="0"
-                                                                                                cellspacing="0" role="module"
-                                                                                                style="table-layout:fixed" width="100%">
-                                                                                                <tbody>
-                                                                                                    <tr>
-                                                                                                        <td align="center" bgcolor=""
-                                                                                                            style="padding:0px 0px 0px 0px">
-                                                                                                            <table border="0"
-                                                                                                                cellpadding="0"
-                                                                                                                cellspacing="0"
-                                                                                                                class="m_4493907587022712475wrapper-mobile"
-                                                                                                                style="text-align:center">
-                                                                                                                <tbody>
-                                                                                                                    <tr>
-                                                                                                                        <td align="center"
-                                                                                                                            bgcolor="#321fdb"
-                                                                                                                            style="border-radius:6px;font-size:16px;text-align:center;background-color:inherit">
-                                                                                                                            <b>${token}</b>
-                                                                                                                        </td>
-                                                                                                                    </tr>
-                                                                                                                </tbody>
-                                                                                                            </table>
-                                                                                                        </td>
-                                                                                                    </tr>
-                                                                                                </tbody>
-                                                                                            </table>
+                                                                                                            <div></div>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                        <table border="0" cellpadding="0"
+                                                                                            cellspacing="0" role="module"
+                                                                                            style="table-layout:fixed" width="100%">
+                                                                                            <tbody>
+                                                                                                <tr>
+                                                                                                    <td align="center" bgcolor=""
+                                                                                                        style="padding:0px 0px 0px 0px">
+                                                                                                        <table border="0"
+                                                                                                            cellpadding="0"
+                                                                                                            cellspacing="0"
+                                                                                                            class="m_4493907587022712475wrapper-mobile"
+                                                                                                            style="text-align:center">
+                                                                                                            <tbody>
+                                                                                                                <tr>
+                                                                                                                    <td align="center"
+                                                                                                                        bgcolor="#321fdb"
+                                                                                                                        style="border-radius:6px;font-size:16px;text-align:center;background-color:inherit">
+                                                                                                                        <a href="http://localhost:3004/acccount/reset_password/${data.token}"
+                                                                                                                            style="background-color:#321fdb;border:0px solid #333333;border-color:#333333;border-radius:4px;border-width:0px;color:#ffffff;display:inline-block;font-size:16px;font-weight:700;letter-spacing:0px;line-height:normal;padding:12px 18px 12px 18px;text-align:center;text-decoration:none;border-style:solid"
+                                                                                                                            target="_blank"
+                                                                                                                            data-saferedirecturl="https://www.google.com/url?q=http://url6312.coreui.io/ls/click?upn%3DzYcg0S-2FzDXu459e3sth3RJeidPi8smGI64DUWxreqbx7uH9dvu9SbozstYcne-2BE2VCf0757GQ1QMCUMmTbJQqUJzs-2Bns7ErRdOGnUEIt7j6YS0cgKKoO-2BxSDf8qMZ-2BFslDl6XxVKMTSpCE0qZce8ZSvMP5k0prAY0CIr-2FcSYPS5pIDojh0y2PlpTjcdpn3FYO-2F3DFHLXyUrKCgdo1KK-2F6g-3D-3DW3fN_ndFMJpcCIGXHo1VJty3Pr-2FLtmK191lDwToRcRw2pMHsjJ9N6iSgpX5Kal6lnrooJL24Y9CGJxndH85Fv-2Bqsp6Q53fj3O52IoQHaSvhm5ooqGyjL-2F0jnRCj8902bGYqj5Pis-2FLVf-2BiaGGPOgQbtLlPS9jb1IJkLRytvJECCfaALR6KQDFYuL5J6sl0-2BXCSRo2pGEw3iGLB-2FWEiiPSfkWpixT26NWCPaN4D0Ud-2By7WF1l-2BZ3meeyy9W5WTnsCbYtld-2Bg1MgFoDx21ZPlbdM6BcfzlY-2BvTOjOl5VqruCB7ncwCuUrhTncQZT88HZoEqxC78Xpayt4Nk0ohDdAOvv-2FirsBIvjpb8q9POVsGgedXORFI-3D&amp;source=gmail&amp;ust=1629219091591000&amp;usg=AFQjCNEwhklbqiHn8aJzAhOk_fs2_4QFLw">
+                                                                                                                            Reset password</a>
+                                                                                                                    </td>
+                                                                                                                </tr>
+                                                                                                            </tbody>
+                                                                                                        </table>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                            </tbody>
+                                                                                        </table>
                                                                                             <table role="module" border="0"
                                                                                                 cellpadding="0" cellspacing="0"
                                                                                                 width="100%" style="table-layout:fixed">
@@ -203,7 +229,7 @@ exports.generateOTP = async (req, res, next) => {
                                                                                                                     style="font-family:inherit;text-align:inherit">
                                                                                                                     <span
                                                                                                                         style="font-family:-apple-system,&quot;.SFNSDisplay-Regular&quot;,&quot;Helvetica Neue&quot;,Helvetica,Arial,sans-serif;font-style:normal;font-variant-ligatures:normal;font-variant-caps:normal;font-weight:400;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;background-color:rgb(255,255,255);text-decoration-style:initial;text-decoration-color:initial;float:none;display:inline;font-size:16px;color:#252a2e">
-                                                                                                                        If your OTP does not work, please request for a new confirmation code.
+                                                                                                                        If you did not initiate this request, please contact us immediately at support@UMS.com.
                                                                                                                     </span>
                                                                                                                 </div>
                                                                                                                 <div
@@ -213,12 +239,15 @@ exports.generateOTP = async (req, res, next) => {
                                                                                                                     style="font-family:inherit;text-align:inherit">
                                                                                                                     <span
                                                                                                                         style="font-family:-apple-system,&quot;.SFNSDisplay-Regular&quot;,&quot;Helvetica Neue&quot;,Helvetica,Arial,sans-serif;font-style:normal;font-variant-ligatures:normal;font-variant-caps:normal;font-weight:400;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;background-color:rgb(255,255,255);text-decoration-style:initial;text-decoration-color:initial;float:none;display:inline;font-size:16px;color:#252a2e">Yours
-                                                                                                                        regards,</span>
+                                                                                                                        Thank you,
+                                                                                                                        <br>
+                                                                                                                        The UMS Team
+                                                                                                                    </span>
                                                                                                                 </div>
                                                                                                                 <div
                                                                                                                     style="font-family:inherit;text-align:inherit">
                                                                                                                     <span
-                                                                                                                        style="font-family:-apple-system,&quot;.SFNSDisplay-Regular&quot;,&quot;Helvetica Neue&quot;,Helvetica,Arial,sans-serif;font-style:normal;font-variant-ligatures:normal;font-variant-caps:normal;font-weight:400;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;background-color:rgb(255,255,255);text-decoration-style:initial;text-decoration-color:initial;float:none;display:inline;font-size:16px;color:#252a2e">-Automated EISO Management system</span>
+                                                                                                                        style="font-family:-apple-system,&quot;.SFNSDisplay-Regular&quot;,&quot;Helvetica Neue&quot;,Helvetica,Arial,sans-serif;font-style:normal;font-variant-ligatures:normal;font-variant-caps:normal;font-weight:400;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;background-color:rgb(255,255,255);text-decoration-style:initial;text-decoration-color:initial;float:none;display:inline;font-size:16px;color:#252a2e"></span>
                                                                                                                 </div>
                                                                                                                 <div></div>
                                                                                                             </div>
@@ -252,18 +281,86 @@ exports.generateOTP = async (req, res, next) => {
                 </div>`
         });
 
-        const data = {
-            token: jwt.sign(
-                {
-                    email: email,
-                },
-                config.JWTKey, {
-                expiresIn: 600
-            })
-        };
-
         return res.status(200).send(codes(200, "", data));
     } catch (e) {
+        console.log(e)
         return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
+    }
+}
+
+exports.verifyResetPasswordParamToken = async (req, res, next) => {
+    try {
+        const { token } = req.body;
+        const jwtObject = await jwt.verify(token, config.JWTKey)
+        const { user_guid, verificationCode } = jwtObject;
+
+        let result = await resettingPasswordService.verifyToken(user_guid, verificationCode)
+            .catch((error) => {
+                return res.status(500).send(codes(500));
+            });
+
+        if (result.length !== 1) {
+            return res.status(403).send(codes(403));
+        }
+
+        if (result[0].verification_code !== verificationCode) {
+            return res.status(403).send(codes(403), "", "Your token has expired. Please try again");
+        }
+
+        const currentUTCTiming = moment.utc();
+        const databaseTiming = moment.utc(result[0].created_at);
+        const isPassedLimit = (currentUTCTiming - databaseTiming) / (10 * 60 * 100) > 5;
+
+        if (isPassedLimit) {
+            return res.status(408).send(codes(408));
+        } else {
+            return res.status(204).send(codes(204));
+        }
+    } catch (error) {
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).send(codes(401))
+        }
+
+        return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
+    }
+}
+
+exports.verifyPasswordUniquness = async (req, res, next) => {
+    try {
+        const { token, incomingPassword } = req.body;
+        const { user_guid } = jwt.verify(token, config.JWTKey);
+        const { currentPassword, oldPassword1, oldPassword2 } = await resettingPasswordService.retriveUserPasswordHistory(user_guid).then((error) => {
+            return res.status(404).send(codes(404));
+        })
+
+        await bcrypt.compare(incomingPassword, currentPassword)
+            .then((result) => {
+                if (result) {
+                    return res.status(401).send(codes(401))
+                }
+            });
+
+        if (oldPassword1) {
+            await bcrypt.compare(incomingPassword, oldPassword1)
+                .then((isRepeated1) => {
+                    if (isRepeated1) {
+                        return res.status(401).send(codes(401));
+                    }
+                })
+        }
+
+        if (oldPassword2) {
+            await bcrypt.compare(incomingPassword, oldPassword2)
+                .then((isRepeated2) => {
+                    if (isRepeated2) {
+                        return res.status(401).send(codes(401));
+                    }
+                })
+        }
+
+        return res.status(200).send(codes(200));
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(codes(500));
     }
 }
