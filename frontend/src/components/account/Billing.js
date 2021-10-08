@@ -1,11 +1,9 @@
 import React from 'react'
 
-
-export default function Settings() {
-
+export default function Billing() {
     return (
         <div>
-            
+            yes
         </div>
     )
 }
