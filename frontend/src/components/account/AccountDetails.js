@@ -1,5 +1,4 @@
-import React, {useState, useEffect} from 'react'
-// import { Container, Row, Col } from 'react-bootstrap'
+import React, {useState} from 'react'
 import tw from 'twin.macro';
 import {Pencil} from 'react-bootstrap-icons'
 import Slider from './Slider';
@@ -18,15 +17,17 @@ const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
 const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
 const Line = tw.hr`m-8 w-full h-0`
 
+// ^ dont cock up my tailwind i swear
+
 export default function AccountDetails(props) {
 
     const [data, setData] = useState({
         info: {
             title:'Personal Info',
             data: {
-                Name: '',
-                Email: '',
-                Phone: ''
+                Name: 'cao ni ma',
+                Email: 'nima@gmail.com',
+                Phone: '112323589234789'
             }
         },
         username: {
@@ -44,7 +45,7 @@ export default function AccountDetails(props) {
         timezone: {
             title: 'Timezone',
             data: {
-                Timezone: ''
+                Timezone: 'ok'
             }
         }
     })
@@ -52,13 +53,35 @@ export default function AccountDetails(props) {
     const [showModal, setShowModal] = useState(false)
     const [sendData, setsendData] = useState('')
 
+    const getUserDetails = () => {
+        if(data) {
+            let text = []
+            for(let i in data.info.data) {
+                text.push(data.info.data[i], <br/>)
+            }
+            return text
+        } else {
+            return ''
+        }
+    }
+
+    const getRandom = () => {
+        let num = (Math.floor(Math.random() * 20))
+        let text = ''
+        for(let i = 0; i <num; i++){
+            text += '*'
+        }
+        return text
+    }
+
     const handleEdit = (e) => {
         setShowModal(true)
         setsendData(e)
     }
 
     const newdata = e => {
-        console.log(e);
+        // set the current new data into the state 
+        // can use axios to save data as well, make sure to update the useState
         let newdata = data
         for(let i in newdata) {
             if(i.title == e.title){
@@ -71,35 +94,38 @@ export default function AccountDetails(props) {
     return (
         <MainContent>
             <AccountRow>
+                {/* account details section */}
                 <GridRow>
                     <LeftHeader>Your Account</LeftHeader>
                     <DetailRow>
                         <InfoRow>
                             <Header>Personal Info</Header>
-                            <Content>cummerata chai pin zheng</Content>
+                            <Content>{getUserDetails()}</Content>
                             <Edit onClick={() => handleEdit(data.info)}><Pencil/></Edit>
                         </InfoRow>
                         <InfoRow>
                             <Header>Username</Header>
-                            <Content>cummerata chai pin zheng</Content>
+                            <Content>{data.username.data.Username}</Content>
                             <Edit onClick={() => handleEdit(data.username)}><Pencil/></Edit>
                         </InfoRow>
                         <InfoRow>
                             <Header>Password</Header>
-                            <Content>cummerata chai pin zheng</Content>
+                            <Content>{getRandom()}</Content>
                             <Edit onClick={() => handleEdit(data.password)}><Pencil/></Edit>
                         </InfoRow>
+
+                        {/* inforowlast is used to remove the border bottom */}
                         <InfoRowLast>
                             <Header>TimeZone</Header>
-                            <Content>cummerata chai pin zheng</Content>
+                            <Content>{data.timezone.data.Timezone}</Content>
                             <Edit onClick={() => handleEdit(data.timezone)}><Pencil/></Edit>
                         </InfoRowLast>
                     </DetailRow>
                 </GridRow>
                 <Line/>
-
-
+                {/* any other sections here */}
             </AccountRow>
+            {/* slider */}
             <Slider show={showModal} hide={setShowModal} data={sendData} getData={e => newdata(e)}/>
         </MainContent>
     )

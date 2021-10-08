@@ -27,6 +27,7 @@ export default function Slider(props) {
     }, [props.data])
 
     useEffect(() => { 
+        //empty data will return error if the 'if' statement is removed
         if(data) getData()
     }, [data])
 
@@ -36,7 +37,7 @@ export default function Slider(props) {
             temp.push(
                 <FormRow key={Math.random()}>
                     <FormTitle>{e}:</FormTitle>
-                    <InputText value={data[e]} title={e} onChange={(ev) => handleEdit(ev)}/>
+                    <InputText value={data.data[e]} title={e} onChange={(ev) => handleEdit(ev)}/>
                 </FormRow>
             )
         }
@@ -53,7 +54,6 @@ export default function Slider(props) {
 
     const hideFunc = () => {
         if(edited) {
-            //swal here
             swalWithBootstrapButtons.fire({
                 icon: 'warning',
                 title: 'Are You Sure?',
