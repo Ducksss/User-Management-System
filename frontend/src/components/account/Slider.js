@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import {swalWithBootstrapButtons} from 'shared/swal';
 import tw from 'twin.macro';
+
+//styling
 import styles from './Slider.module.css'
 
 export default function Slider(props) {
@@ -67,6 +69,8 @@ export default function Slider(props) {
                     setedited(false)
                     props.hide(false)
                 }
+                //best to do your axios POST data to the parent 
+                //udk wat yr saving 
             })
         } else {
             setedited(false)

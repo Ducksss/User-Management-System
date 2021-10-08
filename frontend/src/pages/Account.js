@@ -24,7 +24,6 @@ const TabControl = styled.div`
   }
 `;
 
-// active={activeTab === tabName}
 export default function Account() {
     const tab = ['Account', 'Billing']
     const [activeTab, setActiveTab] = useState(tab[0]);
@@ -37,8 +36,7 @@ export default function Account() {
                 <Heading>Account Details</Heading>
                 <div style={{width: 'fit-content', marginTop: '1em', marginBottom: '1em'}}>
                     <TabsControl>
-                        {
-                            tab.map((e,i)=> (
+                        {tab.map((e,i)=> (
                                 <TabControl key={i} active={activeTab === e} onClick={() => setActiveTab(e)}>
                                     {e}
                                 </TabControl>
@@ -48,7 +46,6 @@ export default function Account() {
                 </div>
 
                 {/* content here  */}
-
                 {activeTab == tab[0] ? <AccountDetails/> : <Billing/>}
             </MainContainer>
             <Footer/>

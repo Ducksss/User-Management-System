@@ -1,6 +1,8 @@
 import React, {useState} from 'react'
-import tw from 'twin.macro';
 import {Pencil} from 'react-bootstrap-icons'
+import tw from 'twin.macro';
+
+//component
 import Slider from './Slider';
 
 const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
@@ -20,7 +22,6 @@ const Line = tw.hr`m-8 w-full h-0`
 // ^ dont cock up my tailwind i swear
 
 export default function AccountDetails(props) {
-
     const [data, setData] = useState({
         info: {
             title:'Personal Info',
@@ -54,6 +55,7 @@ export default function AccountDetails(props) {
     const [sendData, setsendData] = useState('')
 
     const getUserDetails = () => {
+        //personal info has 3 keys, so have to loop to get all of it to display
         if(data) {
             let text = []
             for(let i in data.info.data) {
