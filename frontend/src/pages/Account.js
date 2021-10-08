@@ -12,8 +12,6 @@ import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 //components
 import AccountDetails from 'components/account/AccountDetails';
 import Billing from 'components/account/Billing';
-import Slider from 'components/account/Slider';
-
 
 const MainContainer = tw.div`w-full`;
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold`;

@@ -57,6 +57,17 @@ export default function AccountDetails(props) {
         setsendData(e)
     }
 
+    const newdata = e => {
+        console.log(e);
+        let newdata = data
+        for(let i in newdata) {
+            if(i.title == e.title){
+                newdata[i] = e
+            }
+        }
+        setData(data)
+    }
+
     return (
         <MainContent>
             <AccountRow>
@@ -89,7 +100,7 @@ export default function AccountDetails(props) {
 
 
             </AccountRow>
-            <Slider show={showModal} hide={setShowModal} data={sendData} />
+            <Slider show={showModal} hide={setShowModal} data={sendData} getData={e => newdata(e)}/>
         </MainContent>
     )
 }

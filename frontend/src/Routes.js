@@ -1,5 +1,7 @@
 import "tailwindcss/dist/base.css";
 import "styles/globalStyles.css";
+import 'sweetalert2/src/sweetalert2.scss'
+
 import React from "react";
 import { css } from "styled-components/macro"; //eslint-disable-line
 
