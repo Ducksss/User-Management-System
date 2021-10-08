@@ -16,7 +16,7 @@ let Toast = Swal.mixin({
   },
 });
 class CheckoutForm extends React.Component {
-  
+
   handleSubmit = async event => {
     event.preventDefault();
     console.log(event.target.name)
@@ -36,23 +36,22 @@ class CheckoutForm extends React.Component {
     if (result.error) {
       console.log(result.error.message);
     } else {
-        //Backend api
-        axios.post(`http://localhost:8003/api/u/pricing/subscribe`, {
-          token : result.token.id,
-          amount : "$1",
-          currency : "usd",
-
+      //Backend api
+      axios.post(`http://localhost:8003/api/u/pricing/subscribe`, {
+        token: result.token.id,
+        amount: "$1",
+        currency: "usd",
+      })
+        .then((response) => {
+          Toast.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Item has successfully been bought",
+          });
         })
-            .then((response) => {
-              Toast.fire({
-                icon: "success",
-                title: "Success!",
-                text: "Item has successfully been bought",
-              });
-            })
-            .catch((error) => {
-                
-    });
+        .catch((error) => {
+
+        });
       console.log(result.token);
     }
   };
@@ -60,12 +59,12 @@ class CheckoutForm extends React.Component {
   render() {
     return (
       <div>
-        
+
         <form onSubmit={this.handleSubmit}>
-        <label class="product-info">
-          <h3 name="product_name" value="hi"className="product-title">Apple MacBook Pro</h3>
-          <h4 name="product_price" value="hi" className="product-price">$999</h4>
-        </label>
+          <label class="product-info">
+            <h3 name="product_name" value="hi" className="product-title">Apple MacBook Pro</h3>
+            <h4 name="product_price" value="hi" className="product-price">$999</h4>
+          </label>
           <CardSection />
           <button disabled={!this.props.stripe} className="btn-pay">
             Buy Now
