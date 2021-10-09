@@ -230,7 +230,7 @@ export default function Login() {
   // Pre Defined Variables
   const logoLinkUrl = "http://localhost:3004/";
   const signupUrl = "http://localhost:3004/signup";
-  const forgotPasswordUrl = "http://localhost:3004/account/begin_password_reset";
+  const forgotPasswordUrl = "http://localhost:3004/account/forgot_password";
 
   const illustrationImageSrc = illustration;
   const headingText = "Sign In To UMS";

@@ -127,7 +127,7 @@ export default function App(props) {
           <SignupPage />
         </Route>
 
-        <Route path="/account/begin_password_reset">
+        <Route path="/account/forgot_password">
           <BeginPasswordReset />
         </Route>
 
