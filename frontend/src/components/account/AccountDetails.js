@@ -1,7 +1,8 @@
-import React, {useState} from 'react'
-import {Pencil} from 'react-bootstrap-icons'
+import React, { useState, useEffect } from 'react'
+import { Link, withRouter } from 'react-router-dom';
+import { Pencil } from 'react-bootstrap-icons'
 import tw from 'twin.macro';
-
+import config from "../../Config.js";
 //component
 import Slider from './Slider';
 
@@ -9,7 +10,7 @@ const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
 const AccountRow = tw.div` grid grid-rows-3 w-11/12`
 const GridRow = tw.div`flex`
 const DetailRow = tw.div`border rounded-lg border-gray-400  w-8/12 `
-const LeftHeader =  tw.div` text-xl font-black w-4/12`
+const LeftHeader = tw.div` text-xl font-black w-4/12`
 
 const InfoRow = tw.div`flex flex-row border-b border-gray-400 px-3 py-5`
 const InfoRowLast = tw.div`flex flex-row py-5 px-3`
@@ -20,11 +21,41 @@ const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
 const Line = tw.hr`m-8 w-full h-0`
 
 // ^ dont cock up my tailwind i swear
+const AccountSubscription = ({ subscription }) => {
+    return (
+        <DetailRow>
+            <hr />
+            <InfoRow>
+            <Header>Subscription ID:</Header>
+            <Content>    
+                    {subscription.id}
+                
+                </Content> 
+            </InfoRow>
 
+            <InfoRow>
+            <Header>Status:</Header><Content> {subscription.status}</Content>
+                </InfoRow>
+
+                <InfoRow>
+                Card last4: {subscription.default_payment_method?.card?.last4}
+                </InfoRow>
+
+                <InfoRowLast>
+                Current period end: {(new Date(subscription.current_period_end * 1000).toString())}
+                </InfoRowLast>
+
+            {/* <Link to={{pathname: '/change-plan', state: {subscription: subscription.id }}}>Change plan</Link><br /> */}
+            <Link to={{ pathname: '/cancel', state: { subscription: subscription.id } }}>Cancel</Link>
+        </DetailRow>
+    )
+}
 export default function AccountDetails(props) {
+
+
     const [data, setData] = useState({
         info: {
-            title:'Personal Info',
+            title: 'Personal Info',
             data: {
                 Name: 'cao ni ma',
                 Email: 'nima@gmail.com',
@@ -56,10 +87,10 @@ export default function AccountDetails(props) {
 
     const getUserDetails = () => {
         //personal info has 3 keys, so have to loop to get all of it to display
-        if(data) {
+        if (data) {
             let text = []
-            for(let i in data.info.data) {
-                text.push(data.info.data[i], <br/>)
+            for (let i in data.info.data) {
+                text.push(data.info.data[i], <br />)
             }
             return text
         } else {
@@ -70,7 +101,7 @@ export default function AccountDetails(props) {
     const getRandom = () => {
         let num = (Math.floor(Math.random() * 20))
         let text = ''
-        for(let i = 0; i <num; i++){
+        for (let i = 0; i < num; i++) {
             text += '*'
         }
         return text
@@ -85,14 +116,27 @@ export default function AccountDetails(props) {
         // set the current new data into the state 
         // can use axios to save data as well, make sure to update the useState
         let newdata = data
-        for(let i in newdata) {
-            if(i.title == e.title){
+        for (let i in newdata) {
+            if (i.title == e.title) {
                 newdata[i] = e
             }
         }
         setData(data)
     }
+    const [subscriptions, setSubscriptions] = useState([]);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            const { subscriptions } = await fetch(`${config.baseUrl}/u/user/subscriptions`).then(r => r.json());
+
+            setSubscriptions(subscriptions.data);
+        }
+        fetchData();
+    }, []);
+
+    if (!subscriptions) {
+        return '';
+    }
     return (
         <MainContent>
             <AccountRow>
@@ -103,32 +147,41 @@ export default function AccountDetails(props) {
                         <InfoRow>
                             <Header>Personal Info</Header>
                             <Content>{getUserDetails()}</Content>
-                            <Edit onClick={() => handleEdit(data.info)}><Pencil/></Edit>
+                            <Edit onClick={() => handleEdit(data.info)}><Pencil /></Edit>
                         </InfoRow>
                         <InfoRow>
                             <Header>Username</Header>
                             <Content>{data.username.data.Username}</Content>
-                            <Edit onClick={() => handleEdit(data.username)}><Pencil/></Edit>
+                            <Edit onClick={() => handleEdit(data.username)}><Pencil /></Edit>
                         </InfoRow>
                         <InfoRow>
                             <Header>Password</Header>
                             <Content>{getRandom()}</Content>
-                            <Edit onClick={() => handleEdit(data.password)}><Pencil/></Edit>
+                            <Edit onClick={() => handleEdit(data.password)}><Pencil /></Edit>
                         </InfoRow>
 
                         {/* inforowlast is used to remove the border bottom */}
                         <InfoRowLast>
                             <Header>TimeZone</Header>
                             <Content>{data.timezone.data.Timezone}</Content>
-                            <Edit onClick={() => handleEdit(data.timezone)}><Pencil/></Edit>
+                            <Edit onClick={() => handleEdit(data.timezone)}><Pencil /></Edit>
                         </InfoRowLast>
                     </DetailRow>
                 </GridRow>
-                <Line/>
+                <Line />
                 {/* any other sections here */}
+                
+
+                <GridRow >
+                <LeftHeader>Subscriptions</LeftHeader>
+                    {subscriptions.map(s => {
+                        return <AccountSubscription key={s.id} subscription={s} />
+                    })}
+                </GridRow>
             </AccountRow>
+
             {/* slider */}
-            <Slider show={showModal} hide={setShowModal} data={sendData} getData={e => newdata(e)}/>
+            <Slider show={showModal} hide={setShowModal} data={sendData} getData={e => newdata(e)} />
         </MainContent>
     )
 }
