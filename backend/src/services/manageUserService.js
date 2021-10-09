@@ -29,6 +29,33 @@ module.exports.getEmail = (email) => {
     })
 }
 
+// verify if number has been taken and translating number to UUID
+module.exports.getNumber = (number) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `SELECT 
+                                user_guid 
+                            FROM 
+                                user_management_system.users 
+                            where 
+                                contact_number = ?;
+                            `;
+                connection.query(query, [number], (err, results) => {
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
 // adding user information to the database
 module.exports.addUser = (firstName, lastName, email, contact, privilege) => {
     return new Promise((resolve, reject) => {

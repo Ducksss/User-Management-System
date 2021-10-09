@@ -40,19 +40,34 @@ exports.checkDuplicateEmails = async (req, res, next) => {
     }
 }
 
+//checks for duplicate numbers before user registration
+exports.checkDuplicateNumbers = async (req, res, next) => {
+    try {
+        let { number } = req.params;
+        let results = await manageUsers.getNumber(number);
+
+        if (results.length === 1) {
+            return res.status(409).send(codes(409, null, "The number has already been taken."))
+        } else {
+            return res.status(200).send(codes(200, null, results));
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
+}
+
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
 
         let data = {
-            firstName: validators.validateText(req.body.firstName), 
-            lastName: validators.validateText(req.body.firstName), 
-            email: validators.validateEmail(req.body.email), 
-            password: validators.validateText(req.body.password), 
+            firstName: validators.validateText(req.body.firstName),
+            lastName: validators.validateText(req.body.firstName),
+            email: validators.validateEmail(req.body.email),
+            password: validators.validateText(req.body.password),
             contact: validators.validateInt(req.body.contact)
         }
-
-        console.log(data);
 
         let { firstName, lastName, email, password, contact, privilege } = data;
 
