@@ -105,7 +105,7 @@ import ComponentRenderer from "ComponentRenderer.js";
 import MainLandingPage from "MainLandingPage.js";
 import ThankYouPage from "ThankYouPage.js";
 
-import BeginPasswordReset from "pages/BeginPasswordReset"
+import BeginPasswordReset from "pages/ForgotPassword"
 import ResetPassword from "pages/ResetPassword"
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 

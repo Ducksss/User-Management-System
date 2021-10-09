@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 
 // styling
 import styled from "styled-components";
@@ -15,9 +15,7 @@ import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { useHistory } from "react-router-dom";
-import { SearchOutline } from 'react-ionicons';
 import { Formik, Form, useField } from 'formik';
-import ClipLoader from "react-spinners/ClipLoader";
 import PasswordStrengthBar from 'react-password-strength-bar';
 
 import { Alert } from "../components/misc/Alert";
@@ -32,9 +30,6 @@ const MainContent = tw.div`mt-12 flex flex-col items-center`;
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold`;
 const Subheading = tw.h5`font-bold text-primary-500`
 const FormContainer = tw.div`w-full flex-1 mt-8`;
-
-const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
-const DividerText = tw.div`leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform -translate-y-1/2 absolute inset-x-0 top-1/2 bg-transparent`;
 
 const SubmitButton = styled.button`
   ${tw`mt-5 tracking-wide font-semibold bg-primary-500 text-gray-100 w-full py-4 rounded-lg hover:bg-primary-900 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none`}
@@ -206,10 +201,22 @@ export default function ResetPassword() {
             .catch((error) => {
                 if (error.response.data.code === 401) {
                     history.push("/")
-                    // redirect the user to some error page such as the one on sendgrid
+                    // Expired
+                }
+
+                if (error.response.data.code === 403) {
+                    // Forbidden - either it has already been done or fail
+                    if (error.response.data.description === "filler") {
+                        // Reset already accomplished
+                        history.push("/")
+                    } else {
+                        // Token mismatch error
+                        history.push("/stupid")
+                    }
                 }
 
                 if (error.response.data.code === 500) {
+                    // General failure
                     history.push("/")
                 }
 

@@ -318,7 +318,7 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
         }
 
         if (result[0].type === 1) {
-            return res.status(403).send(codes(403), "", "Your token has expired. Please try again");
+            return res.status(403).send(codes(403), "", "It has already been done");
         }
 
         const currentUTCTiming = moment.utc();
@@ -335,6 +335,7 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
             return res.status(401).send(codes(401))
         }
 
+        console.log(error)
         return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
     }
 }
