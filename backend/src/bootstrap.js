@@ -7,4 +7,5 @@ module.exports = (app, router) => {
     loginRoute.route(router)
     manageUserRoute.route(router)
     resettingPasswordRoute.route(router)
+    encryptionRoute.route(router)
 };
