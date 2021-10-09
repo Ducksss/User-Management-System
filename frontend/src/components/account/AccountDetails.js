@@ -21,36 +21,8 @@ const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
 const Line = tw.hr`m-8 w-full h-0`
 
 // ^ dont cock up my tailwind i swear
-const AccountSubscription = ({ subscription }) => {
-    return (
-        <DetailRow>
-            <hr />
-            <InfoRow>
-            <Header>Subscription ID:</Header>
-            <Content>    
-                    {subscription.id}
-                
-                </Content> 
-            </InfoRow>
 
-            <InfoRow>
-            <Header>Status:</Header><Content> {subscription.status}</Content>
-                </InfoRow>
-
-                <InfoRow>
-                Card last4: {subscription.default_payment_method?.card?.last4}
-                </InfoRow>
-
-                <InfoRowLast>
-                Current period end: {(new Date(subscription.current_period_end * 1000).toString())}
-                </InfoRowLast>
-
-            {/* <Link to={{pathname: '/change-plan', state: {subscription: subscription.id }}}>Change plan</Link><br /> */}
-            <Link to={{ pathname: '/cancel', state: { subscription: subscription.id } }}>Cancel</Link>
-        </DetailRow>
-    )
-}
-export default function AccountDetails(props) {
+export default function AccountDetails(location) {
 
 
     const [data, setData] = useState({
@@ -84,7 +56,7 @@ export default function AccountDetails(props) {
 
     const [showModal, setShowModal] = useState(false)
     const [sendData, setsendData] = useState('')
-
+    const [cancelled, setCancelled] = useState(false);
     const getUserDetails = () => {
         //personal info has 3 keys, so have to loop to get all of it to display
         if (data) {
@@ -124,7 +96,20 @@ export default function AccountDetails(props) {
         setData(data)
     }
     const [subscriptions, setSubscriptions] = useState([]);
-
+    const handleClick = async (e,subscriptionID) => {
+        e.preventDefault();
+        console.log(e)
+        await fetch(`${config.baseUrl}/u/user/cancelSubscription`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subscriptionId: subscriptionID
+          }),
+        })
+        setCancelled(true);
+      };
     useEffect(() => {
         const fetchData = async () => {
             const { subscriptions } = await fetch(`${config.baseUrl}/u/user/subscriptions`).then(r => r.json());
@@ -136,6 +121,36 @@ export default function AccountDetails(props) {
 
     if (!subscriptions) {
         return '';
+    }
+    const AccountSubscription = ({ subscription }) => {
+        return (
+            <DetailRow>
+                <hr />
+                <InfoRow>
+                    <Header>Subscription ID:</Header>
+                    <Content>
+                        {subscription.id}
+                    </Content>
+                </InfoRow>
+    
+                <InfoRow>
+                    <Header>Status:</Header><Content> {subscription.status}</Content>
+                </InfoRow>
+    
+                <InfoRow>
+                    <Header>Card last4:</Header><Content> {subscription.default_payment_method?.card?.last4}</Content>
+                </InfoRow>
+    
+                <InfoRowLast>
+                    <Header>Current period end:</Header><Content> {(new Date(subscription.current_period_end * 1000).toString())}</Content>
+                </InfoRowLast>
+    
+                {/* <Link to={{pathname: '/change-plan', state: {subscription: subscription.id }}}>Change plan</Link><br /> */}
+                <button onClick={(e) => { handleClick(e, subscription.id) }}>Cancel</button>
+                
+            </DetailRow>
+            
+        )
     }
     return (
         <MainContent>
@@ -170,14 +185,16 @@ export default function AccountDetails(props) {
                 </GridRow>
                 <Line />
                 {/* any other sections here */}
-                
+
 
                 <GridRow >
-                <LeftHeader>Subscriptions</LeftHeader>
+                    <LeftHeader>Subscriptions</LeftHeader>
                     {subscriptions.map(s => {
                         return <AccountSubscription key={s.id} subscription={s} />
                     })}
+                    
                 </GridRow>
+                
             </AccountRow>
 
             {/* slider */}

@@ -107,6 +107,8 @@ import ComponentRenderer from "ComponentRenderer.js";
 import MainLandingPage from "MainLandingPage.js";
 import ThankYouPage from "ThankYouPage.js";
 import Account from 'pages/Account.js'
+import Subscribe from 'pages/Subscribe.js'
+// import Subscribe from 'pages/Subscribe.js'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 export default function App(props) {
@@ -140,6 +142,9 @@ export default function App(props) {
 
         <Route path='/account'>
           <Account />  
+        </Route>
+        <Route path='/subscribe'>
+          <Subscribe />  
         </Route>
 
         <Route path="/" >
