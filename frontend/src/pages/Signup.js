@@ -18,7 +18,6 @@ import axios from "axios";
 import * as Yup from "yup";
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
-import { Formik, Form } from 'formik';
 import { resEncrypt } from '../RsaEncryption';
 import { useHistory } from "react-router-dom";
 import { Formik, Form, useField } from 'formik';
