@@ -33,7 +33,6 @@ const MainContent = tw.div`mt-12 flex flex-col items-center`;
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold`;
 const FormContainer = tw.div`w-full flex-1 mt-8`;
 
-// const Form = tw.form`mx-auto max-w-xs`;
 const Input = tw.input`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5 first:mt-0`;
 const SubmitButton = styled.button`
   ${tw`mt-5 tracking-wide font-semibold bg-primary-500 text-gray-100 w-full py-4 rounded-lg hover:bg-primary-900 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none`}
@@ -118,9 +117,9 @@ export default function Signup() {
       .email('Invalid email address')
       .required('Your email is required')
       .test('Unique Email', 'The email has already been taken', // <- key, message
-        function (value, context) {
+        function (value) {
           return new Promise((resolve, reject) => {
-            axios.get(`http://localhost:8003/api/u/user/${value}/available`)
+            axios.get(`http://localhost:8003/api/u/user/email/${value}/available`)
               .then((res) => {
                 resolve(true)
               })
@@ -134,7 +133,22 @@ export default function Signup() {
       ),
     contactNumber: Yup.string()
       .matches(/^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/, "Must be a phone number")
-      .required('Your contact number is required'),
+      .required('Your contact number is required')
+      .test('Unique Number', 'The number has already been taken', // <- key, message
+        function (value) {
+          return new Promise((resolve, reject) => {
+            axios.get(`${config.baseUrl}/u/user/number/${value}/available`)
+              .then((res) => {
+                resolve(true)
+              })
+              .catch((error) => {
+                if (error.response.data.code === 409) {
+                  resolve(false);
+                }
+              })
+          })
+        }
+      ),
     password: Yup.string()
       .required('Your password is required')
       .min(5, "Your password must be minimally 5 characters long!"),
@@ -144,7 +158,7 @@ export default function Signup() {
   })
 
   const registerUserInformation = (values) => {
-        
+
     axios
       .post(`${config.baseUrl}/u/user/create-account`, {
         firstName: resEncrypt(values.firstName, publicKey),

@@ -77,7 +77,6 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
     const signupUrl = "http://localhost:3004/signup";
     const forgotPasswordUrl = "http://localhost:3004/account/begin_password_reset";
 
-    // const ref = useRef(null);
     const history = useHistory();
     const [isSubmitted, setIsSubmitted] = React.useState(false);
 
@@ -93,10 +92,6 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
         }
     });
 
-    // const handleClick = () => {
-    //     ref.current.showAlert()
-    // };
-
     const ResetPasswordSchema = Yup.object({
         email: Yup.string()
             .email("Invalid email address format")
@@ -108,12 +103,6 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
 
         axios
             .post(`${config.baseUrl}/u/user/begin-reset-password/${values.email}`)
-            .then((results) => {
-                let token = results.data.content.token
-                history.push({
-                    pathname: `/account/begin_password_reset/${token}`,
-                });
-            })
             .catch((error) => {
                 // handleClick();
                 if (error.response.data.code === 500) {
@@ -121,8 +110,6 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                         icon: 'error',
                         title: `Please contact an administrator for help!`
                     })
-
-                    // setMessage({ color: "red", message: "Please contact an administrator for help!" })
                 }
             })
             .finally(() => {
