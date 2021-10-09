@@ -79,14 +79,17 @@ const MyTextInput = ({ label, ...props }) => {
 };
 
 export default function Signup() {
-  const logoLinkUrl = "#";
-  const illustrationImageSrc = illustration;
-  const headingText = "Sign Up For Treact";
-  const submitButtonText = "Sign Up";
-  const SubmitButtonIcon = SignUpIcon;
+  // links
   const tosUrl = "#";
+  const logoLinkUrl = "#";
   const privacyPolicyUrl = "#";
   const signInUrl = "http://localhost:3004/login";
+
+  // Pre defined
+  const submitButtonText = "Sign Up";
+  const SubmitButtonIcon = SignUpIcon;
+  const headingText = "Sign Up For Treact";
+  const illustrationImageSrc = illustration;
 
   // Team's Defined Variables
   const history = useHistory();
@@ -118,6 +121,7 @@ export default function Signup() {
         }
       ),
     contactNumber: Yup.string()
+      .matches(/^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/, "Must be a phone number")
       .required('Your contact number is required'),
     password: Yup.string()
       .required('Your password is required')
@@ -231,6 +235,7 @@ export default function Signup() {
                       <SubmitButtonIcon className="icon" />
                       <span className="text">{submitButtonText}</span>
                     </SubmitButton>
+
                     <p tw="mt-6 text-xs text-gray-600 text-center">
                       I agree to abide by treact's{" "}
                       <a href={tosUrl} tw="border-b border-gray-500 border-dotted">

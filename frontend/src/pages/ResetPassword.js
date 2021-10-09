@@ -6,11 +6,7 @@ import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 
 // icons
 import logo from "images/logo.svg";
-import { FaBeer } from 'react-icons/fa';
-import googleIconImageSrc from "images/google-icon.png";
 import illustration from "images/login-illustration.svg";
-import twitterIconImageSrc from "images/twitter-icon.png";
-import { ReactComponent as LoginIcon } from "feather-icons/dist/icons/log-in.svg";
 
 // imports
 import axios from "axios";
@@ -18,12 +14,11 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
-import { Formik, Form, Field, FastField } from 'formik';
-import { SearchOutline } from 'react-ionicons'
 import { useHistory } from "react-router-dom";
+import { SearchOutline } from 'react-ionicons';
+import { Formik, Form, useField } from 'formik';
 import ClipLoader from "react-spinners/ClipLoader";
 import PasswordStrengthBar from 'react-password-strength-bar';
-import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 
 import { Alert } from "../components/misc/Alert";
 import { Container as ContainerBase } from "components/misc/Layouts";
@@ -41,7 +36,6 @@ const FormContainer = tw.div`w-full flex-1 mt-8`;
 const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
 const DividerText = tw.div`leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform -translate-y-1/2 absolute inset-x-0 top-1/2 bg-transparent`;
 
-const Input = tw.input`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5 first:mt-0`;
 const SubmitButton = styled.button`
   ${tw`mt-5 tracking-wide font-semibold bg-primary-500 text-gray-100 w-full py-4 rounded-lg hover:bg-primary-900 transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none`}
   .icon {
@@ -56,6 +50,26 @@ const IllustrationImage = styled.div`
   ${props => `background-image: url("${props.imageSrc}");`}
   ${tw`m-12 xl:m-16 w-full max-w-sm bg-contain bg-center bg-no-repeat`}
 `;
+
+const MyTextInput = ({ label, ...props }) => {
+    // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
+    // which we can spread on <input> and alse replace ErrorMessage entirely.
+    const [field, meta] = useField(props);
+
+    return (
+        <div css={[tw`mt-6`]}>
+            <label htmlFor={props.id || props.name} css={[tw`font-bold`]}>{label}</label>
+            <input css={[tw`w-full px-6 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white focus:border-solid focus:border-blue-400 first:mt-0 invalid:border-solid invalid:border-red-500 `]} {...field} {...props} />
+            {field.name === "password" ? (
+                <PasswordStrengthBar
+                    password={meta.value}
+                />) : (null)}
+            {meta.touched && meta.error ? (
+                <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
+            ) : null}
+        </div>
+    );
+};
 
 const StepOne = ({ setMessage, setCurrentStep }) => {
     const history = useHistory();
@@ -91,7 +105,7 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                                 resolve(true)
                             })
                             .catch((error) => {
-                                if (error.response.data.code === 403) {
+                                if (error.response.data.code === 401) {
                                     resolve(false);
                                 }
                             })
@@ -103,15 +117,20 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
             .oneOf([Yup.ref('password'), null], 'Passwords must match'),
     });
 
-    const searchUserExists = (values) => {
+    const updateUserPassword = (values) => {
         setIsSubmitted(true);
         axios
-            .post(`${config.baseUrl}/u/user/begin-reset-password/${values.email}`)
+            .post(`${config.baseUrl}/u/user/account/reset-password`, {
+                token: token[0],
+                incomingPassword: values.password,
+                part: "store"
+            })
             .then((results) => {
-                let token = results.data.content.token
-                history.push({
-                    pathname: `/account/begin_password_reset/${token}`,
-                });
+                alert("Success")
+                // let token = results.data.content.token
+                // history.push({
+                //     pathname: `/signin`,
+                // });
             })
             .catch((error) => {
                 // handleClick();
@@ -142,74 +161,37 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
             validateOnChange={false}
             validationSchema={ResetPasswordSchema}
             onSubmit={(values) => {
-                searchUserExists(values);
+                updateUserPassword(values);
             }}
         >
-            {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                /* and other goodies */
-            }) => (
-                <Form css={[tw.form`mx-auto max-w-xs`]}>
-                    <Input
-                        type="password"
-                        name="password"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.password}
-                        placeholder="password"
-                    />
-                    <PasswordStrengthBar
-                        password={values.password}
-                    />
-                    {(errors.password && touched.password) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.password}</span>}
 
-                    <Input
-                        type="password"
-                        name="passwordConfirmation"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.passwordConfirmation}
-                        placeholder="Confirm password"
-                    />
-                    {(errors.passwordConfirmation && touched.passwordConfirmation) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.passwordConfirmation}</span>}
+            <Form css={[tw.form`mx-auto max-w-xs`]}>
+                <MyTextInput
+                    label="Password"
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                />
 
-                    <SubmitButton type="submit">
-                        <SearchOutline color="white" />
-                        <span className="text">Search</span>
-                    </SubmitButton>
+                <MyTextInput
+                    label="Confirm password"
+                    name="passwordConfirmation"
+                    type="password"
+                    placeholder="Password"
+                />
 
-                    <p tw="mt-8 text-sm text-gray-600 text-center">
-                        Dont have an account?{" "}
-                        <a href={signupUrl} tw="border-b border-gray-500 border-dotted">
-                            Sign Up
-                        </a>
-                    </p>
-                    {/* <Alert
-                        ref={ref}
-                    /> */}
-                </Form>
-            )}
+                <SubmitButton type="submit">
+                    <span className="text">Save</span>
+                </SubmitButton>
+
+                <p tw="mt-8 text-sm text-gray-600 text-center">
+                    Dont have an account?{" "}
+                    <a href={signupUrl} tw="border-b border-gray-500 border-dotted">
+                        Sign Up
+                    </a>
+                </p>
+            </Form>
         </Formik>
-    )
-}
-
-const StepTwo = () => {
-    return (
-        <FormContainer>
-            <div css={[tw`text-gray-600`]}>
-                If we found an account associated with that username, we've sent password reset instructions to the primary email address on the account.
-            </div>
-            <DividerTextContainer>
-                <DividerText css={[tw`leading-normal`]}>
-                    Still having trouble logging in? Contact Support.
-                </DividerText>
-            </DividerTextContainer>
-        </FormContainer>
     )
 }
 
@@ -226,6 +208,11 @@ export default function ResetPassword() {
                     history.push("/")
                     // redirect the user to some error page such as the one on sendgrid
                 }
+
+                if (error.response.data.code === 500) {
+                    history.push("/")
+                }
+
                 console.log(error.response)
             })
     })
@@ -242,7 +229,7 @@ export default function ResetPassword() {
             setMessage={setMessage}
             setCurrentStep={setCurrentStep}
         />,
-        <StepTwo />]
+    ]
 
     return (
         <AnimationRevealPage>

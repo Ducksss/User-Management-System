@@ -18,9 +18,9 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
-import { Formik, Form } from 'formik';
-import { SearchOutline } from 'react-ionicons'
 import { useHistory } from "react-router-dom";
+import { SearchOutline } from 'react-ionicons';
+import { Formik, Form, useField } from 'formik';
 import ClipLoader from "react-spinners/ClipLoader";
 import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 
@@ -55,6 +55,22 @@ const IllustrationImage = styled.div`
   ${props => `background-image: url("${props.imageSrc}");`}
   ${tw`m-12 xl:m-16 w-full max-w-sm bg-contain bg-center bg-no-repeat`}
 `;
+
+const MyTextInput = ({ label, ...props }) => {
+    // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
+    // which we can spread on <input> and alse replace ErrorMessage entirely.
+    const [field, meta] = useField(props);
+
+    return (
+        <div>
+            <label htmlFor={props.id || props.name} css={[tw`font-bold`]}>{label}</label>
+            <input css={[tw`w-full px-6 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white focus:border-solid focus:border-blue-400 first:mt-0 invalid:border-solid invalid:border-red-500 `]} {...field} {...props} />
+            {meta.touched && meta.error ? (
+                <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
+            ) : null}
+        </div>
+    );
+};
 
 const StepOne = ({ setMessage, setCurrentStep }) => {
     // links
@@ -127,46 +143,34 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                 searchUserExists(values);
             }}
         >
-            {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                /* and other goodies */
-            }) => (
-                <Form css={[tw.form`mx-auto max-w-xs`]}>
-                    <Input
-                        type="email"
-                        name="email"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.email}
-                        placeholder="email"
-                    />
-                    {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
 
-                    <SubmitButton type="submit">
-                        <SearchOutline color="white" />
-                        <span className="text">Search</span>
-                    </SubmitButton>
-                    <p tw="mt-6 text-xs text-gray-600 text-center">
-                        <a href={forgotPasswordUrl} tw="border-b border-gray-500 border-dotted">
-                            Forgot Password ?
-                        </a>
-                    </p>
-                    <p tw="mt-8 text-sm text-gray-600 text-center">
-                        Dont have an account?{" "}
-                        <a href={signupUrl} tw="border-b border-gray-500 border-dotted">
-                            Sign Up
-                        </a>
-                    </p>
-                    {/* <Alert
-                        ref={ref}
-                    /> */}
-                </Form>
-            )}
+            <Form css={[tw.form`mx-auto max-w-xs`]}>
+                <MyTextInput
+                    label="Email"
+                    name="email"
+                    type="email"
+                    placeholder="JaneDoe@gmail.com"
+                />
+
+                <SubmitButton type="submit">
+                    <SearchOutline color="white" />
+                    <span className="text">Search</span>
+                </SubmitButton>
+                <p tw="mt-6 text-xs text-gray-600 text-center">
+                    <a href={forgotPasswordUrl} tw="border-b border-gray-500 border-dotted">
+                        Forgot Password ?
+                    </a>
+                </p>
+                <p tw="mt-8 text-sm text-gray-600 text-center">
+                    Dont have an account?{" "}
+                    <a href={signupUrl} tw="border-b border-gray-500 border-dotted">
+                        Sign Up
+                    </a>
+                </p>
+                {/* <Alert
+                    ref={ref}
+                /> */}
+            </Form>
         </Formik>
     )
 }
