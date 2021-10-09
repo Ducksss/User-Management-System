@@ -17,7 +17,7 @@ exports.isLoggedIn = async (req, res, next) => {
             let getSuspendedAccount = await manageUserService.isSuspended(userId);
             if (getSuspendedAccount[0].status == 0) {
                 // not banned
-                req.userId = userId;
+                req.user_guid = user_guid;
                 req.email = email;
                 next();
             } else {

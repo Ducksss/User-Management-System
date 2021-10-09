@@ -6,6 +6,10 @@ const speakeasy = require('speakeasy');
 const nodeMailer = require('nodemailer');
 const config = require('../config/config');
 const { codes } = require('../config/codes');
+const validators = require('../middlewares/validators');
+// const { validationResult } = require('express-validator');
+// const rsaDecryption = require('../middlewares/rsaDecryption');
+// const key = require('../routes/encryptionRoute')
 
 // services
 const manageUsers = require('../services/manageUserService')
@@ -39,7 +43,18 @@ exports.checkDuplicateEmails = async (req, res, next) => {
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
-        let { firstName, lastName, email, password, contact, privilege } = req.body;
+
+        let data = {
+            firstName: validators.validateText(req.body.firstName), 
+            lastName: validators.validateText(req.body.firstName), 
+            email: validators.validateEmail(req.body.email), 
+            password: validators.validateText(req.body.password), 
+            contact: validators.validateInt(req.body.contact)
+        }
+
+        console.log(data);
+
+        let { firstName, lastName, email, password, contact, privilege } = data;
 
         // guard statement
         if (privilege == null) privilege = 4;

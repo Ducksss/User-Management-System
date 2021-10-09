@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // styling 
 import "../styles/globalStyles.css"
@@ -18,6 +18,8 @@ import axios from "axios";
 import * as Yup from "yup";
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
+import { Formik, Form } from 'formik';
+import { resEncrypt } from '../RsaEncryption';
 import { useHistory } from "react-router-dom";
 import { Formik, Form, useField } from 'formik';
 import ClipLoader from "react-spinners/ClipLoader";
@@ -94,6 +96,17 @@ export default function Signup() {
   // Team's Defined Variables
   const history = useHistory();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [publicKey, setPublicKey] = useState();
+
+  useEffect(() => {
+    axios.get(`${config.baseUrl}/keys`)
+      .then((response) => {
+        let key = response.data.publicKey
+        console.log(response.data.publicKey);
+        setPublicKey(key);
+        console.log(publicKey)
+      });
+  });
 
   const validationSchema = Yup.object({
     firstName: Yup.string()
@@ -132,15 +145,17 @@ export default function Signup() {
   })
 
   const registerUserInformation = (values) => {
+        
     axios
       .post(`${config.baseUrl}/u/user/create-account`, {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
-        password: values.password,
-        contact: values.contactNumber,
+        firstName: resEncrypt(values.firstName, publicKey),
+        lastName: resEncrypt(values.lastName, publicKey),
+        email: resEncrypt(values.email, publicKey),
+        password: resEncrypt(values.password, publicKey),
+        contact: resEncrypt(values.contactNumber, publicKey),
       })
       .then((results) => {
+        console.log(results)
         history.push({
           pathname: "/login",
           state: "success"
