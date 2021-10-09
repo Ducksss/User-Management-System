@@ -1,10 +1,11 @@
 // imports
+const qrcode = require('qrcode');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
-const moment = require("moment-timezone");
-const config = require('../config/config');
+const speakeasy = require('speakeasy');
 const nodeMailer = require('nodemailer');
-const { codes } = require('../config/codes')
+const config = require('../config/config');
+const { codes } = require('../config/codes');
 const validators = require('../middlewares/validators');
 // const { validationResult } = require('express-validator');
 // const rsaDecryption = require('../middlewares/rsaDecryption');
@@ -20,8 +21,9 @@ const transporter = nodeMailer.createTransport({
         user: config.GMAIL_USER,
         pass: config.GMAIL_PASS,
     }
-})
+});
 
+//checks for duplicate emails before user registration
 exports.checkDuplicateEmails = async (req, res, next) => {
     try {
         let { email } = req.params;
@@ -61,7 +63,6 @@ exports.addUser = async (req, res, next) => {
         // adding user info
         await manageUsers.addUser(firstName, lastName, email, contact, privilege)
             .catch((error) => {
-                console.log(error)
                 return res.status(401).send(codes(500, 'Internal error.'));
             });
 
@@ -72,7 +73,9 @@ exports.addUser = async (req, res, next) => {
             });
         let { user_guid } = results[0]
         let hashedPassword = await bcrypt.hash(password, 10);
-        await manageUsers.addUserLogin(user_guid, hashedPassword)
+        let secret = speakeasy.generateSecret({ length: 20, });
+
+        await manageUsers.addUserLogin(user_guid, hashedPassword, secret.base32)
             .catch((error) => {
                 console.log(error)
                 return res.status(401).send(codes(500, 'Internal error.'));
@@ -90,6 +93,24 @@ exports.verifyRole = async (req, res, next) => {
         let results = await manageUsers.getRole(userId);
 
         return res.status(200).send(codes(200, null, results));
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
+}
+
+// generating 2FA QRCode
+exports.generate2FA = async (req, res, next) => {
+    try {
+        let { user_guid } = req;
+
+        let secret = speakeasy.generateSecret({ length: 20, });
+
+        console.log(secret.base32)
+        await manageUsers.add2FA(user_guid, secret.base32)
+        let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
+
+        return res.status(200).send(codes(200, { qrcodeURL: qrcodeURL }));
     } catch (error) {
         console.log(error)
         return res.status(500).send(codes(500));

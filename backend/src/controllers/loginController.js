@@ -10,7 +10,7 @@ const loginService = require('../services/loginService');
 const { codes } = require('../config/codes')
 
 // Get user information
-exports.processUserLogin = async (req, res) => {
+exports.processUserLogin = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         // Checking for invalid credentials
@@ -33,6 +33,8 @@ exports.processUserLogin = async (req, res) => {
         }
 
         if (bcrypt.compareSync(password, results[0].password_hash)) {
+            // req.user_guid = results[0].user_guid;
+            // next();
             let data = {
                 displayName: results[0].firstName + " " + results[0].lastName,
                 email: results[0].email,

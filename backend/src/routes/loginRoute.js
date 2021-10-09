@@ -1,4 +1,5 @@
 const loginController = require('../controllers/loginController');
+const manageUserController = require('../controllers/manageUserController')
 const validators = require('../middlewares/validators');
 const limiter = require('../middlewares/rateLimiter')
 

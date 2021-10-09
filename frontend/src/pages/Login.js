@@ -65,30 +65,15 @@ const IllustrationImage = styled.div`
   ${tw`m-12 xl:m-16 w-full max-w-sm bg-contain bg-center bg-no-repeat`}
 `;
 
-export default function Login() {
-  // Pre Defined Variables
-  const logoLinkUrl = "#";
-  const illustrationImageSrc = illustration;
-  const headingText = "Sign In To Treact";
-  const socialButtons = [
-    {
-      iconImageSrc: googleIconImageSrc,
-      text: "Sign In With Google",
-      url: "https://google.com"
-    },
-    {
-      iconImageSrc: twitterIconImageSrc,
-      text: "Sign In With Twitter",
-      url: "https://twitter.com"
-    }
-  ];
+const StepOne = () => {
+  // styling
   const submitButtonText = "Sign In";
   const SubmitButtonIcon = LoginIcon;
-  const forgotPasswordUrl = "#";
-  const signupUrl = "http://localhost:3004/register";
 
-  // Team's Defined Variables
+  // team's defined variables
   const history = useHistory();
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
+
   const LoginSchema = Yup.object({
     email: Yup.string()
       .email("Invalid email address format")
@@ -96,19 +81,6 @@ export default function Login() {
     password: Yup.string()
       .required('Your password is required')
   });
-  const [isSubmitted, setIsSubmitted] = React.useState(false);
-
-  const Toast = Swal.mixin({
-    toast: true,
-    position: 'top',
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.addEventListener('mouseenter', Swal.stopTimer)
-      toast.addEventListener('mouseleave', Swal.resumeTimer)
-    }
-  })
 
   const validateLogininformation = (values) => {
     setIsSubmitted(true);
@@ -147,6 +119,146 @@ export default function Login() {
   }
 
   return (
+    <Formik
+      initialValues={{
+        email: '',
+        password: ''
+      }}
+      validateOnBlur
+      validateOnChange={false}
+      validationSchema={LoginSchema}
+      onSubmit={(values) => {
+        validateLogininformation(values);
+      }}
+    >
+      {({
+        values,
+        errors,
+        touched,
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        /* and other goodies */
+      }) => (
+        <Form css={[tw.form`mx-auto max-w-xs`]}>
+          <Input
+            type="email"
+            name="email"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.email}
+            placeholder="email"
+          />
+          {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
+
+          <Input
+            type="password"
+            name="password"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.password}
+            placeholder="password"
+          />
+          {(errors.password && touched.password) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.password}</span>}
+
+          <SubmitButton type="submit">
+            <SubmitButtonIcon className="icon" />
+            <span className="text">{submitButtonText}</span>
+          </SubmitButton>
+        </Form>
+      )}
+    </Formik>
+  )
+}
+
+const StepTwo = () => {
+  // styling
+  const submitButtonText = "Sign In";
+  const SubmitButtonIcon = LoginIcon;
+
+  // team's defined variables
+  const history = useHistory();
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
+
+  const LoginSchema = Yup.object({
+    email: Yup.string()
+      .email("Invalid email address format")
+      .required("Please enter your email address!"),
+    password: Yup.string()
+      .required('Your password is required')
+  });
+
+  const validateLogininformation = (values) => {
+    setIsSubmitted(true);
+
+    axios
+      .post(`${config.baseUrl}/u/user/signin`, {
+        email: values.email,
+        password: values.password,
+      })
+      .then((results) => {
+        localStorage.setItem('token', results.data.token);
+        localStorage.setItem('displayName', results.data.displayName);
+
+        history.push({
+          pathname: "/",
+        });
+      })
+      .catch((error) => {
+        if (error.response.data.description === "Login failed.") {
+          Toast.fire({
+            icon: 'error',
+            title: `Please key in a your valid credentials.`
+          })
+        }
+
+        if (error.response.data.description === "Internal error") {
+          Toast.fire({
+            icon: 'error',
+            title: `Please contact an administrator for help!`
+          })
+        }
+      })
+      .finally(() => {
+        setIsSubmitted(false);
+      })
+  }
+
+  return (
+    <p>PENIS HEHE</p>
+  )
+}
+
+export default function Login() {
+  // Pre Defined Variables
+  const logoLinkUrl = "http://localhost:3004/";
+  const signupUrl = "http://localhost:3004/signup";
+  const forgotPasswordUrl = "http://localhost:3004/account/begin_password_reset";
+
+  const illustrationImageSrc = illustration;
+  const headingText = "Sign In To UMS";
+
+  // Team's Defined Variables
+  const history = useHistory();
+  const [data, setData] = React.useState({
+    email: "",
+  })
+  const [currentStep, setCurrentStep] = React.useState(0);
+  const steps = [<StepOne />, <StepTwo />]
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer)
+      toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+  });
+
+  return (
     <AnimationRevealPage>
       <Container>
         <Content>
@@ -157,54 +269,7 @@ export default function Login() {
             <MainContent>
               <Heading>{headingText}</Heading>
               <FormContainer>
-                <Formik
-                  initialValues={{
-                    email: '',
-                    password: ''
-                  }}
-                  validateOnChange={false}
-                  validationSchema={LoginSchema}
-                  onSubmit={(values) => {
-                    validateLogininformation(values);
-                  }}
-                >
-                  {({
-                    values,
-                    errors,
-                    touched,
-                    handleChange,
-                    handleBlur,
-                    handleSubmit,
-                    /* and other goodies */
-                  }) => (
-                    <Form css={[tw.form`mx-auto max-w-xs`]}>
-                      <Input
-                        type="email"
-                        name="email"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.email}
-                        placeholder="email"
-                      />
-                      {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
-
-                      <Input
-                        type="password"
-                        name="password"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.password}
-                        placeholder="password"
-                      />
-                      {(errors.password && touched.password) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.password}</span>}
-
-                      <SubmitButton type="submit">
-                        <SubmitButtonIcon className="icon" />
-                        <span className="text">{submitButtonText}</span>
-                      </SubmitButton>
-                    </Form>
-                  )}
-                </Formik>
+                {steps[currentStep]}
                 <p tw="mt-6 text-xs text-gray-600 text-center">
                   <a href={forgotPasswordUrl} tw="border-b border-gray-500 border-dotted">
                     Forgot Password ?

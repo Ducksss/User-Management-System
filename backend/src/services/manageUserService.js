@@ -30,8 +30,7 @@ module.exports.getEmail = (email) => {
 }
 
 // adding user information to the database
-module.exports.addUser = (firstName, lastName, email, contact, privilege, UTCDateFormat) => {
-    
+module.exports.addUser = (firstName, lastName, email, contact, privilege) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(async (err, connection) => {
             if (err) {
@@ -61,7 +60,7 @@ module.exports.addUser = (firstName, lastName, email, contact, privilege, UTCDat
 };
 
 // adding user login information to the database
-module.exports.addUserLogin = (user_guid, password_hash) => {
+module.exports.addUserLogin = (user_guid, password_hash, secret) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(async (err, connection) => {
             if (err) {
@@ -70,9 +69,9 @@ module.exports.addUserLogin = (user_guid, password_hash) => {
                 try {
                     //stores current into repository of history
                     let query = `INSERT INTO user_management_system.logins(
-                                login_guid, user_guid, password_hash, created_at, 
-                                    updated_at) VALUES (UUID(), ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())`;
-                    connection.query(query, [user_guid, password_hash], (err, results) => {
+                                login_guid, user_guid, password_hash, secret, created_at, 
+                                    updated_at) VALUES (UUID(), ?, ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())`;
+                    connection.query(query, [user_guid, password_hash, secret], (err, results) => {
                         if (err) {
                             reject(err);
                         } else {
@@ -89,6 +88,38 @@ module.exports.addUserLogin = (user_guid, password_hash) => {
     })
 };
 
+module.exports.add2FA = (user_guid, secret) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection(async (err, connection) => {
+            if (err) {
+                reject(err);
+            } else {
+                try {
+                    //stores current into repository of history
+                    let query = `INSERT INTO user_management_system.verifications(
+                                    verification_guid, user_guid, secret, 
+                                    verification_attempt, type, created_at
+                                ) 
+                                VALUES 
+                                    (UUID(), ?, ?, 0, 0, UTC_TIMESTAMP())
+                                `;
+                    connection.query(query, [user_guid, secret], (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            console.log(results)
+                            resolve(results);
+                        }
+                        connection.release();
+                    });
+                } catch (error) {
+                    reject(error);
+                }
+            }
+        });
+    })
+}
+
 // for dynamically displaying header functionality
 module.exports.isLoggedIn = (user_guid, email) => {
     return new Promise((resolve, reject) => {
@@ -98,11 +129,11 @@ module.exports.isLoggedIn = (user_guid, email) => {
             } else {
                 try {
                     let query = `SELECT 
-                                    user_guid 
+                                    user_guid
                                 FROM 
                                     user_management_system.users
                                 where 
-                                    user_guid = ? 
+                                    user_guid = ?
                                     and email = ?;
                                 `;
                     connection.query(query, [user_guid, email], (err, results) => {
