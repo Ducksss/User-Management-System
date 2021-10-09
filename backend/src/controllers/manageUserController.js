@@ -5,7 +5,10 @@ const moment = require("moment-timezone");
 const config = require('../config/config');
 const nodeMailer = require('nodemailer');
 const { codes } = require('../config/codes')
-const { validationResult } = require('express-validator');
+const validators = require('../middlewares/validators');
+// const { validationResult } = require('express-validator');
+// const rsaDecryption = require('../middlewares/rsaDecryption');
+// const key = require('../routes/encryptionRoute')
 
 // services
 const manageUsers = require('../services/manageUserService')
@@ -39,12 +42,17 @@ exports.checkDuplicateEmails = async (req, res, next) => {
 exports.addUser = async (req, res, next) => {
     try {
 
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+        let data = {
+            firstName: validators.validateText(req.body.firstName), 
+            lastName: validators.validateText(req.body.firstName), 
+            email: validators.validateEmail(req.body.email), 
+            password: validators.validateText(req.body.password), 
+            contact: validators.validateInt(req.body.contact)
         }
 
-        let { firstName, lastName, email, password, contact, privilege } = req.body;
+        console.log(data);
+
+        let { firstName, lastName, email, password, contact, privilege } = data;
 
         // guard statement
         if (privilege == null) privilege = 4;
