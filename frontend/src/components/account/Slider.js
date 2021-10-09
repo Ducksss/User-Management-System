@@ -21,7 +21,8 @@ export default function Slider(props) {
     const CancelBtn = tw.button`bg-red-600 p-2 rounded-lg text-white`
 
     const [html, sethtml] = useState([])
-    const [edited, setedited] = useState(false)
+    // const [edited, setedited] = useState(false)
+    // var edited = false
     const [data, setdata] = useState()
 
     useEffect(() => {
@@ -39,7 +40,7 @@ export default function Slider(props) {
             temp.push(
                 <FormRow key={Math.random()}>
                     <FormTitle>{e}:</FormTitle>
-                    <InputText value={data.data[e]} title={e} onChange={(ev) => handleEdit(ev)}/>
+                    <InputText defaultValue={data.data[e]} title={e} onChange={(ev) => handleEdit(ev)}/>
                 </FormRow>
             )
         }
@@ -47,7 +48,7 @@ export default function Slider(props) {
     }
     
     const handleEdit = e => {
-        setedited(true)
+        // edited = true
         let attribute = e.target.getAttribute('title')
         let newdata = data
         newdata.data[attribute] = e.target.value
@@ -55,7 +56,7 @@ export default function Slider(props) {
     }
 
     const hideFunc = () => {
-        if(edited) {
+        if(props.edit) {
             swalWithBootstrapButtons.fire({
                 icon: 'warning',
                 title: 'Are You Sure?',
@@ -66,14 +67,14 @@ export default function Slider(props) {
                 showCloseButton: true,
             }).then(result => {
                 if(result.isConfirmed) {
-                    setedited(false)
+                    // edited = false
                     props.hide(false)
                 }
                 //best to do your axios POST data to the parent 
                 //udk wat yr saving 
             })
         } else {
-            setedited(false)
+            // edited = false
             props.hide(false)
         }
     }
