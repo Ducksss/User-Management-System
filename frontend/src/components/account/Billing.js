@@ -52,26 +52,30 @@ export default function Billing() {
         }} />
     }
     return (
-        <DetailRow>
-            <LeftHeader>Select a plan</LeftHeader>
+        <MainContent>
+            <AccountRow>
+                <GridRow>
+                    <LeftHeader>Select a plan</LeftHeader>
 
-            <DetailRow className="price-list">
-                {prices.map((price) => {
-                    return (
-                        <InfoRow key={price.id}>
-                            <Header>{price.product.name}</Header>
+                    <DetailRow className="price-list">
+                        {prices.map((price) => {
+                            return (
+                                <InfoRow key={price.id}>
+                                    <Header>{price.product.name}</Header>
 
-                            <Content>
-                                ${price.unit_amount / 100} / month
-                            </Content>
+                                    <Content>
+                                        ${price.unit_amount / 100} / month
+                                    </Content>
 
-                            <button onClick={() => createSubscription(price.id)}>
-                                Select
-                            </button>
-                        </InfoRow>
-                    )
-                })}
-            </DetailRow>
-        </DetailRow>
+                                    <button onClick={() => createSubscription(price.id)}>
+                                        Select
+                                    </button>
+                                </InfoRow>
+                            )
+                        })}
+                    </DetailRow>
+                </GridRow>
+            </AccountRow>
+        </MainContent>
     )
 }
