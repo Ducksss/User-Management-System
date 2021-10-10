@@ -24,6 +24,30 @@ exports.config = async (req, res, next) => {
     });
 };
 exports.createCustomer = async (req, res, next) => {
+    // Simulate authenticated user. In practice this will be the
+    // Stripe Customer ID related to the authenticated user.
+    const customerId = req.cookies['customer'];
+
+    // Create the subscription
+    const priceId = req.body.priceId;
+
+    try {
+        const subscription = await stripe.subscriptions.create({
+            customer: customerId,
+            items: [{
+                price: priceId,
+            }],
+            payment_behavior: 'default_incomplete',
+            expand: ['latest_invoice.payment_intent'],
+        });
+
+        res.send({
+            subscriptionId: subscription.id,
+            clientSecret: subscription.latest_invoice.payment_intent.client_secret,
+        });
+    } catch (error) {
+        return res.status(400).send({ error: { message: error.message } });
+    }
 };
 exports.createSubscription = async (req, res, next) => {
     // Simulate authenticated user. In practice this will be the
@@ -56,15 +80,15 @@ exports.invoicePreview = async (req, res, next) => {
 };
 exports.cancelSubscription = async (req, res, next) => {
     // Cancel the subscription
-  try {
-    const deletedSubscription = await stripe.subscriptions.del(
-      req.body.subscriptionId
-    );
+    try {
+        const deletedSubscription = await stripe.subscriptions.del(
+            req.body.subscriptionId
+        );
 
-    res.send({ subscription: deletedSubscription });
-  } catch (error) {
-    return res.status(400).send({ error: { message: error.message } });
-  }
+        res.send({ subscription: deletedSubscription });
+    } catch (error) {
+        return res.status(400).send({ error: { message: error.message } });
+    }
 };
 exports.updateSubscription = async (req, res, next) => {
 };

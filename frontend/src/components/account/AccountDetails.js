@@ -3,9 +3,10 @@ import { Link, withRouter } from 'react-router-dom';
 import { Pencil } from 'react-bootstrap-icons'
 import tw from 'twin.macro';
 import config from "../../Config.js";
+import axios from "axios";
 //component
 import Slider from './Slider';
-
+import Swal from "sweetalert2";
 const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
 const AccountRow = tw.div` grid grid-rows-3 w-11/12`
 const GridRow = tw.div`flex`
@@ -23,7 +24,18 @@ const Line = tw.hr`m-8 w-full h-0`
 // ^ dont cock up my tailwind i swear
 
 export default function AccountDetails(location) {
-
+    let Toast = Swal.mixin({
+        toast: true,
+        position: "top",
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 1500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+    });
 
     const [data, setData] = useState({
         info: {
@@ -96,25 +108,39 @@ export default function AccountDetails(location) {
         setData(data)
     }
     const [subscriptions, setSubscriptions] = useState([]);
-    const handleClick = async (e,subscriptionID) => {
+    const handleClick = async (e, subscriptionID) => {
         e.preventDefault();
         console.log(e)
-        await fetch(`${config.baseUrl}/u/user/cancelSubscription`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        await axios.post(`${config.baseUrl}/u/user/cancelSubscription`, {
             subscriptionId: subscriptionID
-          }),
         })
-        setCancelled(true);
-      };
+            .then((response) => {
+                Toast.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "Your subscription has successfully been cancelled",
+                });
+                window.location.reload();
+            })
+            .catch((error) => {
+                Toast.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: "Unable to cancel",
+                });
+            });
+    }
+
+    //     
     useEffect(() => {
         const fetchData = async () => {
-            const { subscriptions } = await fetch(`${config.baseUrl}/u/user/subscriptions`).then(r => r.json());
-
-            setSubscriptions(subscriptions.data);
+            await axios.get(`${config.baseUrl}/u/user/subscriptions`)
+                .then((response) => {
+                    setSubscriptions(Object.values(response.data.subscriptions)[1]);
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
         }
         fetchData();
     }, []);
@@ -124,6 +150,8 @@ export default function AccountDetails(location) {
     }
     const AccountSubscription = ({ subscription }) => {
         return (
+            <GridRow>
+                
             <DetailRow>
                 <hr />
                 <InfoRow>
@@ -132,24 +160,25 @@ export default function AccountDetails(location) {
                         {subscription.id}
                     </Content>
                 </InfoRow>
-    
+
                 <InfoRow>
                     <Header>Status:</Header><Content> {subscription.status}</Content>
                 </InfoRow>
-    
+
                 <InfoRow>
                     <Header>Card last4:</Header><Content> {subscription.default_payment_method?.card?.last4}</Content>
                 </InfoRow>
-    
+
                 <InfoRowLast>
                     <Header>Current period end:</Header><Content> {(new Date(subscription.current_period_end * 1000).toString())}</Content>
                 </InfoRowLast>
-    
+
                 {/* <Link to={{pathname: '/change-plan', state: {subscription: subscription.id }}}>Change plan</Link><br /> */}
                 <button onClick={(e) => { handleClick(e, subscription.id) }}>Cancel</button>
-                
+
             </DetailRow>
-            
+            </GridRow>
+
         )
     }
     return (
@@ -185,17 +214,16 @@ export default function AccountDetails(location) {
                 </GridRow>
                 <Line />
                 {/* any other sections here */}
+                </AccountRow>
 
-
-                <GridRow >
-                    <LeftHeader>Subscriptions</LeftHeader>
+                <AccountRow >
+                    
+                <LeftHeader>Subscriptions</LeftHeader>
                     {subscriptions.map(s => {
                         return <AccountSubscription key={s.id} subscription={s} />
                     })}
-                    
-                </GridRow>
-                
-            </AccountRow>
+
+                </AccountRow>
 
             {/* slider */}
             <Slider show={showModal} hide={setShowModal} data={sendData} getData={e => newdata(e)} />

@@ -24,6 +24,7 @@ export default function Billing() {
         const fetchPrices = async () => {
             const { prices } = await fetch(`${config.baseUrl}/u/user/config`).then(r => r.json());
             setPrices(prices);
+            console.log(prices)
         };
         fetchPrices();
     }, [])

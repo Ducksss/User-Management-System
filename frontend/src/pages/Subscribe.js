@@ -6,9 +6,31 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import { Redirect } from 'react-router-dom';
-const Subscribe = ({location}) => {
-  
+import Header from "components/headers/light.js";
+import Footer from "components/footers/FiveColumnWithInputForm.js";
+import tw from 'twin.macro';
+const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
+
+const AccountRow = tw.div` grid grid-rows-3 w-11/12`
+const GridRow = tw.div`flex`
+const DetailRow = tw.div`border rounded-lg border-gray-400  w-8/12 `
+const LeftHeader = tw.div` text-xl font-black w-4/12`
+
+const InfoRow = tw.div`flex flex-row border-b border-gray-400 px-3 py-5`
+const InfoRowLast = tw.div`flex flex-row py-5 px-3`
+
+// const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
+const HeaderRow = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
+
+const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
+const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
+const Line = tw.hr`m-8 w-full h-0`
+
+const stripePromise = loadStripe("pk_test_51JGzn3FHCNlc2sRxjF3QjRNI553RlKSJvYYb5aopFEWryIiNRVES320DyFdtLOQkE9PZgDJg3Jd6QBp4J1cyT0rW00tIu4SRDC");
+const Subscribe = ({ location }) => {
+
   // Get the lookup key for the price from the previous page redirect.
   const [clientSecret] = useState(location.state.clientSecret);
   const [subscriptionId] = useState(location.state.subscriptionId);
@@ -54,7 +76,7 @@ const Subscribe = ({location}) => {
       }
     });
 
-    if(error) {
+    if (error) {
       // show error and collect new card details.
       setMessage(error.message);
       return;
@@ -62,44 +84,70 @@ const Subscribe = ({location}) => {
     setPaymentIntent(paymentIntent);
   }
 
-  if(paymentIntent && paymentIntent.status === 'succeeded') {
-    return <Redirect to={{pathname: '/account'}} />
+  if (paymentIntent && paymentIntent.status === 'succeeded') {
+    return <Redirect to={{ pathname: '/account' }} />
   }
 
   return (
-    <>
-      <h1>Subscribe</h1>
+    <div>
+      <Header />
 
-      <p>
-        Try the successful test card: <span>4242424242424242</span>.
-      </p>
+      <MainContent>
+        <h1>Subscribe</h1>
 
-      <p>
-        Try the test card that requires SCA: <span>4000002500003155</span>.
-      </p>
+        {/* <p>
+          Try the successful test card: <span>4242424242424242</span>.
+        </p>
 
-      <p>
-        Use any <i>future</i> expiry date, CVC,5 digit postal code
-      </p>
+        <p>
+          Try the test card that requires SCA: <span>4000002500003155</span>.
+        </p>
 
-      <hr />
+        <p>
+          Use any <i>future</i> expiry date, CVC,5 digit postal code
+        </p>
 
-      <form onSubmit={handleSubmit}>
-        <label>
-          Full name
-          <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
-        </label>
+        <hr /> */}
+        <DetailRow>
+          <form onSubmit={handleSubmit}>
+            <InfoRow>
+              <HeaderRow>
+                Full name</HeaderRow>
+              <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} />
 
-        <CardElement />
-
-        <button>
-          Subscribe
-        </button>
-
-        <div>{messages}</div>
-      </form>
-    </>
+            </InfoRow>
+            <CardElement options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#424770',
+                  '::placeholder': {
+                    color: '#aab7c4',
+                  },
+                  margin:'auto',
+                },
+                invalid: {
+                  color: '#9e2146',
+                },
+              },
+            }} />
+            <HeaderRow>
+              <button>
+                Subscribe
+              </button>
+            </HeaderRow>
+            <div>{messages}</div>
+          </form>
+        </DetailRow>
+      </MainContent>
+      <Footer />
+    </div>
   )
 }
-
-export default withRouter(Subscribe);
+// Wrapper for stripe promise, do not remove this - matthew
+const Wrapper = (props) => (
+  <Elements stripe={stripePromise}>
+    <Subscribe {...props} />
+  </Elements>
+);
+export default withRouter(Wrapper);
