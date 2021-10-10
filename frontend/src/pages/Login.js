@@ -17,9 +17,9 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
-import { Formik, Form } from 'formik';
 import { useHistory } from "react-router-dom";
-import ClipLoader from "react-spinners/ClipLoader";
+import { Formik, Form, useField } from 'formik';
+import { ClipLoader, HashLoader, FadeLoader, BeatLoader, SyncLoader } from "react-spinners";
 import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 import { Container as ContainerBase } from "components/misc/Layouts";
 
@@ -65,6 +65,22 @@ const IllustrationImage = styled.div`
   ${tw`m-12 xl:m-16 w-full max-w-sm bg-contain bg-center bg-no-repeat`}
 `;
 
+const MyTextInput = ({ label, ...props }) => {
+  // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
+  // which we can spread on <input> and alse replace ErrorMessage entirely.
+  const [field, meta] = useField(props);
+
+  return (
+    <div css={[tw`mt-6`]}>
+      <label htmlFor={props.id || props.name} css={[tw`font-bold`]}>{label}</label>
+      <input css={[tw`w-full px-6 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white focus:border-solid focus:border-blue-400 first:mt-0 invalid:border-solid invalid:border-red-500 `]} {...field} {...props} />
+      {meta.touched && meta.error ? (
+        <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
+      ) : null}
+    </div>
+  );
+};
+
 const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   // styling
   const submitButtonText = "Sign In";
@@ -72,7 +88,6 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
 
   // team's defined variables
   const history = useHistory();
-  const [isSubmitted, setIsSubmitted] = React.useState(false);
 
   const LoginSchema = Yup.object({
     email: Yup.string()
@@ -83,8 +98,6 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   });
 
   const validateLogininformation = (values) => {
-    setIsSubmitted(true);
-
     axios
       .post(`${config.baseUrl}/u/user/signin`, {
         email: values.email,
@@ -122,9 +135,6 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
           });
         }
       })
-      .finally(() => {
-        setIsSubmitted(false);
-      })
   }
 
   return (
@@ -136,41 +146,41 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
       validateOnBlur
       validateOnChange={false}
       validationSchema={LoginSchema}
-      onSubmit={(values) => {
+      onSubmit={(values, { setSubmitting }) => {
+        var bt = document.getElementById('mySubmit');
+        bt.disabled = true;
         validateLogininformation(values);
+        setSubmitting(false);
+        bt.disabled = false;
       }}
     >
-      {({
-        values,
-        errors,
-        touched,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        /* and other goodies */
-      }) => (
+      {({ isSubmitting }) => (
         <Form css={[tw.form`mx-auto max-w-xs`]}>
-          <Input
-            type="email"
-            name="email"
-            onChange={handleChange}
-            onBlur={handleBlur}
-            value={values.email}
-            placeholder="email"
-          />
-          {(errors.email && touched.email) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.email}</span>}
+          {isSubmitting ? (
+            <div css={[tw`flex flex-col min-h-48 justify-center items-center`]}>
+              <div >
+                <SyncLoader color={"#3c0d99"} loading={isSubmitting} size={150} speedMultiplier={0.5} size={15} />
+              </div>
+              <span css={[tw`mt-5 italic`]}>Authenticating...</span>
+            </div>
+          ) : (
+            <div>
+              <MyTextInput
+                label="Email"
+                name="email"
+                type="email"
+                placeholder="JaneDoe@gmail.com"
+              />
 
-          <Input
-            type="password"
-            name="password"
-            onChange={handleChange}
-            onBlur={handleBlur}
-            value={values.password}
-            placeholder="password"
-          />
-          {(errors.password && touched.password) && <span style={{ color: 'red', fontSize: '0.8rem', marginLeft: '1.5rem' }}>{errors.password}</span>}
+              <MyTextInput
+                label="Password"
+                name="password"
+                type="password"
+                placeholder="Password"
+              />
+            </div>)}
 
-          <SubmitButton type="submit">
+          <SubmitButton type="submit" disabled={isSubmitting} id="mySubmit">
             <SubmitButtonIcon className="icon" />
             <span className="text">{submitButtonText}</span>
           </SubmitButton>

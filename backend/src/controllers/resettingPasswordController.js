@@ -404,6 +404,8 @@ exports.updateNewPassword = async (req, res, next) => {
 
         const hashedIncomingPassword = await bcrypt.hash(incomingPassword, 10);
 
+        await manageUsers.updateLoginAttempts(0, user_guid);
+
         await resettingPasswordService.verificationCompleted(verification_guid)
             .catch((error) => {
                 return res.status(401).send(codes(401))
