@@ -12,9 +12,9 @@ exports.isLoggedIn = async (req, res, next) => {
         let token = auth.split(' ')[1];
         let { user_guid, email } = jwt.verify(token, config.JWTKey);
 
-        let getLoggedInData = await manageUserService.isLoggedIn(user_guid, email);
+        let getLoggedInData = await manageUserService.isLoggedIn(user_guid);
         if (getLoggedInData.length == 1) {
-            let getSuspendedAccount = await manageUserService.isSuspended(userId);
+            let getSuspendedAccount = await manageUserService.isSuspended(user_guid);
             if (getSuspendedAccount[0].status == 0) {
                 // not banned
                 req.user_guid = user_guid;
