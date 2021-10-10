@@ -2,7 +2,7 @@ const rateLimit = require("express-rate-limit");
 
 module.exports.loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10,
+    max: 5,
     statusCode: 200,
     message: {
         status: 429,
