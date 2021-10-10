@@ -31,7 +31,6 @@ function Index() {
         } else {
             setToken(false)
         }
-        console.log(response);
     })
     .catch(error => console.log(error))
     .finally(()=> setisLoading(false))

@@ -272,7 +272,6 @@ module.exports.addRefreshToken = (userid, token) => {
 
 //get refresh token 
 module.exports.findUserToken = (token) => {
-    console.log(token);
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
