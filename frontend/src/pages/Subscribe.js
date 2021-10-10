@@ -12,23 +12,15 @@ import Header from "components/headers/light.js";
 import Footer from "components/footers/FiveColumnWithInputForm.js";
 import tw from 'twin.macro';
 const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
-
-const AccountRow = tw.div` grid grid-rows-3 w-11/12`
-const GridRow = tw.div`flex`
 const DetailRow = tw.div`border rounded-lg border-gray-400  w-8/12 `
-const LeftHeader = tw.div` text-xl font-black w-4/12`
 
 const InfoRow = tw.div`flex flex-row border-b border-gray-400 px-3 py-5`
-const InfoRowLast = tw.div`flex flex-row py-5 px-3`
 
 // const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
 const HeaderRow = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
 
-const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
-const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
-const Line = tw.hr`m-8 w-full h-0`
 
-const stripePromise = loadStripe("pk_test_51JGzn3FHCNlc2sRxjF3QjRNI553RlKSJvYYb5aopFEWryIiNRVES320DyFdtLOQkE9PZgDJg3Jd6QBp4J1cyT0rW00tIu4SRDC");
+const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
 const Subscribe = ({ location }) => {
 
   // Get the lookup key for the price from the previous page redirect.
