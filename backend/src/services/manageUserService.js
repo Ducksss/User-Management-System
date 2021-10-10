@@ -10,7 +10,8 @@ module.exports.getEmail = (email) => {
                 resolve(err);
             } else {
                 let query = `SELECT 
-                                user_guid 
+                                user_guid,
+                                created_at
                             FROM 
                                 user_management_system.users 
                             where 
@@ -256,6 +257,35 @@ module.exports.getRole = (user_guid) => {
                                 user_guid = ?;
                             `;
                 connection.query(query, [user_guid], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
+module.exports.verifyVerificationEmailToken = (user_guid, created_at) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            SELECT 
+                                * 
+                            FROM 
+                                user_management_system.users 
+                            where 
+                                created_at = ?
+                                and user_guid = ?;
+                            `;
+                connection.query(query, [user_guid, created_at], (err, results) => {
                     if (err) {
                         console.log(err)
                         reject(err)

@@ -17,9 +17,9 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
+import { SyncLoader } from "react-spinners";
 import { useHistory } from "react-router-dom";
 import { Formik, Form, useField } from 'formik';
-import { ClipLoader, HashLoader, FadeLoader, BeatLoader, SyncLoader } from "react-spinners";
 import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 import { Container as ContainerBase } from "components/misc/Layouts";
 
@@ -147,11 +147,13 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
       validateOnChange={false}
       validationSchema={LoginSchema}
       onSubmit={(values, { setSubmitting }) => {
-        var bt = document.getElementById('mySubmit');
-        bt.disabled = true;
-        validateLogininformation(values);
-        setSubmitting(false);
-        bt.disabled = false;
+        setTimeout(() => {
+          var bt = document.getElementById('mySubmit');
+          bt.disabled = true;
+          validateLogininformation(values);
+          setSubmitting(false);
+          bt.disabled = false;
+        }, 100)
       }}
     >
       {({ isSubmitting }) => (
@@ -182,7 +184,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
 
           <SubmitButton type="submit" disabled={isSubmitting} id="mySubmit">
             <SubmitButtonIcon className="icon" />
-            <span className="text">{submitButtonText}</span>
+            <span className="text">{isSubmitting ? ("Signing in...") : (submitButtonText)}</span>
           </SubmitButton>
         </Form>
       )}

@@ -19,4 +19,3 @@ module.exports.registrationLimiter = rateLimit({
         error: "Too many accounts created from this IP, please try again in an hour"
     }
 });
-
