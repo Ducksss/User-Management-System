@@ -53,7 +53,6 @@ exports.createSubscription = async (req, res, next) => {
     // Simulate authenticated user. In practice this will be the
     // Stripe Customer ID related to the authenticated user.
     // const customerId = req.cookies['customer'];
-    console.log("it is entering the backend")
     // Create the subscription
     const priceId = req.body.priceId;
 
@@ -102,6 +101,5 @@ exports.subscriptions = async (req, res, next) => {
         status: 'all',
         expand: ['data.default_payment_method'],
     });
-    console.log("it enters here")
     res.json({ subscriptions });
 };

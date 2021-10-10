@@ -110,7 +110,6 @@ export default function AccountDetails(location) {
     const [subscriptions, setSubscriptions] = useState([]);
     const handleClick = async (e, subscriptionID) => {
         e.preventDefault();
-        console.log(e)
         await axios.post(`${config.baseUrl}/u/user/cancelSubscription`, {
             subscriptionId: subscriptionID
         })
@@ -171,7 +170,7 @@ export default function AccountDetails(location) {
                 </InfoRowLast>
 
                 {/* <Link to={{pathname: '/change-plan', state: {subscription: subscription.id }}}>Change plan</Link><br /> */}
-                <button onClick={(e) => { handleClick(e, subscription.id) }}>Cancel</button>
+                <button onClick={(e) => { handleClick(e, subscription.id) }}>Cancel Subscription</button>
             </DetailRow>
         )
     }
