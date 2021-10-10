@@ -121,14 +121,11 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                 part: "store"
             })
             .then((results) => {
-                alert("Success")
-                // let token = results.data.content.token
-                // history.push({
-                //     pathname: `/signin`,
-                // });
+                history.push({
+                    pathname: `/login`,
+                });
             })
             .catch((error) => {
-                // handleClick();
                 if (error.response.data.code === 500) {
                     Toast.fire({
                         icon: 'error',
@@ -211,7 +208,7 @@ export default function ResetPassword() {
                         history.push("/")
                     } else {
                         // Token mismatch error
-                        history.push("/stupid")
+                        history.push("/")
                     }
                 }
 
@@ -220,7 +217,7 @@ export default function ResetPassword() {
                     history.push("/")
                 }
 
-                console.log(error.response)
+                console.log(error.response);
             })
     })
 

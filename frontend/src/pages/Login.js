@@ -93,10 +93,7 @@ const StepOne = () => {
       .then((results) => {
         localStorage.setItem('token', results.data.token);
         localStorage.setItem('displayName', results.data.displayName);
-
-        history.push({
-          pathname: "/",
-        });
+        history.push({ pathname: "/" });
       })
       .catch((error) => {
         if (error.response.data.description === "Login failed.") {
@@ -239,24 +236,11 @@ export default function Login() {
   const headingText = "Sign In To UMS";
 
   // Team's Defined Variables
-  const history = useHistory();
   const [data, setData] = React.useState({
     email: "",
-  })
-  const [currentStep, setCurrentStep] = React.useState(0);
-  const steps = [<StepOne />, <StepTwo />]
-
-  const Toast = Swal.mixin({
-    toast: true,
-    position: 'top',
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.addEventListener('mouseenter', Swal.stopTimer)
-      toast.addEventListener('mouseleave', Swal.resumeTimer)
-    }
   });
+  const steps = [<StepOne />, <StepTwo />];
+  const [currentStep, setCurrentStep] = React.useState(0);
 
   return (
     <AnimationRevealPage>

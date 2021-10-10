@@ -3,9 +3,10 @@ const middlewares = require('../middlewares/middleware');
 const limiter = require('../middlewares/rateLimiter');
 
 exports.route = router => {
-
     // without middlewear
-    router.get('/api/u/user/:email/available', manageUserController.checkDuplicateEmails);
+    router.get('/api/u/user/email/:email/available', manageUserController.checkDuplicateEmails);
+    router.get('/api/u/user/number/:number/available', manageUserController.checkDuplicateNumbers);
+
 
     // with middlewear
     router.post('/api/u/user/create-account', limiter.registrationLimiter, manageUserController.addUser);
