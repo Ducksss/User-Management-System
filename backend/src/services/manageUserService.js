@@ -248,9 +248,9 @@ module.exports.addRefreshToken = (userid, token) => {
                     let query = `
                                 INSERT INTO
                                     refresh_tokens
-                                        (user_guid, refresh_token)   
+                                        (user_guid, refresh_token, created_at)   
                                 VALUES 
-                                    (?,?)         
+                                    (?,?, UTC_TIMESTAMP())         
                                 `
                     connection.query(query, [userid,token], (err, result) => {
                         if (err) {
