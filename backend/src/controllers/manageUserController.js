@@ -1,11 +1,15 @@
 // imports
+const qrcode = require('qrcode');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
-const moment = require("moment-timezone");
-const config = require('../config/config');
+const speakeasy = require('speakeasy');
 const nodeMailer = require('nodemailer');
-const { codes } = require('../config/codes')
-const { validationResult } = require('express-validator');
+const config = require('../config/config');
+const { codes } = require('../config/codes');
+const validators = require('../middlewares/validators');
+// const { validationResult } = require('express-validator');
+// const rsaDecryption = require('../middlewares/rsaDecryption');
+// const key = require('../routes/encryptionRoute')
 
 // services
 const manageUsers = require('../services/manageUserService')
@@ -17,8 +21,9 @@ const transporter = nodeMailer.createTransport({
         user: config.GMAIL_USER,
         pass: config.GMAIL_PASS,
     }
-})
+});
 
+// Checks for duplicate emails before user registration
 exports.checkDuplicateEmails = async (req, res, next) => {
     try {
         let { email } = req.params;
@@ -35,16 +40,36 @@ exports.checkDuplicateEmails = async (req, res, next) => {
     }
 }
 
+// Checks for duplicate numbers before user registration
+exports.checkDuplicateNumbers = async (req, res, next) => {
+    try {
+        let { number } = req.params;
+        let results = await manageUsers.getNumber(number);
+
+        if (results.length === 1) {
+            return res.status(409).send(codes(409, null, "The number has already been taken."))
+        } else {
+            return res.status(200).send(codes(200, null, results));
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
+}
+
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
 
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+        let data = {
+            firstName: validators.validateText(req.body.firstName),
+            lastName: validators.validateText(req.body.firstName),
+            email: validators.validateEmail(req.body.email),
+            password: validators.validateText(req.body.password),
+            contact: validators.validateInt(req.body.contact)
         }
 
-        let { firstName, lastName, email, password, contact, privilege } = req.body;
+        let { firstName, lastName, email, password, contact, privilege } = data;
 
         // guard statement
         if (privilege == null) privilege = 4;
@@ -53,7 +78,6 @@ exports.addUser = async (req, res, next) => {
         // adding user info
         await manageUsers.addUser(firstName, lastName, email, contact, privilege)
             .catch((error) => {
-                console.log(error)
                 return res.status(401).send(codes(500, 'Internal error.'));
             });
 
@@ -64,7 +88,9 @@ exports.addUser = async (req, res, next) => {
             });
         let { user_guid } = results[0]
         let hashedPassword = await bcrypt.hash(password, 10);
-        await manageUsers.addUserLogin(user_guid, hashedPassword)
+        let secret = speakeasy.generateSecret({ length: 20, });
+
+        await manageUsers.addUserLogin(user_guid, hashedPassword, secret.base32)
             .catch((error) => {
                 console.log(error)
                 return res.status(401).send(codes(500, 'Internal error.'));
@@ -76,10 +102,29 @@ exports.addUser = async (req, res, next) => {
     }
 };
 
-exports.verifyRole = async (req, res, next) => {
+// generating 2FA QRCode
+exports.generate2FA = async (req, res, next) => {
     try {
-        let { userId } = req;
-        let results = await manageUsers.getRole(userId);
+        let { user_guid } = req;
+
+        let secret = speakeasy.generateSecret({ length: 20, });
+
+        console.log(secret.base32)
+        await manageUsers.add2FA(user_guid, secret.base32)
+        let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
+
+        return res.status(200).send(codes(200, { qrcodeURL: qrcodeURL }));
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
+}
+
+// Used by the header and other components to generate different view based on role
+exports.getUserPrivilege = async (req, res, next) => {
+    try {
+        let { user_guid } = req;
+        let results = await manageUsers.getRole(user_guid);
 
         return res.status(200).send(codes(200, null, results));
     } catch (error) {

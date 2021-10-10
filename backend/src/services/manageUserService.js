@@ -29,9 +29,35 @@ module.exports.getEmail = (email) => {
     })
 }
 
+// verify if number has been taken and translating number to UUID
+module.exports.getNumber = (number) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `SELECT 
+                                user_guid 
+                            FROM 
+                                user_management_system.users 
+                            where 
+                                contact_number = ?;
+                            `;
+                connection.query(query, [number], (err, results) => {
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
 // adding user information to the database
-module.exports.addUser = (firstName, lastName, email, contact, privilege, UTCDateFormat) => {
-    
+module.exports.addUser = (firstName, lastName, email, contact, privilege) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(async (err, connection) => {
             if (err) {
@@ -61,7 +87,7 @@ module.exports.addUser = (firstName, lastName, email, contact, privilege, UTCDat
 };
 
 // adding user login information to the database
-module.exports.addUserLogin = (user_guid, password_hash) => {
+module.exports.addUserLogin = (user_guid, password_hash, secret) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(async (err, connection) => {
             if (err) {
@@ -70,9 +96,9 @@ module.exports.addUserLogin = (user_guid, password_hash) => {
                 try {
                     //stores current into repository of history
                     let query = `INSERT INTO user_management_system.logins(
-                                login_guid, user_guid, password_hash, created_at, 
-                                    updated_at) VALUES (UUID(), ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())`;
-                    connection.query(query, [user_guid, password_hash], (err, results) => {
+                                login_guid, user_guid, password_hash, secret, created_at, 
+                                    updated_at) VALUES (UUID(), ?, ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())`;
+                    connection.query(query, [user_guid, password_hash, secret], (err, results) => {
                         if (err) {
                             reject(err);
                         } else {
@@ -89,8 +115,75 @@ module.exports.addUserLogin = (user_guid, password_hash) => {
     })
 };
 
+// adding speakeasy secret after adding user information
+module.exports.add2FA = (user_guid, secret) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection(async (err, connection) => {
+            if (err) {
+                reject(err);
+            } else {
+                try {
+                    //stores current into repository of history
+                    let query = `INSERT INTO user_management_system.verifications(
+                                    verification_guid, user_guid, secret, 
+                                    verification_attempt, type, created_at
+                                ) 
+                                VALUES 
+                                    (UUID(), ?, ?, 0, 0, UTC_TIMESTAMP())
+                                `;
+                    connection.query(query, [user_guid, secret], (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            console.log(results)
+                            resolve(results);
+                        }
+                        connection.release();
+                    });
+                } catch (error) {
+                    reject(error);
+                }
+            }
+        });
+    })
+}
+
+// updating the number of login attempts
+module.exports.updateLoginAttempts = (login_attempt, user_guid) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection(async (err, connection) => {
+            if (err) {
+                reject(err);
+            } else {
+                try {
+                    //stores current into repository of history
+                    let query = `
+                                UPDATE 
+                                    user_management_system.logins 
+                                SET 
+                                    login_attempt = ?
+                                where 
+                                    user_guid = ?
+                                `;
+                    connection.query(query, [login_attempt, user_guid], (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            console.log(results)
+                            resolve(results);
+                        }
+                        connection.release();
+                    });
+                } catch (error) {
+                    reject(error);
+                }
+            }
+        });
+    })
+}
+
 // for dynamically displaying header functionality
-module.exports.isLoggedIn = (user_guid, email) => {
+module.exports.isLoggedIn = (user_guid) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -98,14 +191,13 @@ module.exports.isLoggedIn = (user_guid, email) => {
             } else {
                 try {
                     let query = `SELECT 
-                                    user_guid 
+                                    *
                                 FROM 
                                     user_management_system.users
                                 where 
-                                    user_guid = ? 
-                                    and email = ?;
+                                    user_guid = ?
                                 `;
-                    connection.query(query, [user_guid, email], (err, results) => {
+                    connection.query(query, [user_guid], (err, results) => {
                         if (err) {
                             console.log(err)
                             reject(err)
@@ -122,7 +214,7 @@ module.exports.isLoggedIn = (user_guid, email) => {
     })
 }
 
-module.exports.isSuspended = (userId) => {
+module.exports.isSuspended = (user_guid) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -131,12 +223,12 @@ module.exports.isSuspended = (userId) => {
                 let query = `SELECT 
                                 status 
                             from 
-                                sp_shop.users 
+                                user_management_system.logins 
                             where 
-                                user_id = ? 
+                                user_guid = ? 
                             `;
 
-                connection.query(query, [userId], (err, results) => {
+                connection.query(query, [user_guid], (err, results) => {
                     if (err) {
                         console.log(err)
                         reject(err)
@@ -150,20 +242,20 @@ module.exports.isSuspended = (userId) => {
     })
 }
 
-module.exports.getRole = (userId) => {
+module.exports.getRole = (user_guid) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
                 resolve(err);
             } else {
                 let query = `SELECT 
-                                type 
+                                privilege 
                             FROM 
-                                sp_shop.users 
+                                user_management_system.users 
                             where 
-                                user_id = ?;
+                                user_guid = ?;
                             `;
-                connection.query(query, [userId], (err, results) => {
+                connection.query(query, [user_guid], (err, results) => {
                     if (err) {
                         console.log(err)
                         reject(err)

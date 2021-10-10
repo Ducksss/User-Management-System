@@ -68,6 +68,7 @@ export default function AccountDetails(location) {
 
     const [showModal, setShowModal] = useState(false)
     const [sendData, setsendData] = useState('')
+    const [edited, setedited] = useState(false)
 
     const getUserDetails = () => {
         //personal info has 3 keys, so have to loop to get all of it to display
