@@ -11,6 +11,7 @@ import { Redirect } from 'react-router-dom';
 import Header from "components/headers/light.js";
 import Footer from "components/footers/FiveColumnWithInputForm.js";
 import tw from 'twin.macro';
+import Config from '../Config'
 const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
 const DetailRow = tw.div`border rounded-lg border-gray-400  w-8/12 `
 
@@ -20,7 +21,7 @@ const InfoRow = tw.div`flex flex-row border-b border-gray-400 px-3 py-5`
 const HeaderRow = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
 
 
-const stripePromise = loadStripe(process.env.STRIPE_PUBLISHABLE_KEY);
+const stripePromise = loadStripe(Config.STRIPE_PUBLISHABLE_KEY);
 const Subscribe = ({ location }) => {
 
   // Get the lookup key for the price from the previous page redirect.
