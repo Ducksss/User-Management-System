@@ -36,7 +36,7 @@ exports.processUserLogin = async (req, res, next) => {
             // req.user_guid = results[0].user_guid;
             // next();
             let data = {
-                displayName: results[0].firstName + " " + results[0].lastName,
+                displayName: results[0].firstName + " " + results[0].lastame,
                 email: results[0].email,
                 token: jwt.sign({
                     user_guid: results[0].user_guid,
@@ -44,12 +44,32 @@ exports.processUserLogin = async (req, res, next) => {
                     privilege: results[0].privilege
                 },
                     config.JWTKey, {
-                    expiresIn: 86400 //Expires in 24 hrs
+                    expiresIn: 3 * 60 //Expires in 3 mins
                 })
             };
 
-            console.log(data)
-            return res.status(200).send(data);
+            let refresh_token = jwt.sign({
+                _id: results[0].user_guid
+                }, config.REFRESH_TOKEN_SECRET, {
+                expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
+            })
+
+            let insertRefreshToken = await loginService.addRefreshToken(results[0].user_guid, refresh_token)
+
+            if(insertRefreshToken) {
+                res.cookie('refreshToken', refresh_token, {
+                    httpOnly: true,
+                    secure: true,
+                    signed: true,
+                    maxAge: 60 * 60 * 24 * 3 * 1000, //3 days
+                    sameSite: "none",
+                })
+                
+                console.log(data)
+                return res.status(200).send(data);
+            } else {
+                return res.status(401).send(codes(401, 'Login failed.'));
+            }
         } else {
             return res.status(401).send(codes(401, 'Login failed.'));
         }

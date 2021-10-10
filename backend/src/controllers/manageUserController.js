@@ -60,7 +60,6 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
-
         let data = {
             firstName: validators.validateText(req.body.firstName),
             lastName: validators.validateText(req.body.firstName),
@@ -130,4 +129,63 @@ exports.generate2FA = async (req, res, next) => {
         console.log(error)
         return res.status(500).send(codes(500));
     }
+}
+
+//refresh token
+exports.refreshToken = async (req,res) => {
+    const { signedCookies = {} } = req //get the cookie from the request header
+    const { refreshToken } = signedCookies //get the cookie by key
+    console.log(signedCookies);
+    if(refreshToken) {
+        try {
+            const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET)
+            const userId = payload._id
+ 
+            let getUser = await manageUsers.findUserToken(refreshToken, userId) 
+            if(getUser.length == 1) { //if token is same 
+
+                if(getUser[0].times_used > 0) {
+                    // lock user out 
+                    await manageUsers.lockUser(userId)
+                    return res.status(401).send(codes(401, 'locked out.'))
+                } else {
+                    await manageUsers.updateTimesUsed(token, (getUser[0].times_used + 1))
+                }
+
+                //create access token
+                const token = jwt.sign({
+                        user_guid: getUser[0].user_guid,
+                        email: getUser[0].email,
+                        privilege: getUser[0].privilege
+                    },
+                        config.JWTkey, {
+                        expiresIn: 60 * 3
+                        // 3 minutes expiry
+                    })
+                           
+                const refresh_token = jwt.sign({_id: userId}, config.REFRESH_TOKEN_SECRET, {
+                    expiresIn: eval(config.REFRESH_TOKEN_EXPIRY) 
+                })
+    
+                res.cookie('refreshToken', refresh_token, {
+                    httpOnly: true,
+                    secure: true,
+                    signed: true,
+                    maxAge: 60 * 60 * 24 * 3 * 1000,
+                    sameSite: "none",
+                })
+                return res.status(200).send(token);
+            } else {
+                console.log('yes');
+                return res.status(401).send(codes(401))
+            }
+ 
+        } catch (error) {
+            return res.status(500).send(codes(500))
+        }
+    } else {
+        console.log('no');
+
+        return res.status(401).send(codes(401, 'No token is detected.'))
+    }   
 }

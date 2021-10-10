@@ -234,3 +234,91 @@ module.exports.getRole = (userId) => {
         })
     })
 }
+
+//get refresh token 
+module.exports.findUserToken = (token) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `SELECT 
+                                u.user_guid, u.email, u.privilege, rt.refresh_token, rt.times_used 
+                            FROM 
+                                refresh_tokens rt
+                            JOIN
+                                users u
+                            ON
+                                rt.user_guid=u.user_guid
+                            where 
+                                refresh_token = ?;
+                            `;
+                connection.query(query, [token], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
+//lock user  
+module.exports.lockUser = (userid) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `UPDATE 
+                                logins
+                            SET
+                                status = 3
+                            WHERE 
+                                user_guid = ?;
+                            `;
+                connection.query(query, [userid], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
+//lock user  
+module.exports.updateTimesUsed = (token, used) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `UPDATE 
+                                refresh_tokens
+                            SET
+                                times_used = ?
+                            WHERE 
+                                refresh_token = ?;
+                            `;
+                connection.query(query, [used, token], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}

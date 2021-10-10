@@ -3,12 +3,12 @@ const config = require('../config/config');
 const pool = require('../config/database')
 
 // Authenticates whether the user does exist and whether their email and password matches
-module.exports.authenticateUser = (email, callback) => {
+module.exports.authenticateUser = (email) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
                 console.log("Database connection error ", err);
-                resolve(err);
+                reject(err);
             } else {
                 try {
                     let query = `
@@ -42,9 +42,41 @@ module.exports.authenticateUser = (email, callback) => {
                     });
                 } catch (error) {
                     console.log(err);
-                    resolve(err);
+                    reject(err);
                 }
             }
         });
     }); // End of getConnection
 } // End of authenticate
+
+//add refresh token into db
+module.exports.addRefreshToken = (userid, token) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                console.log("Database connection error ", err);
+                reject(err);
+            } else {
+                try {
+                    let query = `
+                                INSERT INTO
+                                refresh_tokens(user_guid, refresh_token)   
+                                VALUES (?,?)         
+                    `
+                    connection.query(query, [userid,token], (err, result) => {
+                        if (err) {
+                            console.log(err);
+                            reject(err);
+                        } else {
+                            resolve(result);
+                        }
+                        connection.release();
+                    });
+                } catch (error) {
+                    console.log(error);
+                    reject(error)
+                }
+            }
+        })
+    })
+}

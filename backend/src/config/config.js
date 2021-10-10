@@ -15,6 +15,10 @@ module.exports = {
     GMAIL_PASS: process.env.GMAIL_PASS,
 
     EMAIL_SECRET: process.env.EMAIL_SECRET,
+
+    REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY,
+    COOKIE_SECRET: process.env.COOKIE_SECRET,
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET
 };
 //Reference:
 //https://medium.com/the-node-js-collection/making-your-node-js-work-everywhere-with-environment-variables-2da8cdf6e786
