@@ -5,6 +5,7 @@ const config = require('../config/config');
 
 // Importing service's layer
 const loginService = require('../services/loginService');
+const manageUsers = require('../services/manageUserService')
 
 // Status codes
 const { codes } = require('../config/codes')
@@ -54,7 +55,7 @@ exports.processUserLogin = async (req, res, next) => {
                 expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
             })
 
-            let insertRefreshToken = await loginService.addRefreshToken(results[0].user_guid, refresh_token)
+            let insertRefreshToken = await manageUsers.addRefreshToken(results[0].user_guid, refresh_token)
 
             if(insertRefreshToken) {
                 res.cookie('refreshToken', refresh_token, {

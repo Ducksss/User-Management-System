@@ -48,35 +48,3 @@ module.exports.authenticateUser = (email) => {
         });
     }); // End of getConnection
 } // End of authenticate
-
-//add refresh token into db
-module.exports.addRefreshToken = (userid, token) => {
-    return new Promise((resolve, reject) => {
-        pool.getConnection((err, connection) => {
-            if (err) {
-                console.log("Database connection error ", err);
-                reject(err);
-            } else {
-                try {
-                    let query = `
-                                INSERT INTO
-                                refresh_tokens(user_guid, refresh_token)   
-                                VALUES (?,?)         
-                    `
-                    connection.query(query, [userid,token], (err, result) => {
-                        if (err) {
-                            console.log(err);
-                            reject(err);
-                        } else {
-                            resolve(result);
-                        }
-                        connection.release();
-                    });
-                } catch (error) {
-                    console.log(error);
-                    reject(error)
-                }
-            }
-        })
-    })
-}
