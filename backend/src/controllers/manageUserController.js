@@ -23,7 +23,7 @@ const transporter = nodeMailer.createTransport({
     }
 });
 
-//checks for duplicate emails before user registration
+// Checks for duplicate emails before user registration
 exports.checkDuplicateEmails = async (req, res, next) => {
     try {
         let { email } = req.params;
@@ -40,7 +40,7 @@ exports.checkDuplicateEmails = async (req, res, next) => {
     }
 }
 
-//checks for duplicate numbers before user registration
+// Checks for duplicate numbers before user registration
 exports.checkDuplicateNumbers = async (req, res, next) => {
     try {
         let { number } = req.params;
@@ -102,18 +102,6 @@ exports.addUser = async (req, res, next) => {
     }
 };
 
-exports.verifyRole = async (req, res, next) => {
-    try {
-        let { userId } = req;
-        let results = await manageUsers.getRole(userId);
-
-        return res.status(200).send(codes(200, null, results));
-    } catch (error) {
-        console.log(error)
-        return res.status(500).send(codes(500));
-    }
-}
-
 // generating 2FA QRCode
 exports.generate2FA = async (req, res, next) => {
     try {
@@ -126,6 +114,19 @@ exports.generate2FA = async (req, res, next) => {
         let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
 
         return res.status(200).send(codes(200, { qrcodeURL: qrcodeURL }));
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
+}
+
+// Used by the header and other components to generate different view based on role
+exports.getUserPrivilege = async (req, res, next) => {
+    try {
+        let { user_guid } = req;
+        let results = await manageUsers.getRole(user_guid);
+
+        return res.status(200).send(codes(200, null, results));
     } catch (error) {
         console.log(error)
         return res.status(500).send(codes(500));

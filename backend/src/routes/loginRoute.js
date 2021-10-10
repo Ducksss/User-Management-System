@@ -4,5 +4,5 @@ const validators = require('../middlewares/validators');
 const limiter = require('../middlewares/rateLimiter')
 
 exports.route = router => {
-    router.post('/api/u/user/signin',limiter.loginLimiter, loginController.processUserLogin);
+    router.post('/api/u/user/signin', limiter.loginLimiter, loginController.processUserLogin);
 }
