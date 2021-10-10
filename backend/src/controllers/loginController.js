@@ -16,7 +16,7 @@ exports.processUserLogin = async (req, res, next) => {
     try {
         // Checking for invalid credentials
         let results = await loginService.authenticateUser(email).catch((error) => {
-            return res.status(401).send(codes(401, 'Invalid Credentials.'));
+            return res.status(500).send(codes(500, 'Internal error'));
         });
 
         // Checking for invalid credentials
@@ -26,12 +26,12 @@ exports.processUserLogin = async (req, res, next) => {
 
         // Checking for banned user
         if (results[0].status == 1) {
-            return res.status(401).send(codes(401, 'Banned.'));
+            return res.status(403).send(codes(403, 'Banned.'));
         }
 
         // check for locked account
         if (results[0].login_attempt == 10) {
-            return res.status(401).send(codes(401, 'Locked Out.'));
+            return res.status(403).send(codes(403, 'Locked Out.'));
         }
 
         if (bcrypt.compareSync(password, results[0].password_hash)) {
