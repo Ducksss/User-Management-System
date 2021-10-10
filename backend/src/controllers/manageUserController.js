@@ -61,6 +61,12 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
 exports.addUser = async (req, res, next) => {
     try {
 
+        await validators.validateText(req.body.password)
+        .catch((error) => {
+            console.log(error)
+        });
+
+
         let data = {
             firstName: validators.validateText(req.body.firstName),
             lastName: validators.validateText(req.body.firstName),
