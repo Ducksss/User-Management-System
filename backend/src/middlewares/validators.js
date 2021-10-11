@@ -8,10 +8,10 @@ module.exports.validateEmail = (encrypted, res) => {
         return new Promise((resolve, reject) => {
             let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
             if (validator.isEmpty(decrypted)) {
-                return reject(res.status(409).send(codes(409, null, "Missing Field")));
+                return reject("Missing Field");
             }
             if (!validator.isEmail(decrypted)) {
-                return reject(res.status(409).send(codes(409, null, "Input is not an Email")));
+                return reject("Input is not an Email");
             }
             decrypted = validator.normalizeEmail(decrypted)
             return resolve(decrypted)
@@ -22,42 +22,56 @@ module.exports.validateEmail = (encrypted, res) => {
 }
 
 module.exports.validateText = (encrypted) => {
-
-    return new Promise((resolve, reject) => {
-        let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
-        if (validator.isEmpty(decrypted)) {
-            return reject("Missing Field");
-        }
-        if (!validator.isAlphanumeric(decrypted)) {
-            return reject("Input is not Alpha Numeric");
-        }
-        decrypted = validator.escape(decrypted)
-        decrypted = validator.trim(decrypted)
-        return resolve(decrypted)
-    });
+    try {
+        return new Promise((resolve, reject) => {
+            let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
+            if (validator.isEmpty(decrypted)) {
+                return reject("Missing Field");
+            }
+            if (!validator.isAlphanumeric(decrypted)) {
+                return reject("Input is not Alpha Numeric");
+            }
+            decrypted = validator.escape(decrypted)
+            decrypted = validator.trim(decrypted)
+            return resolve(decrypted)
+        });
+    } catch (error) {
+        return reject(error)
+    }
 }
 
 module.exports.validateInt = (encrypted) => {
-    let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
-    if (validator.isEmpty(decrypted)) {
-        return res.status(409).send(codes(409, null, "Missing Field"));
+    try {
+        return new Promise((resolve, reject) => {
+            let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
+            if (validator.isEmpty(decrypted)) {
+                return reject("Missing Field");
+            }
+            if (!validator.isNumeric(decrypted)) {
+                return reject("Input is not a number");
+            }
+            decrypted = validator.escape(decrypted)
+            decrypted = validator.trim(decrypted)
+            return resolve(decrypted)
+        });
+    } catch (error) {
+        return reject(error)
     }
-    if (!validator.isNumeric(decrypted)) {
-        return res.status(409).send(codes(409, null, "Input is not a number"));
-    }
-    decrypted = validator.escape(decrypted)
-    decrypted = validator.trim(decrypted)
-    return decrypted
 }
 
 module.exports.validatePassword = (encrypted) => {
-    let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
-    if (validator.isEmpty(decrypted)) {
-        return res.status(409).send(codes(409, null, "Missing Field"));
+    try {
+        return new Promise((resolve, reject) => {
+            let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
+            if (validator.isEmpty(decrypted)) {
+                return reject("Missing Field");
+            }
+            if (!validator.isAscii(decrypted)) {
+                return reject("Input is not Ascii");
+            }
+            return resolve(decrypted)
+        });
+    } catch (error) {
+        return reject(error)
     }
-    if (!validator.isAscii(decrypted)) {
-        return res.status(409).send(codes(409, null, "Input is not alpha numeric"));
-    }
-    decrypted = validator.trim(decrypted)
-    return decrypted
 }
