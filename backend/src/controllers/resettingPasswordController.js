@@ -300,9 +300,9 @@ exports.generateOTP = async (req, res, next) => {
 
 exports.verifyResetPasswordParamToken = async (req, res, next) => {
     try {
-        const { token } = req.body;
+        const { token, part } = req.body;
         const jwtObject = await jwt.verify(token, config.JWTKey);
-        const { user_guid, verificationCode, verification_guid } = jwtObject;
+        const { user_guid, verificationCode } = jwtObject;
 
         let result = await resettingPasswordService.verifyToken(user_guid, verificationCode)
             .catch((error) => {
@@ -328,6 +328,10 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
         if (isPassedLimit) {
             return res.status(408).send(codes(408));
         } else {
+            if (part === "store") {
+                next();
+            }
+
             return res.status(204).send(codes(204));
         }
     } catch (error) {
@@ -399,6 +403,8 @@ exports.updateNewPassword = async (req, res, next) => {
         const { user_guid, currentPassword, oldPassword1, verification_guid } = req;
 
         const hashedIncomingPassword = await bcrypt.hash(incomingPassword, 10);
+
+        await manageUsers.updateLoginAttempts(0, user_guid);
 
         await resettingPasswordService.verificationCompleted(verification_guid)
             .catch((error) => {

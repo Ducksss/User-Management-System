@@ -1,66 +1,66 @@
 const httpCodeObj = {
     200: {
         code: 200,
-        description: "Success",
+        message: "Success",
         content: []
     },
     201: {
         code: 200,
-        description: "Created",
+        message: "Created",
         content: []
     },
     400: {
         code: 400,
         error: true,
-        description: 'Bad Request',
+        message: 'Bad Request',
         content: []
     },
     401: {
         code: 401,
         error: true,
-        description: "Unauthorized",
+        message: "Unauthorized",
         content: []
     },
     402: {
         code: 402,
         error: true,
-        description: 'Payment Requireed',
+        message: 'Payment Requireed',
         content: []
     },
     403: {
         code: 403,
         error: true,
-        description: 'Forbidden',
+        message: 'Forbidden',
         content: []
     },
     404: {
         code: 404,
         error: true,
-        description: "Not Found",
+        message: "Not Found",
         content: []
     },
     405: {
         code: 405,
         error: true,
-        description: "Method Not Allowed",
+        message: "Method Not Allowed",
         content: []
     },
     406: {
         code: 406,
         error: true,
-        description: "Not Acceptable",
+        message: "Not Acceptable",
         content: []
     },
     409: {
         code: 409,
         error: true,
-        description: "conflict",
+        message: "Conflict",
         content: []
     },
     500: {
         code: 500,
         error: true,
-        description: 'Internal Server Error',
+        message: 'Internal Server Error',
         content: []
     },
 }
@@ -68,11 +68,9 @@ const httpCodeObj = {
 module.exports.codes = (statusCode, message, content) => {
     let httpCode = httpCodeObj[statusCode]
 
-    if (message) {
-        httpCode.description = message
-    }
-    if (content) {
-        httpCode.content = content
-    }
+    if (message) httpCode.message = message
+    
+    if (content) httpCode.content = content
+    
     return httpCode
 }

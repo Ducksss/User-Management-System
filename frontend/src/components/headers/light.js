@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
+
+// icons
+import logo from "../../images/logo.svg";
+import { ReactComponent as CloseIcon } from "feather-icons/dist/icons/x.svg";
+import { ReactComponent as MenuIcon } from "feather-icons/dist/icons/menu.svg";
+
+// imports
+import axios from "axios";
+import config from "../../Config";
 import { motion } from "framer-motion";
+import { useHistory } from "react-router-dom";
+
+// styling
 import tw from "twin.macro";
 import styled from "styled-components";
 import { css } from "styled-components/macro"; //eslint-disable-line
 
 import useAnimatedNavToggler from "../../helpers/useAnimatedNavToggler.js";
-
-import logo from "../../images/logo.svg";
-import { ReactComponent as MenuIcon } from "feather-icons/dist/icons/menu.svg";
-import { ReactComponent as CloseIcon } from "feather-icons/dist/icons/x.svg";
 
 const Header = tw.header`
   flex justify-between items-center
@@ -70,9 +78,40 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
    * changing the defaultLinks variable below below.
    * If you manipulate links here, all the styling on the links is already done for you. If you pass links yourself though, you are responsible for styling the links or use the helper styled components that are defined here (NavLink)
    */
+
+  const history = useHistory();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  React.useEffect(() => {
+    axios.defaults.headers.common = { 'Authorization': `bearer ${localStorage.token}` }
+
+    if (!hasLoaded) {
+      getList();
+    }
+  })
+
+  const getList = async () => {
+    await axios
+      .get(`${config.baseUrl}/u/user/role`)
+      .then((result) => {
+        setIsLoggedIn(true);
+        let type = result.data.content[0].type;
+
+        if (type === "Admin") {
+          setIsAdmin(true);
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+        setIsLoggedIn(false);
+      })
+
+    setHasLoaded(true);
+  }
   const defaultLinks = [
     <NavLinks key={1}>
-      <NavLink href="/#">About456</NavLink>
+      <NavLink href="/#">About</NavLink>
       <NavLink href="/#">Blog</NavLink>
       <NavLink href="/#">Pricing</NavLink>
       <NavLink href="/#">Contact Us</NavLink>
