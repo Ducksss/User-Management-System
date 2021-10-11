@@ -23,7 +23,7 @@ const transporter = nodeMailer.createTransport({
     }
 });
 
-//checks for duplicate emails before user registration
+// Checks for duplicate emails before user registration
 exports.checkDuplicateEmails = async (req, res, next) => {
     try {
         let { email } = req.params;
@@ -40,7 +40,7 @@ exports.checkDuplicateEmails = async (req, res, next) => {
     }
 }
 
-//checks for duplicate numbers before user registration
+// Checks for duplicate numbers before user registration
 exports.checkDuplicateNumbers = async (req, res, next) => {
     try {
         let { number } = req.params;
@@ -60,12 +60,19 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
+
+        let eFirstName = await validators.validateText(req.body.firstName)
+        let eLastName = await validators.validateText(req.body.lastName)
+        let eEmail = await validators.validateEmail(req.body.email)
+        let ePassword = await validators.validatePassword(req.body.password)
+        let eContact = await validators.validateInt(req.body.contact)
+
         let data = {
-            firstName: validators.validateText(req.body.firstName),
-            lastName: validators.validateText(req.body.firstName),
-            email: validators.validateEmail(req.body.email),
-            password: validators.validateText(req.body.password),
-            contact: validators.validateInt(req.body.contact)
+            firstName: eFirstName,
+            lastName: eLastName,
+            email: eEmail,
+            password: ePassword,
+            contact: eContact
         }
 
         let { firstName, lastName, email, password, contact, privilege } = data;
@@ -100,18 +107,6 @@ exports.addUser = async (req, res, next) => {
         return res.status(500).send(codes(500));
     }
 };
-
-exports.verifyRole = async (req, res, next) => {
-    try {
-        let { userId } = req;
-        let results = await manageUsers.getRole(userId);
-
-        return res.status(200).send(codes(200, null, results));
-    } catch (error) {
-        console.log(error)
-        return res.status(500).send(codes(500));
-    }
-}
 
 // generating 2FA QRCode
 exports.generate2FA = async (req, res, next) => {
@@ -187,7 +182,7 @@ exports.refreshToken = async (req,res) => {
                 console.log('yes');
                 return res.status(401).send(codes(401, 'Your account has been locked out.'))
             }
- 
+
         } catch (error) {
             console.log(error);
             return res.status(500).send(codes(500))
@@ -196,4 +191,17 @@ exports.refreshToken = async (req,res) => {
         console.log('no');
         return res.status(401).send(codes(401, 'No token is detected.'))
     }   
+}
+
+// Used by the header and other components to generate different view based on role
+exports.getUserPrivilege = async (req, res, next) => {
+    try {
+        let { user_guid } = req;
+        let results = await manageUsers.getRole(user_guid);
+
+        return res.status(200).send(codes(200, null, results));
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
 }

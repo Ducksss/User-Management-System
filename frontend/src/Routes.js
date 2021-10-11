@@ -110,6 +110,8 @@ import ThankYouPage from "ThankYouPage.js";
 import BeginPasswordReset from "pages/ForgotPassword"
 import ResetPassword from "pages/ResetPassword"
 import Account from 'pages/Account.js'
+import Subscribe from 'pages/Subscribe.js'
+// import Subscribe from 'pages/Subscribe.js'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 export default function App(props) {
@@ -127,7 +129,7 @@ export default function App(props) {
           <SignupPage />
         </Route>
 
-        <Route path="/account/begin_password_reset">
+        <Route path="/account/forgot_password">
           <BeginPasswordReset />
         </Route>
 
@@ -151,6 +153,9 @@ export default function App(props) {
 
         <Route path='/account'>
           <Account />  
+        </Route>
+        <Route path='/subscribe'>
+          <Subscribe />  
         </Route>
 
         <Route path="/" >
