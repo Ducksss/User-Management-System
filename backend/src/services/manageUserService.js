@@ -391,3 +391,29 @@ module.exports.updateTimesUsed = (token, used) => {
         })
     })
 }
+
+//delete token
+module.exports.deleteRefreshToken = (token) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `DELETE FROM 
+                                refresh_tokens
+                            WHERE 
+                                refresh_token = ?;
+                            `;
+                connection.query(query, [token], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}

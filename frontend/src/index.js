@@ -18,7 +18,7 @@ ReactDOM.render(
 
 function Index() {
   const [isLoading, setisLoading] = useState(true)
-  const {setToken, setmessage} = useContext(TokenContext)
+  const {token, setToken, setmessage} = useContext(TokenContext)
 
   const verifyUser = useCallback(() => {
     setisLoading(true)
@@ -26,7 +26,8 @@ function Index() {
     axios.get(`${config.baseUrl}/u/user/refresh-token`, {withCredentials: true})
     .then(response => {
         if(response.status == 200) {
-            setToken(response.data.token) 
+            setToken(response.data) 
+            axios.defaults.headers.common = { 'Authorization': `bearer ${response.data}` }
             setTimeout(verifyUser, 2 * 60 * 1000) //reresh every 3 minutes
         } else {
             setToken(false)

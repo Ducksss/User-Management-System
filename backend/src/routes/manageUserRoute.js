@@ -7,6 +7,7 @@ exports.route = router => {
     router.get('/api/u/user/email/:email/available', manageUserController.checkDuplicateEmails);
     router.get('/api/u/user/number/:number/available', manageUserController.checkDuplicateNumbers);
     router.get('/api/u/user/refresh-token', manageUserController.refreshToken)
+    router.get('/api/u/user/logout', manageUserController.logout)
 
 
     // with middlewear
