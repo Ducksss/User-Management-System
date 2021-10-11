@@ -135,7 +135,7 @@ exports.refreshToken = async (req,res) => {
         try {
             const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET)
             const userId = payload._id
-            const now = Date.now().valueOf() + 999999
+            const now = Date.now().valueOf()
             
             if(payload && (payload.exp * 1000 >= now)) {
                 res.clearCookie('refreshToken')
@@ -179,17 +179,17 @@ exports.refreshToken = async (req,res) => {
                 })
                 return res.status(200).send(token);
             } else {
-                console.log('yes');
-                return res.status(401).send(codes(401, 'Your account has been locked out.'))
+                //db returns 0 or more than 1 tokens
+                return res.status(500).send(codes(500, 'Internal Error'))
             }
 
         } catch (error) {
             console.log(error);
-            return res.status(500).send(codes(500))
+            return res.status(500).send(codes(500, 'Internal Error'))
         }
     } else {
-        console.log('no');
-        return res.status(401).send(codes(401, 'No token is detected.'))
+        //no refresh token available
+        return res.status(204).send()
     }   
 }
 
