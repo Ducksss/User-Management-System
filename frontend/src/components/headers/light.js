@@ -83,32 +83,32 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
   const [isAdmin, setIsAdmin] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  React.useEffect(() => {
-    axios.defaults.headers.common = { 'Authorization': `bearer ${localStorage.token}` }
+  // React.useEffect(() => {
+  //   axios.defaults.headers.common = { 'Authorization': `bearer ${localStorage.token}` }
 
-    if (!hasLoaded) {
-      getList();
-    }
-  })
+  //   if (!hasLoaded) {
+  //     getList();
+  //   }
+  // })
 
-  const getList = async () => {
-    await axios
-      .get(`${config.baseUrl}/u/user/role`)
-      .then((result) => {
-        setIsLoggedIn(true);
-        let type = result.data.content[0].type;
+  // const getList = async () => {
+  //   await axios
+  //     .get(`${config.baseUrl}/u/user/role`)
+  //     .then((result) => {
+  //       setIsLoggedIn(true);
+  //       let type = result.data.content[0].type;
 
-        if (type === "Admin") {
-          setIsAdmin(true);
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-        setIsLoggedIn(false);
-      })
+  //       if (type === "Admin") {
+  //         setIsAdmin(true);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.log(error)
+  //       setIsLoggedIn(false);
+  //     })
 
-    setHasLoaded(true);
-  }
+  //   setHasLoaded(true);
+  // }
   const defaultLinks = [
     <NavLinks key={1}>
       <NavLink href="/#">About</NavLink>
