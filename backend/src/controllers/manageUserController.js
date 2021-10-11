@@ -138,9 +138,8 @@ exports.refreshToken = async (req,res) => {
             const now = Date.now().valueOf()
             
             if(payload && (payload.exp * 1000 >= now)) {
-                console.log('HERERERERERR');
                 res.clearCookie('refreshToken')
-                return res.status(401).send(codes(401, 'Session Expired'))
+                return res.status(401).send(codes(401, 'Your Session has expired.'))
             }
             
             let getUser = await manageUsers.findUserToken(refreshToken) 
@@ -149,7 +148,7 @@ exports.refreshToken = async (req,res) => {
                 if(getUser[0].times_used > 0) {
                     // lock user out 
                     await manageUsers.lockUser(userId)
-                    return res.status(401).send(codes(401, 'locked out.'))
+                    return res.status(401).send(codes(401, 'Your account has been locked out.'))
                 } else {
                     await manageUsers.updateTimesUsed(refreshToken, (getUser[0].times_used + 1))
                 }
@@ -170,7 +169,6 @@ exports.refreshToken = async (req,res) => {
                 })
 
                 await manageUsers.addRefreshToken(getUser[0].user_guid, refresh_token)
-
     
                 res.cookie('refreshToken', refresh_token, {
                     httpOnly: true,
@@ -181,17 +179,17 @@ exports.refreshToken = async (req,res) => {
                 })
                 return res.status(200).send(token);
             } else {
-                console.log('yes');
-                return res.status(401).send(codes(401))
+                //db returns 0 or more than 1 tokens
+                return res.status(500).send(codes(500, 'Internal Error'))
             }
 
         } catch (error) {
             console.log(error);
-            return res.status(500).send(codes(500))
+            return res.status(500).send(codes(500, 'Internal Error'))
         }
     } else {
-        console.log('no');
-        return res.status(401).send(codes(401, 'No token is detected.'))
+        //no refresh token available
+        return res.status(204).send()
     }   
 }
 
