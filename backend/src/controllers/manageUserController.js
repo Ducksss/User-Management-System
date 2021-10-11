@@ -60,27 +60,31 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
-
-        let eFirstName = await validators.validateText(req.body.firstName)
-        let eLastName = await validators.validateText(req.body.lastName)
-        let eEmail = await validators.validateEmail(req.body.email)
-        let ePassword = await validators.validatePassword(req.body.password)
-        let eContact = await validators.validateInt(req.body.contact)
-
-        let data = {
-            firstName: eFirstName,
-            lastName: eLastName,
-            email: eEmail,
-            password: ePassword,
-            contact: eContact
+        let data = {}
+        try {
+            validators.validateText(req.body.firstName)
+            validators.validateText(req.body.lastName)
+            validators.validateEmail(req.body.email)
+            validators.validatePassword(req.body.password)
+            validators.validateInt(req.body.contact)
+    
+            data = {
+                firstName: validators.validateText(req.body.firstName),
+                lastName: validators.validateText(req.body.lastName),
+                email: validators.validateEmail(req.body.email),
+                password: validators.validatePassword(req.body.password),
+                contact: validators.validateInt(req.body.contact)
+            }
+        } catch (error) {
+            console.log(error.message);
+            return res.status(401).send(codes(401, 'Missing information.'))
         }
 
         let { firstName, lastName, email, password, contact, privilege } = data;
 
         // guard statement
         if (privilege == null) privilege = 4;
-        if (!(firstName && lastName && email && password && contact)) return res.status(401).send(codes(401, 'Missing information.'));
-
+        
         // adding user info
         await manageUsers.addUser(firstName, lastName, email, contact, privilege)
             .catch((error) => {
@@ -102,7 +106,7 @@ exports.addUser = async (req, res, next) => {
                 return res.status(401).send(codes(500, 'Internal error.'));
             });
         return res.status(200).send(codes(200));
-    } catch (error) {
+    } catch (error) { 
         console.log(error)
         return res.status(500).send(codes(500));
     }
