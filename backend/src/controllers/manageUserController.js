@@ -140,14 +140,20 @@ exports.refreshToken = async (req,res) => {
         try {
             const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET)
             const userId = payload._id
- 
+            const now = Date.now().valueOf() + 999999
+            
+            if(payload && (payload.exp * 1000 >= now)) {
+                res.clearCookie('refreshToken')
+                return res.status(401).send(codes(401, 'Your Session has expired.'))
+            }
+            
             let getUser = await manageUsers.findUserToken(refreshToken) 
 
             if(getUser.length == 1) { //if token is same 
                 if(getUser[0].times_used > 0) {
                     // lock user out 
                     await manageUsers.lockUser(userId)
-                    return res.status(401).send(codes(401, 'locked out.'))
+                    return res.status(401).send(codes(401, 'Your account has been locked out.'))
                 } else {
                     await manageUsers.updateTimesUsed(refreshToken, (getUser[0].times_used + 1))
                 }
@@ -168,7 +174,6 @@ exports.refreshToken = async (req,res) => {
                 })
 
                 await manageUsers.addRefreshToken(getUser[0].user_guid, refresh_token)
-
     
                 res.cookie('refreshToken', refresh_token, {
                     httpOnly: true,
@@ -180,7 +185,7 @@ exports.refreshToken = async (req,res) => {
                 return res.status(200).send(token);
             } else {
                 console.log('yes');
-                return res.status(401).send(codes(401))
+                return res.status(401).send(codes(401, 'Your account has been locked out.'))
             }
  
         } catch (error) {

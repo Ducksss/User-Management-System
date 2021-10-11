@@ -18,7 +18,7 @@ ReactDOM.render(
 
 function Index() {
   const [isLoading, setisLoading] = useState(true)
-  const {setToken} = useContext(TokenContext)
+  const {setToken, setmessage} = useContext(TokenContext)
 
   const verifyUser = useCallback(() => {
     setisLoading(true)
@@ -32,7 +32,9 @@ function Index() {
             setToken(false)
         }
     })
-    .catch(error => console.log(error))
+    .catch(error => {
+      setmessage(error.response.data.message)
+    })
     .finally(()=> setisLoading(false))
     // call refreshToken every 3 minutes to renew the authentication token.
 }, [setToken])
@@ -50,10 +52,10 @@ useEffect(() => {
 
 function Loader() {
   return(
-    <>
-      <div class="loadingio-spinner-ripple-ii6oghkbxnr"><div class="ldio-0ykxk211rqx">
+    <div className='loaderContainer'>
+      <div className="loadingio-spinner-ripple-ii6oghkbxnr"><div className="ldio-0ykxk211rqx">
       <div></div><div></div>
       </div></div>
-    </>
+    </div >
   )
 }
