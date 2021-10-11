@@ -66,7 +66,7 @@ exports.addUser = async (req, res, next) => {
         let eEmail = await validators.validateEmail(req.body.email)
         let ePassword = await validators.validatePassword(req.body.password)
         let eContact = await validators.validateInt(req.body.contact)
-        
+
         let data = {
             firstName: eFirstName,
             lastName: eLastName,
@@ -128,7 +128,7 @@ exports.generateVerificationEmail = async (req, res, next) => {
                 },
                 config.JWTKey,
                 {
-                    expiresIn: 600
+                    expiresIn: 604800
                 }
             )
         };
@@ -281,11 +281,11 @@ exports.generateVerificationEmail = async (req, res, next) => {
                                                                                                                     <td align="center"
                                                                                                                         bgcolor="#321fdb"
                                                                                                                         style="border-radius:6px;font-size:16px;text-align:center;background-color:inherit">
-                                                                                                                        <a href="http://localhost:3004/acccount/reset_password/${data.token}"
+                                                                                                                        <a href="http://localhost:3004/account/verify_email/${data.token}"
                                                                                                                             style="background-color:#321fdb;border:0px solid #333333;border-color:#333333;border-radius:4px;border-width:0px;color:#ffffff;display:inline-block;font-size:16px;font-weight:700;letter-spacing:0px;line-height:normal;padding:12px 18px 12px 18px;text-align:center;text-decoration:none;border-style:solid"
                                                                                                                             target="_blank"
                                                                                                                             data-saferedirecturl="https://www.google.com/url?q=http://url6312.coreui.io/ls/click?upn%3DzYcg0S-2FzDXu459e3sth3RJeidPi8smGI64DUWxreqbx7uH9dvu9SbozstYcne-2BE2VCf0757GQ1QMCUMmTbJQqUJzs-2Bns7ErRdOGnUEIt7j6YS0cgKKoO-2BxSDf8qMZ-2BFslDl6XxVKMTSpCE0qZce8ZSvMP5k0prAY0CIr-2FcSYPS5pIDojh0y2PlpTjcdpn3FYO-2F3DFHLXyUrKCgdo1KK-2F6g-3D-3DW3fN_ndFMJpcCIGXHo1VJty3Pr-2FLtmK191lDwToRcRw2pMHsjJ9N6iSgpX5Kal6lnrooJL24Y9CGJxndH85Fv-2Bqsp6Q53fj3O52IoQHaSvhm5ooqGyjL-2F0jnRCj8902bGYqj5Pis-2FLVf-2BiaGGPOgQbtLlPS9jb1IJkLRytvJECCfaALR6KQDFYuL5J6sl0-2BXCSRo2pGEw3iGLB-2FWEiiPSfkWpixT26NWCPaN4D0Ud-2By7WF1l-2BZ3meeyy9W5WTnsCbYtld-2Bg1MgFoDx21ZPlbdM6BcfzlY-2BvTOjOl5VqruCB7ncwCuUrhTncQZT88HZoEqxC78Xpayt4Nk0ohDdAOvv-2FirsBIvjpb8q9POVsGgedXORFI-3D&amp;source=gmail&amp;ust=1629219091591000&amp;usg=AFQjCNEwhklbqiHn8aJzAhOk_fs2_4QFLw">
-                                                                                                                            Reset password</a>
+                                                                                                                            Verify me</a>
                                                                                                                     </td>
                                                                                                                 </tr>
                                                                                                             </tbody>
@@ -369,10 +369,11 @@ exports.generateVerificationEmail = async (req, res, next) => {
 exports.verifyVerificationEmail = async (req, res, next) => {
     try {
         const { token } = req.body;
-        const jwtObject = await jwt.verify(token, config.JWTKey);
+        const jwtObject = await jwt.verify(token[0], config.JWTKey);
         const { user_guid, email, created_at } = jwtObject;
+        console.log(user_guid)
 
-        let result = await manageUsers.verifyVerificationEmailToken(user_guid, created_at)
+        let result = await manageUsers.verifyVerificationEmailToken(user_guid)
             .catch((error) => {
                 console.log(error);
                 return res.status(401).send(codes(401, 'Failed to verify.'));
@@ -381,6 +382,12 @@ exports.verifyVerificationEmail = async (req, res, next) => {
         if (result.length !== 1) {
             return res.status(403).send(codes(403));
         }
+
+        await manageUsers.updateLoginStatus(user_guid, 0)
+            .catch((error) => {
+                console.log(error);
+                return res.status(401).send(codes(401, 'Failed to verify.'));
+            });
 
         return res.status(200).send(codes(200));
     } catch (error) {

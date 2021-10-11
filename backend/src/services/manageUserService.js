@@ -282,10 +282,37 @@ module.exports.verifyVerificationEmailToken = (user_guid, created_at) => {
                             FROM 
                                 user_management_system.users 
                             where 
-                                created_at = ?
-                                and user_guid = ?;
+                                user_guid = ?;
                             `;
-                connection.query(query, [user_guid, created_at], (err, results) => {
+                connection.query(query, [user_guid], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
+module.exports.updateLoginStatus = (user_guid, status) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            UPDATE 
+                                user_management_system.logins 
+                            SET 
+                                status = ?
+                            WHERE 
+                                user_guid = ?
+                            `;
+                connection.query(query, [status, user_guid], (err, results) => {
                     if (err) {
                         console.log(err)
                         reject(err)

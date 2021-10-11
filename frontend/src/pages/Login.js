@@ -120,17 +120,27 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
               data: "Your account has been locked. Please reset your password before proceeding.",
               type: "alert-danger",
             });
+          } else if (error.response.data.description === "Unverified.") {
+            setMessage({
+              data: "You account needs to be verified. Please check your email.",
+              type: "alert-danger",
+            });
           } else {
             setMessage({
               data: "Your username or password is invalid.",
               type: "alert-danger",
             });
           }
-        }
 
-        if (error.response.data.code === 500) {
+        } else if (error.response.data.code === 500) {
           setMessage({
             data: "Please contact an administrator for help.",
+            type: "alert-danger",
+          });
+
+        } else {
+          setMessage({
+            data: "Please accept your",
             type: "alert-danger",
           });
         }
@@ -153,7 +163,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
           validateLogininformation(values);
           setSubmitting(false);
           bt.disabled = false;
-        }, 100)
+        }, 1000)
       }}
     >
       {({ isSubmitting }) => (
