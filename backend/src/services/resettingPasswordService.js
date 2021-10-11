@@ -116,7 +116,7 @@ module.exports.retriveUserPasswordHistory = (user_guid) => {
     })
 }
 
-module.exports.updateCurrentPassword = (user_guid, hashedPassword, currentPassword, oldPassword1) => {
+module.exports.updateCurrentPassword = (user_guid, hashedIncomingPassword, currentPassword, oldPassword1) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -132,7 +132,7 @@ module.exports.updateCurrentPassword = (user_guid, hashedPassword, currentPasswo
                             WHERE 
                                 user_guid = ?              
                             `;
-                connection.query(query, [hashedPassword, currentPassword, oldPassword1, user_guid], (err, results) => {
+                connection.query(query, [hashedIncomingPassword, currentPassword, oldPassword1, user_guid], (err, results) => {
                     if (err) {
                         reject(err)
                     } else {

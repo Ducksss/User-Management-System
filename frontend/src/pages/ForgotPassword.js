@@ -75,7 +75,7 @@ const MyTextInput = ({ label, ...props }) => {
 const StepOne = ({ setMessage, setCurrentStep }) => {
     // links
     const signupUrl = "http://localhost:3004/signup";
-    const forgotPasswordUrl = "http://localhost:3004/account/begin_password_reset";
+    const forgotPasswordUrl = "http://localhost:3004/account/forgot_password";
 
     const history = useHistory();
     const [isSubmitted, setIsSubmitted] = React.useState(false);

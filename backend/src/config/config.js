@@ -18,7 +18,10 @@ module.exports = {
 
     REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY,
     COOKIE_SECRET: process.env.COOKIE_SECRET,
-    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
+  
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
 };
 //Reference:
 //https://medium.com/the-node-js-collection/making-your-node-js-work-everywhere-with-environment-variables-2da8cdf6e786

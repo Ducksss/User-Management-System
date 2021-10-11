@@ -88,7 +88,7 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
         password: Yup.string()
             .required('Your password is required')
             .min(12, "Must have at least 12 characters.")
-            .test('Unique Password', 'New password can\'t be your new password.', // <- key, message
+            .test('Unique Password', 'New password can\'t be your old password.', // <- key, message
                 function (value, context) {
                     return new Promise((resolve, reject) => {
                         console.log(context)
