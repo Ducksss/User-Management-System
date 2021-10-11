@@ -96,7 +96,7 @@ export default function Signup() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [publicKey, setPublicKey] = useState();
 
-  useEffect(() => {
+  React.useEffect(() => {
     axios.get(`${config.baseUrl}/keys`)
       .then((response) => {
         let key = response.data.publicKey
@@ -151,7 +151,7 @@ export default function Signup() {
       ),
     password: Yup.string()
       .required('Your password is required')
-      .min(5, "Your password must be minimally 5 characters long!"),
+      .min(12, "Your password must be minimally 12 characters long!"),
     passwordConfirmation: Yup.string()
       .required('You need to confirm your password')
       .oneOf([Yup.ref('password'), null], 'Passwords must match'),

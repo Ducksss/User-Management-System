@@ -160,7 +160,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
         <Form css={[tw.form`mx-auto max-w-xs`]}>
           {isSubmitting ? (
             <div css={[tw`flex flex-col min-h-48 justify-center items-center`]}>
-              <div >
+              <div>
                 <SyncLoader color={"#3c0d99"} loading={isSubmitting} size={150} speedMultiplier={0.5} size={15} />
               </div>
               <span css={[tw`mt-5 italic`]}>Authenticating...</span>

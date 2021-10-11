@@ -369,7 +369,7 @@ exports.verifyVerificationEmail = async (req, res, next) => {
         let result = await manageUsers.verifyVerificationEmailToken(user_guid, created_at)
             .catch((error) => {
                 console.log(error);
-                return res.status(401).send(codes(401, 'Insertion of OTP has failed'));
+                return res.status(401).send(codes(401, 'Failed to verify.'));
             });
 
         if (result.length !== 1) {
