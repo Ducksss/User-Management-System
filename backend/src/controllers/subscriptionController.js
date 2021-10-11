@@ -10,6 +10,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
         url: "https://github.com/stripe-samples/subscription-use-cases/fixed-price"
     }
 });
+
 // Get customerID when register is done.
 // Get user information
 exports.config = async (req, res, next) => {
@@ -23,6 +24,8 @@ exports.config = async (req, res, next) => {
         prices: prices.data,
     });
 };
+
+
 exports.createCustomer = async (req, res, next) => {
     // Simulate authenticated user. In practice this will be the
     // Stripe Customer ID related to the authenticated user.
@@ -49,6 +52,7 @@ exports.createCustomer = async (req, res, next) => {
         return res.status(400).send({ error: { message: error.message } });
     }
 };
+
 exports.createSubscription = async (req, res, next) => {
     // Simulate authenticated user. In practice this will be the
     // Stripe Customer ID related to the authenticated user.
@@ -75,8 +79,10 @@ exports.createSubscription = async (req, res, next) => {
         return res.status(400).send({ error: { message: error.message } });
     }
 };
+
 exports.invoicePreview = async (req, res, next) => {
 };
+
 exports.cancelSubscription = async (req, res, next) => {
     // Cancel the subscription
     try {
@@ -89,8 +95,10 @@ exports.cancelSubscription = async (req, res, next) => {
         return res.status(400).send({ error: { message: error.message } });
     }
 };
+
 exports.updateSubscription = async (req, res, next) => {
 };
+
 exports.subscriptions = async (req, res, next) => {
     // Simulate authenticated user. In practice this will be the
     // Stripe Customer ID related to the authenticated user.
