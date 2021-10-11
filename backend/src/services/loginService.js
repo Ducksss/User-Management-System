@@ -3,12 +3,12 @@ const config = require('../config/config');
 const pool = require('../config/database')
 
 // Authenticates whether the user does exist and whether their email and password matches
-module.exports.authenticateUser = (email, callback) => {
+module.exports.authenticateUser = (email) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
                 console.log("Database connection error ", err);
-                resolve(err);
+                reject(err);
             } else {
                 try {
                     let query = `
@@ -42,7 +42,7 @@ module.exports.authenticateUser = (email, callback) => {
                     });
                 } catch (error) {
                     console.log(err);
-                    resolve(err);
+                    reject(err);
                 }
             }
         });

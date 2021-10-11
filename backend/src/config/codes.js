@@ -54,7 +54,7 @@ const httpCodeObj = {
     409: {
         code: 409,
         error: true,
-        description: "conflict",
+        description: "Conflict",
         content: []
     },
     500: {
@@ -68,11 +68,9 @@ const httpCodeObj = {
 module.exports.codes = (statusCode, message, content) => {
     let httpCode = httpCodeObj[statusCode]
 
-    if (message) {
-        httpCode.description = message
-    }
-    if (content) {
-        httpCode.content = content
-    }
+    if (message) httpCode.description = message
+    
+    if (content) httpCode.content = content
+    
     return httpCode
 }
