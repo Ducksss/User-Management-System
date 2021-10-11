@@ -104,12 +104,12 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
       })
       .catch((error) => {
         if (error.response.data.code === 401) {
-          if (error.response.data.description === "Banned.") {
+          if (error.response.data.message === "Banned.") {
             setMessage({
               data: "Your account has been banned. Please contact an administrator",
               type: "alert-danger",
             });
-          } else if (error.response.data.description === "Locked Out.") {
+          } else if (error.response.data.message === "Locked Out.") {
             setMessage({
               data: "Your account has been locked. Please reset your password before proceeding.",
               type: "alert-danger",

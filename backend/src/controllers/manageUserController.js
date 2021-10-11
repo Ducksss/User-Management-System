@@ -128,7 +128,14 @@ exports.refreshToken = async (req,res) => {
         try {
             const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET)
             const userId = payload._id
- 
+            const now = Date.now().valueOf()
+            
+            if(payload && (payload.exp * 1000 >= now)) {
+                console.log('HERERERERERR');
+                res.clearCookie('refreshToken')
+                return res.status(401).send(codes(401, 'Session Expired'))
+            }
+            
             let getUser = await manageUsers.findUserToken(refreshToken) 
 
             if(getUser.length == 1) { //if token is same 
@@ -170,7 +177,7 @@ exports.refreshToken = async (req,res) => {
                 console.log('yes');
                 return res.status(401).send(codes(401))
             }
- 
+
         } catch (error) {
             console.log(error);
             return res.status(500).send(codes(500))
@@ -180,6 +187,7 @@ exports.refreshToken = async (req,res) => {
         return res.status(401).send(codes(401, 'No token is detected.'))
     }   
 }
+
 // Used by the header and other components to generate different view based on role
 exports.getUserPrivilege = async (req, res, next) => {
     try {
