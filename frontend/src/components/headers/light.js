@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 
 // icons
 import logo from "../../images/logo.svg";
@@ -17,6 +17,7 @@ import styled from "styled-components";
 import { css } from "styled-components/macro"; //eslint-disable-line
 
 import useAnimatedNavToggler from "../../helpers/useAnimatedNavToggler.js";
+import { TokenContext } from "components/TokenContext";
 
 const Header = tw.header`
   flex justify-between items-center
@@ -65,6 +66,7 @@ export const DesktopNavLinks = tw.nav`
 `;
 
 export default ({ roundedHeaderButton = false, logoLink, links, className, collapseBreakpointClass = "lg" }) => {
+  const { token, setToken } = useContext(TokenContext)
   /*
    * This header component accepts an optionals "links" prop that specifies the links to render in the navbar.
    * This links props should be an array of "NavLinks" components which is exported from this file.
@@ -81,44 +83,75 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
 
   const history = useHistory();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // React.useEffect(() => {
-  //   axios.defaults.headers.common = { 'Authorization': `bearer ${localStorage.token}` }
+  const [isLoading, setisLoading] = useState(false)
 
-  //   if (!hasLoaded) {
-  //     getList();
-  //   }
-  // })
+  useEffect(() => {
+    setisLoading(true)
+    getList();
+  }, [])
 
-  // const getList = async () => {
-  //   await axios
-  //     .get(`${config.baseUrl}/u/user/role`)
-  //     .then((result) => {
-  //       setIsLoggedIn(true);
-  //       let type = result.data.content[0].type;
+  const syncLogout = useCallback(e => {
+    if (e.key === "logout") {
+      window.location.reload()
+    }
+  }, [])
+ 
+  useEffect(() => {
+    window.addEventListener("storage", syncLogout)
+    return () => {
+      window.removeEventListener("storage", syncLogout)
+    }
+  }, [syncLogout])
+  
+  const getList = async () => {
+    await axios
+      .get(`${config.baseUrl}/u/user/role`)
+      .then((result) => {
+        console.log(result);
+        setIsLoggedIn(true);
+        let type = result.data.content[0].type;
 
-  //       if (type === "Admin") {
-  //         setIsAdmin(true);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log(error)
-  //       setIsLoggedIn(false);
-  //     })
+        if (type === "Admin") {
+          setIsAdmin(true);
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+        setIsLoggedIn(false);
+      })
+      .finally(()=> {
+        setisLoading(false)
+      })
+  }
 
-  //   setHasLoaded(true);
-  // }
+  const logoutHandler = () => {
+    axios.get(`${config.baseUrl}/u/user/logout`, {
+      withCredentials: true,
+    }).then(() => {
+      setToken(false)
+      window.localStorage.setItem("logout", Date.now())
+    })
+  }
+
   const defaultLinks = [
     <NavLinks key={1}>
       <NavLink href="/#">About</NavLink>
       <NavLink href="/#">Blog</NavLink>
       <NavLink href="/#">Pricing</NavLink>
       <NavLink href="/#">Contact Us</NavLink>
-      <NavLink href="/login" tw="lg:ml-12!">
-        Login
-      </NavLink>
-      <PrimaryLink css={roundedHeaderButton && tw`rounded-full`} href="/signup">Sign Up</PrimaryLink>
+      {isLoggedIn ? 
+        <> 
+          {/* profile and shit */}
+          <NavLink href="/account" tw="lg:ml-12!">My Account</NavLink>
+          <NavLink tw="lg:ml-12!" onClick={() => logoutHandler()}>Logout</NavLink>
+        </> 
+      :
+        <>
+          <NavLink href="/login" tw="lg:ml-12!">Login</NavLink>
+          <PrimaryLink css={roundedHeaderButton && tw`rounded-full`} href="/signup">Sign Up</PrimaryLink>
+        </>
+      } 
     </NavLinks>
   ];
 
@@ -135,7 +168,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
   logoLink = logoLink || defaultLogoLink;
   links = links || defaultLinks;
 
-  return (
+  return (    
     <Header className={className || "header-light"}>
       <DesktopNavLinks css={collapseBreakpointCss.desktopNavLinks}>
         {logoLink}
@@ -151,7 +184,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
           {showNavLinks ? <CloseIcon tw="w-6 h-6" /> : <MenuIcon tw="w-6 h-6" />}
         </NavToggle>
       </MobileNavLinksContainer>
-    </Header>
+    </Header>    
   );
 };
 

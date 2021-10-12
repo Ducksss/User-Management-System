@@ -115,11 +115,12 @@ import Subscribe from 'pages/Subscribe.js'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import {ToastRefreshToken} from "shared/swal";
 import {TokenContext} from './components/TokenContext'
+import axios from "axios";
 
 export default function App(props) {
   // If you want to disable the animation just use the disabled `prop` like below on your page's component
   // return <AnimationRevealPage disabled>xxxxxxxxxx</AnimationRevealPage>;
-  let {message} = useContext(TokenContext)
+  let {message, token} = useContext(TokenContext)
 
   useEffect(() => {
     if(message.length > 0) {

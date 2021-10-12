@@ -60,27 +60,31 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
-
-        let eFirstName = await validators.validateText(req.body.firstName)
-        let eLastName = await validators.validateText(req.body.lastName)
-        let eEmail = await validators.validateEmail(req.body.email)
-        let ePassword = await validators.validatePassword(req.body.password)
-        let eContact = await validators.validateInt(req.body.contact)
-
-        let data = {
-            firstName: eFirstName,
-            lastName: eLastName,
-            email: eEmail,
-            password: ePassword,
-            contact: eContact
+        let data = {}
+        try {
+            validators.validateText(req.body.firstName)
+            validators.validateText(req.body.lastName)
+            validators.validateEmail(req.body.email)
+            validators.validatePassword(req.body.password)
+            validators.validateInt(req.body.contact)
+    
+            data = {
+                firstName: validators.validateText(req.body.firstName),
+                lastName: validators.validateText(req.body.lastName),
+                email: validators.validateEmail(req.body.email),
+                password: validators.validatePassword(req.body.password),
+                contact: validators.validateInt(req.body.contact)
+            }
+        } catch (error) {
+            console.log(error.message);
+            return res.status(401).send(codes(401, 'Missing information.'))
         }
 
         let { firstName, lastName, email, password, contact, privilege } = data;
 
         // guard statement
         if (privilege == null) privilege = 4;
-        if (!(firstName && lastName && email && password && contact)) return res.status(401).send(codes(401, 'Missing information.'));
-
+        
         // adding user info
         await manageUsers.addUser(firstName, lastName, email, contact, privilege)
             .catch((error) => {
@@ -102,7 +106,7 @@ exports.addUser = async (req, res, next) => {
                 return res.status(401).send(codes(500, 'Internal error.'));
             });
         return res.status(200).send(codes(200));
-    } catch (error) {
+    } catch (error) { 
         console.log(error)
         return res.status(500).send(codes(500));
     }
@@ -136,10 +140,10 @@ exports.refreshToken = async (req,res) => {
             const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET)
             const userId = payload._id
             const now = Date.now().valueOf()
-            
-            if(payload && (payload.exp * 1000 >= now)) {
+
+            if(payload && (payload.exp * 1000 <= now)) {
                 res.clearCookie('refreshToken')
-                return res.status(401).send(codes(401, 'Your Session has expired.'))
+                return res.status(401).send(codes(401, 'Session Expired'))
             }
             
             let getUser = await manageUsers.findUserToken(refreshToken) 
@@ -147,8 +151,11 @@ exports.refreshToken = async (req,res) => {
             if(getUser.length == 1) { //if token is same 
                 if(getUser[0].times_used > 0) {
                     // lock user out 
+                    //delete token
                     await manageUsers.lockUser(userId)
-                    return res.status(401).send(codes(401, 'Your account has been locked out.'))
+                    await manageUsers.deleteRefreshToken(refreshToken)
+
+                    return res.status(401).send(codes(401, 'locked out.'))
                 } else {
                     await manageUsers.updateTimesUsed(refreshToken, (getUser[0].times_used + 1))
                 }
@@ -179,19 +186,45 @@ exports.refreshToken = async (req,res) => {
                 })
                 return res.status(200).send(token);
             } else {
-                //db returns 0 or more than 1 tokens
-                return res.status(500).send(codes(500, 'Internal Error'))
+                res.clearCookie('refreshToken')
+                return res.status(401).send(codes(401))
             }
 
         } catch (error) {
             console.log(error);
-            return res.status(500).send(codes(500, 'Internal Error'))
+            return res.status(500).send(codes(500))
         }
     } else {
-        //no refresh token available
-        return res.status(204).send()
+        return res.status(401).send(codes(401, 'No token is detected.'))
     }   
 }
+
+exports.logout = async (req,res) => {
+    const { signedCookies = {} } = req
+    const { refreshToken } = signedCookies
+
+    if(refreshToken) {
+        try { 
+            let getUser = await manageUsers.findUserToken(refreshToken)
+ 
+            if(getUser.length == 1) {
+                await manageUsers.deleteRefreshToken(refreshToken)
+                res.clearCookie('refreshToken')
+                return res.status(204).send()
+            } else {
+                res.clearCookie('refreshToken')
+                return res.status(401).send('error')
+            }
+        }catch(error) {
+            console.log(error);
+            return res.status(401).send('error')
+
+        }
+    } else {
+        return res.status(500).send(codes(500))
+    }
+}
+
 
 // Used by the header and other components to generate different view based on role
 exports.getUserPrivilege = async (req, res, next) => {
