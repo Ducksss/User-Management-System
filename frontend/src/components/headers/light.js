@@ -84,10 +84,8 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
   const history = useHistory();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setisLoading] = useState(false)
 
   useEffect(() => {
-    setisLoading(true)
     getList();
   }, [])
 
@@ -119,9 +117,6 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
       .catch((error) => {
         console.log(error)
         setIsLoggedIn(false);
-      })
-      .finally(()=> {
-        setisLoading(false)
       })
   }
 

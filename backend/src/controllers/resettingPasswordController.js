@@ -23,11 +23,8 @@ let transporter = nodeMailer.createTransport({
 exports.generateOTP = async (req, res, next) => {
     try {
         const { email } = req.params;
+
         const userInformation = await loginService.authenticateUser(email)
-            .catch((error) => {
-                console.log(error);
-                return res.status(401).send(codes(401, 'Insertion of OTP has failed'));
-            });
 
         // if no user, break and don't send any email
         if (userInformation.length != 1) {
@@ -36,18 +33,14 @@ exports.generateOTP = async (req, res, next) => {
 
         const { first_name, last_name, user_guid } = userInformation[0];
         const verificationCode = Math.floor(100000 + Math.random() * 900000);
-        await resettingPasswordService.insertVerificationCode(user_guid, verificationCode)
-            .catch((error) => {
-                console.log(error);
-                return res.status(401).send(codes(401, 'Insertion of OTP has failed'));
-            })
 
+        await resettingPasswordService.insertVerificationCode(user_guid, verificationCode)
+            
         const verificationInformation = await resettingPasswordService.fetchInsertedVerificationCode(user_guid, verificationCode)
             .catch((error) => {
                 console.log(error);
-                return res.status(401).send(codes(401, 'Insertion of OTP has failed'));
             });
-
+        
         const { verification_guid } = verificationInformation[0];
         const data = {
             token: jwt.sign(
@@ -294,6 +287,9 @@ exports.generateOTP = async (req, res, next) => {
         return res.status(200).send(codes(200, "", data));
     } catch (e) {
         console.log(e)
+
+        if(e == 'Insertion of OTP has failed') return res.status(401).send(codes(401, 'Insertion of OTP has failed'))
+
         return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
     }
 }
@@ -301,39 +297,30 @@ exports.generateOTP = async (req, res, next) => {
 exports.verifyResetPasswordParamToken = async (req, res, next) => {
     try {
         const { token, part } = req.body;
-        const jwtObject = await jwt.verify(token, config.JWTKey);
+        const jwtObject = jwt.verify(token, config.JWTKey);
         const { user_guid, verificationCode } = jwtObject;
 
         let result = await resettingPasswordService.verifyToken(user_guid, verificationCode)
-            .catch((error) => {
-                return res.status(500).send(codes(500));
-            });
 
-        if (result.length !== 1) {
-            return res.status(403).send(codes(403));
-        }
+        if (result.length !== 1) return res.status(403).send(codes(403));
 
         if (result[0].verification_code !== verificationCode) {
             return res.status(403).send(codes(403), "", "Your token has expired. Please try again");
         }
 
-        if (result[0].type === 1) {
-            return res.status(403).send(codes(403), "", "It has already been done");
-        }
-
+        if (result[0].type === 1) return res.status(403).send(codes(403), "", "It has already been done");
+        
         const currentUTCTiming = moment.utc();
         const databaseTiming = moment.utc(result[0].created_at);
         const isPassedLimit = (currentUTCTiming - databaseTiming) / (10 * 60 * 100) > 5;
 
         if (isPassedLimit) {
-            return res.status(408).send(codes(408));
+            return res.status(408).send(codes(408)); 
         } else {
-            if (part === "store") {
-                next();
-            }
-
+            if (part === "store") next();
             return res.status(204).send(codes(204));
         }
+
     } catch (error) {
         if (error.name === "TokenExpiredError") {
             return res.status(401).send(codes(401))
@@ -348,38 +335,25 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
     try {
         const { token, incomingPassword, part } = req.body;
         const { user_guid, verification_guid } = jwt.verify(token, config.JWTKey);
-        const { currentPassword, oldPassword1, oldPassword2 } = await resettingPasswordService.retriveUserPasswordHistory(user_guid)
-            .catch(() => {
-                return res.status(404).send(codes(404));
-            })
+        const userPasswordHistory = await resettingPasswordService.retriveUserPasswordHistory(user_guid)
+        
+        let { currentPassword, oldPassword1, oldPassword2 } = userPasswordHistory
 
         if (!incomingPassword) {
             return res.status(400).send(codes(400));
         } else {
             let isRepeated0 = await bcrypt.compare(incomingPassword, currentPassword)
-                .catch(() => {
-                    return res.status(500).send(codes(500));
-                })
-            if (isRepeated0) {
-                return res.status(401).send(codes(401));
-            }
+
+            if (isRepeated0) return res.status(401).send(codes(401));
 
             if (oldPassword1) {
-                let isRepeated1 = await bcrypt.compare(incomingPassword, oldPassword1).catch(() => {
-                    return res.status(500).send(codes(500));
-                })
-                if (isRepeated1) {
-                    return res.status(401).send(codes(401));
-                }
+                let isRepeated1 = await bcrypt.compare(incomingPassword, oldPassword1)
+                if (isRepeated1) return res.status(401).send(codes(401));
             }
 
             if (oldPassword2) {
-                let isRepeated2 = await bcrypt.compare(incomingPassword, oldPassword2).catch(() => {
-                    return res.status(500).send(codes(500));
-                })
-                if (isRepeated2) {
-                    return res.status(401).send(codes(401));
-                }
+                let isRepeated2 = await bcrypt.compare(incomingPassword, oldPassword2)
+                if (isRepeated2) return res.status(401).send(codes(401));
             }
 
             if (part === "store") {
@@ -393,6 +367,7 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
             }
         }
     } catch (error) {
+        if(error == 'none found') return res.status(404).semd(codes(404))
         return res.status(500).send(codes(500));
     }
 }
@@ -405,19 +380,13 @@ exports.updateNewPassword = async (req, res, next) => {
         const hashedIncomingPassword = await bcrypt.hash(incomingPassword, 10);
 
         await manageUsers.updateLoginAttempts(0, user_guid);
-
         await resettingPasswordService.verificationCompleted(verification_guid)
-            .catch((error) => {
-                return res.status(401).send(codes(401))
-            })
 
         await resettingPasswordService.updateCurrentPassword(user_guid, hashedIncomingPassword, currentPassword, oldPassword1)
-            .catch((error) => {
-                return res.status(401).send(codes(401))
-            })
-
         return res.status(200).send(codes(200));
     } catch (err) {
+    
+        if(err = 'cannot update') return res.status(401).send(codes(401))
         return res.status(500).send(codes(500));
     }
 }

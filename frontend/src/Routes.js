@@ -120,7 +120,7 @@ import axios from "axios";
 export default function App(props) {
   // If you want to disable the animation just use the disabled `prop` like below on your page's component
   // return <AnimationRevealPage disabled>xxxxxxxxxx</AnimationRevealPage>;
-  let {message, token} = useContext(TokenContext)
+  let {message} = useContext(TokenContext)
 
   useEffect(() => {
     if(message.length > 0) {

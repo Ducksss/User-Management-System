@@ -61,13 +61,8 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
 exports.addUser = async (req, res, next) => {
     try {
         let data = {}
+
         try {
-            validators.validateText(req.body.firstName)
-            validators.validateText(req.body.lastName)
-            validators.validateEmail(req.body.email)
-            validators.validatePassword(req.body.password)
-            validators.validateInt(req.body.contact)
-    
             data = {
                 firstName: validators.validateText(req.body.firstName),
                 lastName: validators.validateText(req.body.lastName),
@@ -87,25 +82,17 @@ exports.addUser = async (req, res, next) => {
         
         // adding user info
         await manageUsers.addUser(firstName, lastName, email, contact, privilege)
-            .catch((error) => {
-                return res.status(401).send(codes(500, 'Internal error.'));
-            });
 
         // adding login info
         let results = await manageUsers.getEmail(email)
-            .catch(error => {
-                console.log("Failure detected here")
-            });
+
         let { user_guid } = results[0]
         let hashedPassword = await bcrypt.hash(password, 10);
         let secret = speakeasy.generateSecret({ length: 20, });
 
         await manageUsers.addUserLogin(user_guid, hashedPassword, secret.base32)
-            .catch((error) => {
-                console.log(error)
-                return res.status(401).send(codes(500, 'Internal error.'));
-            });
         return res.status(200).send(codes(200));
+
     } catch (error) { 
         console.log(error)
         return res.status(500).send(codes(500));
@@ -213,12 +200,11 @@ exports.logout = async (req,res) => {
                 return res.status(204).send()
             } else {
                 res.clearCookie('refreshToken')
-                return res.status(401).send('error')
+                return res.status(500).send(codes(500))
             }
         }catch(error) {
             console.log(error);
-            return res.status(401).send('error')
-
+            return res.status(500).send(codes(500))
         }
     } else {
         return res.status(500).send(codes(500))

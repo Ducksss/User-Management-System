@@ -30,7 +30,7 @@ module.exports.authenticateUser = (email) => {
                     connection.query(query, [email], (err, result) => {
                         if (err) {
                             console.log(err);
-                            reject(err);
+                            reject('Insertion of OTP has failed');
                         } else {
                             if (result.length == 1) {
                                 resolve(result);
@@ -42,7 +42,7 @@ module.exports.authenticateUser = (email) => {
                     });
                 } catch (error) {
                     console.log(err);
-                    reject(err);
+                    reject('Insertion of OTP has failed');
                 }
             }
         });

@@ -15,9 +15,7 @@ exports.processUserLogin = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         // Checking for invalid credentials
-        let results = await loginService.authenticateUser(email).catch((error) => {
-            return res.status(500).send(codes(500, 'Internal error'));
-        });
+        let results = await loginService.authenticateUser(email)
 
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
@@ -65,7 +63,6 @@ exports.processUserLogin = async (req, res, next) => {
                     sameSite: "none",
                 })
                 
-                console.log(data)
                 await manageUsers.updateLoginAttempts(0, results[0].user_guid);
                 return res.status(200).send(data);
               

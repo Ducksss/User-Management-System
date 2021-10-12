@@ -21,8 +21,6 @@ function Index() {
   const {token, setToken, setmessage} = useContext(TokenContext)
 
   const verifyUser = useCallback(() => {
-    setisLoading(true)
-
     axios.get(`${config.baseUrl}/u/user/refresh-token`, {withCredentials: true})
     .then(response => {
         if(response.status == 200) {
