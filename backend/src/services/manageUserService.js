@@ -402,7 +402,7 @@ module.exports.lockUser = (userid) => {
                 let query = `UPDATE 
                                 logins
                             SET
-                                status = 3
+                                status = 4
                             WHERE 
                                 user_guid = ?;
                             `;

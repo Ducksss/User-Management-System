@@ -66,7 +66,7 @@ export const DesktopNavLinks = tw.nav`
 `;
 
 export default ({ roundedHeaderButton = false, logoLink, links, className, collapseBreakpointClass = "lg" }) => {
-  const { token, setToken } = useContext(TokenContext)
+  const { setToken } = useContext(TokenContext)
   /*
    * This header component accepts an optionals "links" prop that specifies the links to render in the navbar.
    * This links props should be an array of "NavLinks" components which is exported from this file.
@@ -80,28 +80,13 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
    * changing the defaultLinks variable below below.
    * If you manipulate links here, all the styling on the links is already done for you. If you pass links yourself though, you are responsible for styling the links or use the helper styled components that are defined here (NavLink)
    */
-
-  const history = useHistory();
-  const [isAdmin, setIsAdmin] = useState(false);
+  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     getList();
   }, [])
 
-  const syncLogout = useCallback(e => {
-    if (e.key === "logout") {
-      window.location.reload()
-    }
-  }, [])
- 
-  useEffect(() => {
-    window.addEventListener("storage", syncLogout)
-    return () => {
-      window.removeEventListener("storage", syncLogout)
-    }
-  }, [syncLogout])
-  
   const getList = async () => {
     await axios
       .get(`${config.baseUrl}/u/user/role`)

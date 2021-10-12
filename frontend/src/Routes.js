@@ -2,7 +2,7 @@ import "tailwindcss/dist/base.css";
 import "styles/globalStyles.css";
 import 'sweetalert2/src/sweetalert2.scss'
 
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useCallback } from "react";
 import { css } from "styled-components/macro"; //eslint-disable-line
 
 /*
@@ -133,6 +133,19 @@ export default function App(props) {
     }
   }, [])
 
+  const syncLogout = useCallback(e => {
+    if (e.key === "logout") {
+      window.location.reload()
+    }
+  }, [])
+ 
+  useEffect(() => {
+    window.addEventListener("storage", syncLogout)
+    return () => {
+      window.removeEventListener("storage", syncLogout)
+    }
+  }, [syncLogout])
+  
   return (
     <>
     <Router {...props}>

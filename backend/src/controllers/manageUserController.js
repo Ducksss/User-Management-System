@@ -359,7 +359,8 @@ exports.generateVerificationEmail = async (req, res, next) => {
 exports.verifyVerificationEmail = async (req, res, next) => {
     try {
         const { token } = req.body;
-        const jwtObject = await jwt.verify(token[0], config.JWTKey);
+        const jwtObject = jwt.verify(token[0], config.JWTKey);
+
         const { user_guid, email, created_at } = jwtObject;
         console.log(user_guid)
 
