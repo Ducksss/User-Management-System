@@ -107,54 +107,54 @@ export default function Signup() {
   });
 
   const validationSchema = Yup.object({
-    firstName: Yup.string(),
-      // .max(15, 'Must be 15 characters or less')
-      // .required('Your first name is required'),
-    lastName: Yup.string(),
-      // .max(20, 'Must be 20 characters or less')
-      // .required('Your last name is required'),
-    email: Yup.string(),
-      // .email('Invalid email address')
-      // .required('Your email is required')
-      // .test('Unique Email', 'The email has already been taken', // <- key, message
-      //   function (value) {
-      //     return new Promise((resolve, reject) => {
-      //       axios.get(`http://localhost:8003/api/u/user/email/${value}/available`)
-      //         .then((res) => {
-      //           resolve(true)
-      //         })
-      //         .catch((error) => {
-      //           if (error.response.data.content === "The email has already been taken.") {
-      //             resolve(false);
-      //           }
-      //         })
-      //     })
-      //   }
-      // ),,
-    contactNumber: Yup.string(),
-      // .matches(/^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/, "Must be a phone number")
-      // .required('Your contact number is required')
-      // .test('Unique Number', 'The number has already been taken', // <- key, message
-      //   function (value) {
-      //     return new Promise((resolve, reject) => {
-      //       axios.get(`${config.baseUrl}/u/user/number/${value}/available`)
-      //         .then((res) => {
-      //           resolve(true)
-      //         })
-      //         .catch((error) => {
-      //           if (error.response.data.code === 409) {
-      //             resolve(false);
-      //           }
-      //         })
-      //     })
-      //   }
-      // ),
-    password: Yup.string(),
-      // .required('Your password is required')
-      // .min(5, "Your password must be minimally 5 characters long!"),
+    firstName: Yup.string()
+      .max(15, 'Must be 15 characters or less')
+      .required('Your first name is required'),
+    lastName: Yup.string()
+      .max(20, 'Must be 20 characters or less')
+      .required('Your last name is required'),
+    email: Yup.string()
+      .email('Invalid email address')
+      .required('Your email is required')
+      .test('Unique Email', 'The email has already been taken', // <- key, message
+        function (value) {
+          return new Promise((resolve, reject) => {
+            axios.get(`http://localhost:8003/api/u/user/email/${value}/available`)
+              .then((res) => {
+                resolve(true)
+              })
+              .catch((error) => {
+                if (error.response.data.content === "The email has already been taken.") {
+                  resolve(false);
+                }
+              })
+          })
+        }
+      ),
+    contactNumber: Yup.string()
+      .matches(/^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/, "Must be a phone number")
+      .required('Your contact number is required')
+      .test('Unique Number', 'The number has already been taken', // <- key, message
+        function (value) {
+          return new Promise((resolve, reject) => {
+            axios.get(`${config.baseUrl}/u/user/number/${value}/available`)
+              .then((res) => {
+                resolve(true)
+              })
+              .catch((error) => {
+                if (error.response.data.code === 409) {
+                  resolve(false);
+                }
+              })
+          })
+        }
+      ),
+    password: Yup.string()
+      .required('Your password is required')
+      .min(5, "Your password must be minimally 5 characters long!"),
     passwordConfirmation: Yup.string()
-      // .required('You need to confirm your password')
-      // .oneOf([Yup.ref('password'), null], 'Passwords must match'),
+      .required('You need to confirm your password')
+      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
   })
 
   const registerUserInformation = (values) => {
