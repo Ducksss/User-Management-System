@@ -20,6 +20,7 @@ import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { resEncrypt } from '../RsaEncryption';
 import { useHistory } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Formik, Form, useField } from 'formik';
 import PasswordStrengthBar from 'react-password-strength-bar';
 
@@ -89,6 +90,7 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
 
   // Team's predefined variable
   const history = useHistory();
+  const [isRecaptchaCompleted, setIsRecaptchaCompleted] = React.useState(false);
 
   const validationSchema = Yup.object({
     firstName: Yup.string()
@@ -168,6 +170,10 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
       })
   }
 
+  const onChange = () => {
+    setIsRecaptchaCompleted(true)
+  }
+
   return (
     <Formik
       initialValues={{
@@ -227,6 +233,11 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
           name="passwordConfirmation"
           type="password"
           placeholder="Password"
+        />
+
+        <ReCAPTCHA
+          sitekey="6Ldtm8ccAAAAADS-7pUHoQZ5qDEjckh8oP1Imk_t"
+          onChange={onChange}
         />
 
         <SubmitButton type="submit">
