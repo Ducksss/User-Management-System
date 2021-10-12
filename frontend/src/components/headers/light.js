@@ -82,6 +82,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
    */
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     getList();
