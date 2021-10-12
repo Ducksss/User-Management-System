@@ -2,13 +2,15 @@ const express = require("express");
 const cors = require('cors')
 const config = require('./src/config/config');
 const formData = require('express-form-data');
+const cookieParser = require('cookie-parser');
 // const sockets = require('./src/socket')
 //const dummyUserFn = require('./src/middlewares/dummyUserFn');
 
 let app = express();
 const corsOptions = {
-    origin: "*",
-    optionsSuccessStatus: 200
+    origin: "http://localhost:3004",
+    optionsSuccessStatus: 200,
+    credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -38,6 +40,8 @@ app.use(formData.format());
 app.use(formData.stream());
 //Union the body and the files
 app.use(formData.union());
+
+app.use(cookieParser(config.COOKIE_SECRET))
 
 //Pug Template Engine
 app.set("view engine", "pug");

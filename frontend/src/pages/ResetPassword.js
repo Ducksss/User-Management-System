@@ -203,7 +203,7 @@ export default function ResetPassword() {
 
                 if (error.response.data.code === 403) {
                     // Forbidden - either it has already been done or fail
-                    if (error.response.data.description === "filler") {
+                    if (error.response.data.message === "filler") {
                         // Reset already accomplished
                         history.push("/")
                     } else {

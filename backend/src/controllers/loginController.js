@@ -15,9 +15,7 @@ exports.processUserLogin = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         // Checking for invalid credentials
-        let results = await loginService.authenticateUser(email).catch((error) => {
-            return res.status(500).send(codes(500, 'Internal error'));
-        });
+        let results = await loginService.authenticateUser(email)
 
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
@@ -49,12 +47,34 @@ exports.processUserLogin = async (req, res, next) => {
                     privilege: results[0].privilege
                 },
                     config.JWTKey, {
-                    expiresIn: 86400 //Expires in 24 hrs
+                    expiresIn: 3 * 60 //Expires in 3 mins
                 })
             };
 
-            await manageUsers.updateLoginAttempts(0, results[0].user_guid);
-            return res.status(200).send(data);
+            let refresh_token = jwt.sign({
+                _id: results[0].user_guid
+                }, config.REFRESH_TOKEN_SECRET, {
+                expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
+            })
+
+            let insertRefreshToken = await manageUsers.addRefreshToken(results[0].user_guid, refresh_token)
+
+            if(insertRefreshToken) {
+                res.cookie('refreshToken', refresh_token, {
+                    httpOnly: true,
+                    secure: true,
+                    signed: true,
+                    maxAge: 60 * 60 * 24 * 3 * 1000, //3 days
+                    sameSite: "none",
+                })
+                
+                await manageUsers.updateLoginAttempts(0, results[0].user_guid);
+                return res.status(200).send(data);
+              
+            } else {
+                return res.status(401).send(codes(401, 'Login failed.'));
+            }
+
         } else {
             await manageUsers.updateLoginAttempts(results[0].login_attempt, results[0].user_guid);
             return res.status(401).send(codes(401, 'Login failed.'));

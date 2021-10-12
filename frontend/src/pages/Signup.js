@@ -158,11 +158,11 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
         });
       })
       .catch((error) => {
-        if (error.response.data.description === "Invalid Credentials.") {
+        if (error.response.data.message === "Invalid Credentials.") {
           console.log("Please key in a your valid credentials")
         }
 
-        if (error.response.data.description === "Internal error") {
+        if (error.response.data.message === "Internal error") {
           console.log("Please contact an administrator for help!")
         }
       })
