@@ -76,8 +76,8 @@ exports.addUser = async (req, res, next) => {
                 contact: validators.validateInt(req.body.contact)
             }
         } catch (error) {
-            console.log(error.message);
-            return res.status(401).send(codes(401, 'Missing information.'))
+            console.log(error.message)
+            return res.status(406).send(codes(406, 'Not Acceptable'))
         }
 
         let { firstName, lastName, email, password, contact, privilege } = data;
