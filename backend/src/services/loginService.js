@@ -19,7 +19,8 @@ module.exports.authenticateUser = (email) => {
                                     users.email, 
                                     users.privilege, 
                                     logins.password_hash, 
-                                    logins.login_attempt
+                                    logins.login_attempt,
+                                    logins.status
                                 FROM 
                                     user_management_system.users as users, 
                                     user_management_system.logins as logins 

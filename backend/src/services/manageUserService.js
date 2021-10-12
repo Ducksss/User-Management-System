@@ -10,7 +10,8 @@ module.exports.getEmail = (email) => {
                 resolve(err);
             } else {
                 let query = `SELECT 
-                                user_guid 
+                                user_guid,
+                                created_at
                             FROM 
                                 user_management_system.users 
                             where 
@@ -269,6 +270,61 @@ module.exports.getRole = (user_guid) => {
     })
 }
 
+module.exports.verifyVerificationEmailToken = (user_guid, created_at) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            SELECT 
+                                * 
+                            FROM 
+                                user_management_system.users 
+                            where 
+                                user_guid = ?;
+                            `;
+                connection.query(query, [user_guid], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
+module.exports.updateLoginStatus = (user_guid, status) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            UPDATE 
+                                user_management_system.logins 
+                            SET 
+                                status = ?
+                            WHERE 
+                                user_guid = ?
+                            `;
+                connection.query(query, [status, user_guid], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
 
 //add refresh token into db
 module.exports.addRefreshToken = (userid, token) => {
@@ -286,7 +342,7 @@ module.exports.addRefreshToken = (userid, token) => {
                                 VALUES 
                                     (?,?, UTC_TIMESTAMP())         
                                 `
-                    connection.query(query, [userid,token], (err, result) => {
+                    connection.query(query, [userid, token], (err, result) => {
                         if (err) {
                             console.log(err);
                             reject(err);

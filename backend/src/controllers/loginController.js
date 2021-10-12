@@ -22,6 +22,11 @@ exports.processUserLogin = async (req, res, next) => {
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
         }
 
+        // Check for pending users, i.e. haven't verified their account yet
+        if (results[0].status == 2) {
+            return res.status(401).send(codes(401, 'Unverified.'));
+        }
+
         // Checking for banned user
         if (results[0].status == 1) {
             return res.status(403).send(codes(403, 'Banned.'));
