@@ -60,14 +60,9 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
+        //Decryption, Validation and Sanitization
         let data = {}
         try {
-            validators.validateText(req.body.firstName)
-            validators.validateText(req.body.lastName)
-            validators.validateEmail(req.body.email)
-            validators.validatePassword(req.body.password)
-            validators.validateInt(req.body.contact)
-    
             data = {
                 firstName: validators.validateText(req.body.firstName),
                 lastName: validators.validateText(req.body.lastName),
@@ -76,15 +71,15 @@ exports.addUser = async (req, res, next) => {
                 contact: validators.validateInt(req.body.contact)
             }
         } catch (error) {
-            console.log(error.message)
-            return res.status(406).send(codes(406, 'Not Acceptable'))
+            console.log(error.message);
+            return res.status(406).send(codes(406, 'Not Acceptable'));
         }
 
         let { firstName, lastName, email, password, contact, privilege } = data;
 
         // guard statement
         if (privilege == null) privilege = 4;
-        
+
         // adding user info
         await manageUsers.addUser(firstName, lastName, email, contact, privilege)
             .catch((error) => {
@@ -106,7 +101,7 @@ exports.addUser = async (req, res, next) => {
                 return res.status(401).send(codes(500, 'Internal error.'));
             });
         return res.status(200).send(codes(200));
-    } catch (error) { 
+    } catch (error) {
         console.log(error)
         return res.status(500).send(codes(500));
     }
@@ -131,25 +126,25 @@ exports.generate2FA = async (req, res, next) => {
 }
 
 //refresh token
-exports.refreshToken = async (req,res) => {
+exports.refreshToken = async (req, res) => {
     const { signedCookies = {} } = req //get the cookie from the request header
     const { refreshToken } = signedCookies //get the cookie by key
 
-    if(refreshToken) {
+    if (refreshToken) {
         try {
             const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET)
             const userId = payload._id
             const now = Date.now().valueOf()
 
-            if(payload && (payload.exp * 1000 <= now)) {
+            if (payload && (payload.exp * 1000 <= now)) {
                 res.clearCookie('refreshToken')
                 return res.status(401).send(codes(401, 'Session Expired'))
             }
-            
-            let getUser = await manageUsers.findUserToken(refreshToken) 
 
-            if(getUser.length == 1) { //if token is same 
-                if(getUser[0].times_used > 0) {
+            let getUser = await manageUsers.findUserToken(refreshToken)
+
+            if (getUser.length == 1) { //if token is same 
+                if (getUser[0].times_used > 0) {
                     // lock user out 
                     //delete token
                     await manageUsers.lockUser(userId)
@@ -162,21 +157,21 @@ exports.refreshToken = async (req,res) => {
 
                 //create access token
                 const token = jwt.sign({
-                        user_guid: getUser[0].user_guid,
-                        email: getUser[0].email,
-                        privilege: getUser[0].privilege
-                    },
-                        config.JWTKey, {
-                        expiresIn: 60 * 3
-                        // 3 minutes expiry
-                    })
-                           
-                const refresh_token = jwt.sign({_id: userId}, config.REFRESH_TOKEN_SECRET, {
-                    expiresIn: eval(config.REFRESH_TOKEN_EXPIRY) 
+                    user_guid: getUser[0].user_guid,
+                    email: getUser[0].email,
+                    privilege: getUser[0].privilege
+                },
+                    config.JWTKey, {
+                    expiresIn: 60 * 3
+                    // 3 minutes expiry
+                })
+
+                const refresh_token = jwt.sign({ _id: userId }, config.REFRESH_TOKEN_SECRET, {
+                    expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
                 })
 
                 await manageUsers.addRefreshToken(getUser[0].user_guid, refresh_token)
-    
+
                 res.cookie('refreshToken', refresh_token, {
                     httpOnly: true,
                     secure: true,
@@ -196,18 +191,18 @@ exports.refreshToken = async (req,res) => {
         }
     } else {
         return res.status(401).send(codes(401, 'No token is detected.'))
-    }   
+    }
 }
 
-exports.logout = async (req,res) => {
+exports.logout = async (req, res) => {
     const { signedCookies = {} } = req
     const { refreshToken } = signedCookies
 
-    if(refreshToken) {
-        try { 
+    if (refreshToken) {
+        try {
             let getUser = await manageUsers.findUserToken(refreshToken)
- 
-            if(getUser.length == 1) {
+
+            if (getUser.length == 1) {
                 await manageUsers.deleteRefreshToken(refreshToken)
                 res.clearCookie('refreshToken')
                 return res.status(204).send()
@@ -215,7 +210,7 @@ exports.logout = async (req,res) => {
                 res.clearCookie('refreshToken')
                 return res.status(401).send('error')
             }
-        }catch(error) {
+        } catch (error) {
             console.log(error);
             return res.status(401).send('error')
 
