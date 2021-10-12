@@ -12,11 +12,10 @@ module.exports.loginLimiter = rateLimit({
 
 module.exports.registrationLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 15 minutes
-    max: 5,
+    max: 10,
     statusCode: 429,
     message: {
         status: 429,
         error: "Too many accounts created from this IP, please try again in an hour"
     }
 });
-

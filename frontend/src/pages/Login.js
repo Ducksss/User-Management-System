@@ -18,10 +18,10 @@ import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { resEncrypt } from '../RsaEncryption';
+import { SyncLoader } from "react-spinners";
 import { useHistory } from "react-router-dom";
 
 import { Formik, Form, useField } from 'formik';
-import { ClipLoader, HashLoader, FadeLoader, BeatLoader, SyncLoader } from "react-spinners";
 import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 import { Container as ContainerBase } from "components/misc/Layouts";
 import { TokenContext } from "../components/TokenContext";
@@ -126,17 +126,27 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
               data: "Your account has been locked. Please reset your password before proceeding.",
               type: "alert-danger",
             });
+          } else if (error.response.data.description === "Unverified.") {
+            setMessage({
+              data: "You account needs to be verified. Please check your email.",
+              type: "alert-danger",
+            });
           } else {
             setMessage({
               data: "Your username or password is invalid.",
               type: "alert-danger",
             });
           }
-        }
 
-        if (error.response.data.code === 500) {
+        } else if (error.response.data.code === 500) {
           setMessage({
             data: "Please contact an administrator for help.",
+            type: "alert-danger",
+          });
+
+        } else {
+          setMessage({
+            data: "Please accept your",
             type: "alert-danger",
           });
         }
@@ -153,18 +163,20 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
       validateOnChange={false}
       validationSchema={LoginSchema}
       onSubmit={(values, { setSubmitting }) => {
-        var bt = document.getElementById('mySubmit');
-        bt.disabled = true;
-        validateLogininformation(values);
-        setSubmitting(false);
-        bt.disabled = false;
+        setTimeout(() => {
+          var bt = document.getElementById('mySubmit');
+          bt.disabled = true;
+          validateLogininformation(values);
+          setSubmitting(false);
+          bt.disabled = false;
+        }, 1000)
       }}
     >
       {({ isSubmitting }) => (
         <Form css={[tw.form`mx-auto max-w-xs`]}>
           {isSubmitting ? (
             <div css={[tw`flex flex-col min-h-48 justify-center items-center`]}>
-              <div >
+              <div>
                 <SyncLoader color={"#3c0d99"} loading={isSubmitting} size={150} speedMultiplier={0.5} size={15} />
               </div>
               <span css={[tw`mt-5 italic`]}>Authenticating...</span>
@@ -188,7 +200,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
 
           <SubmitButton type="submit" disabled={isSubmitting} id="mySubmit">
             <SubmitButtonIcon className="icon" />
-            <span className="text">{submitButtonText}</span>
+            <span className="text">{isSubmitting ? ("Signing in...") : (submitButtonText)}</span>
           </SubmitButton>
         </Form>
       )}

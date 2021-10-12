@@ -2,7 +2,7 @@ import "tailwindcss/dist/base.css";
 import "styles/globalStyles.css";
 import 'sweetalert2/src/sweetalert2.scss'
 
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useCallback } from "react";
 import { css } from "styled-components/macro"; //eslint-disable-line
 
 /*
@@ -101,13 +101,15 @@ import PricingPage from "pages/Pricing.js";
 // import TermsOfServicePage from "pages/TermsOfService.js";
 // import PrivacyPolicyPage from "pages/PrivacyPolicy.js";
 
-import LoginPage from "pages/Login.js";
-import SignupPage from "pages/Signup.js";
 import ComponentRenderer from "ComponentRenderer.js";
 import MainLandingPage from "MainLandingPage.js";
 import ThankYouPage from "ThankYouPage.js";
 
-import BeginPasswordReset from "pages/ForgotPassword"
+import LoginPage from "pages/Login.js";
+import SignupPage from "pages/Signup.js";
+import VerifyEmail from "pages/account/VerifyEmail"
+
+import ForgotPassword from "pages/ForgotPassword"
 import ResetPassword from "pages/ResetPassword"
 import Account from 'pages/Account.js'
 import Subscribe from 'pages/Subscribe.js'
@@ -120,7 +122,7 @@ import axios from "axios";
 export default function App(props) {
   // If you want to disable the animation just use the disabled `prop` like below on your page's component
   // return <AnimationRevealPage disabled>xxxxxxxxxx</AnimationRevealPage>;
-  let {message, token} = useContext(TokenContext)
+  let {message} = useContext(TokenContext)
 
   useEffect(() => {
     if(message.length > 0) {
@@ -131,6 +133,19 @@ export default function App(props) {
     }
   }, [])
 
+  const syncLogout = useCallback(e => {
+    if (e.key === "logout") {
+      window.location.reload()
+    }
+  }, [])
+ 
+  useEffect(() => {
+    window.addEventListener("storage", syncLogout)
+    return () => {
+      window.removeEventListener("storage", syncLogout)
+    }
+  }, [syncLogout])
+  
   return (
     <>
     <Router {...props}>
@@ -142,12 +157,14 @@ export default function App(props) {
         <Route path='/signup'>
           <SignupPage />
         </Route>
-
-        <Route path="/account/forgot_password">
-          <BeginPasswordReset />
+        <Route path="/account/verify_email">
+          <VerifyEmail />
         </Route>
 
-        <Route path="/acccount/reset_password/">
+        <Route path="/account/forgot_password">
+          <ForgotPassword />
+        </Route>
+        <Route path="/acccount/reset_password">
           <ResetPassword />
         </Route>
 
@@ -166,10 +183,10 @@ export default function App(props) {
         </Route>
 
         <Route path='/account'>
-          <Account />  
+          <Account />
         </Route>
         <Route path='/subscribe'>
-          <Subscribe />  
+          <Subscribe />
         </Route>
 
         <Route path="/" >

@@ -33,13 +33,16 @@ exports.processUserLogin = async (req, res, next) => {
         let { email, password } = data;
 
         // Checking for invalid credentials
-        let results = await loginService.authenticateUser(email).catch((error) => {
-            return res.status(500).send(codes(500, 'Internal error'));
-        });
+        let results = await loginService.authenticateUser(email)
 
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
+        }
+
+        // Check for pending users, i.e. haven't verified their account yet
+        if (results[0].status == 2) {
+            return res.status(401).send(codes(401, 'Unverified.'));
         }
 
         // Checking for banned user
@@ -82,8 +85,7 @@ exports.processUserLogin = async (req, res, next) => {
                     maxAge: 60 * 60 * 24 * 3 * 1000, //3 days
                     sameSite: "none",
                 })
-
-                console.log(data)
+                
                 await manageUsers.updateLoginAttempts(0, results[0].user_guid);
                 return res.status(200).send(data);
 
