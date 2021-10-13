@@ -78,6 +78,23 @@ const MyTextInput = ({ label, ...props }) => {
   );
 };
 
+const MyRecaptcha = ({ label, ...props }) => {
+  const [field, meta] = useField(props);
+
+  return (
+    <div css={[tw`mt-6`]}>
+      <ReCAPTCHA
+        sitekey="6Lfi5MgcAAAAAJc4WWRAZdcmwgY_RJgCPIwDGXK1"
+        {...field} {...props}
+        css={[tw`mt-6 pl-2`]}
+      />
+      {meta.touched && meta.error ? (
+        <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
+      ) : null}
+    </div>
+  )
+}
+
 const StepOne = ({ publicKey, setCurrentStep }) => {
   // links
   const tosUrl = "#";
@@ -90,6 +107,7 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
 
   // Team's predefined variable
   const history = useHistory();
+  const [trySubmitting, setTrySubmitting] = React.useState(false)
   const [isRecaptchaCompleted, setIsRecaptchaCompleted] = React.useState(false);
 
   const validationSchema = Yup.object({
@@ -99,6 +117,15 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
     lastName: Yup.string()
       .max(20, 'Must be 20 characters or less')
       .required('Your last name is required'),
+    password: Yup.string()
+      .required('Your password is required')
+      .min(12, "Your password must be minimally 12 characters long!"),
+    passwordConfirmation: Yup.string()
+      .required('You need to confirm your password')
+      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
+    acceptedRecaptcha: Yup.boolean()
+      .required('Required')
+      .oneOf([true], 'You must accept the terms and conditions.'),
     email: Yup.string()
       .email('Invalid email address')
       .required('Your email is required')
@@ -135,12 +162,6 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
           })
         }
       ),
-    password: Yup.string()
-      .required('Your password is required')
-      .min(12, "Your password must be minimally 12 characters long!"),
-    passwordConfirmation: Yup.string()
-      .required('You need to confirm your password')
-      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
   })
 
   const registerUserInformation = (values) => {
@@ -170,8 +191,13 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
       })
   }
 
-  const onChange = () => {
-    setIsRecaptchaCompleted(true)
+  const onRecaptchaSubmission = (values) => {
+    setIsRecaptchaCompleted(true);
+    console.log("Recaptcha value", values);
+  }
+
+  const userTriesToSubmit = (values) => {
+
   }
 
   return (
@@ -183,6 +209,7 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
         contactNumber: '',
         password: '',
         passwordConfirmation: '',
+        acceptedRecaptcha: true, // added for our checkbox
       }}
       validateOnChange={false}
       validationSchema={validationSchema}
@@ -190,7 +217,6 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
         registerUserInformation(values);
       }}
     >
-
       <Form css={[tw`mx-auto max-w-xs`]} >
         {/** First Name */}
         <MyTextInput
@@ -236,11 +262,20 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
         />
 
         <ReCAPTCHA
-          sitekey="6Ldtm8ccAAAAADS-7pUHoQZ5qDEjckh8oP1Imk_t"
-          onChange={onChange}
+          sitekey="6Lfi5MgcAAAAAJc4WWRAZdcmwgY_RJgCPIwDGXK1"
+          onChange={onRecaptchaSubmission}
+          css={[tw`mt-6 pl-2`]}
         />
+        {!isRecaptchaCompleted && trySubmitting ?
+          (
+            <div css={[tw`text-xs text-red-600 ml-2`]}>Please verify you're not a bot</div>
+          ) :
+          (
+            null
+          )
+        }
 
-        <SubmitButton type="submit">
+        <SubmitButton type="submit" onClick={() => { setTrySubmitting(true) }}>
           <SubmitButtonIcon className="icon" />
           <span className="text">{submitButtonText}</span>
         </SubmitButton>
@@ -263,7 +298,7 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
           </a>
         </p>
       </Form>
-    </Formik>
+    </Formik >
   )
 }
 
