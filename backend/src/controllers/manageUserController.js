@@ -86,7 +86,7 @@ exports.addUser = async (req, res, next) => {
         // adding login info
         let results = await manageUsers.getEmail(email);
 
-        let { user_guid } = results[0];
+        let { user_guid, created_at } = results[0];
         let hashedPassword = await bcrypt.hash(password, 10);
         let secret = speakeasy.generateSecret({ length: 20, });
 
