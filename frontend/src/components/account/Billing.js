@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import config from "../../Config.js";
 import tw from 'twin.macro';
-
+import axios from "axios";
 
 const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
 const AccountRow = tw.div` grid grid-rows-3 w-11/12`
@@ -31,17 +31,26 @@ export default function Billing() {
 
     const createSubscription = async (priceId) => {
         console.log("it is entering the frontend")
-        const { subscriptionId, clientSecret } = await fetch(`${config.baseUrl}/u/user/createSubscription`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                priceId
-            }),
-        }).then(r => r.json());
+        // const { subscriptionId, clientSecret } = await fetch(`${config.baseUrl}/u/user/createSubscription`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({
+        //         priceId
+        //     }),
+        // }).then(r => r.json());
+        await axios.post(`${config.baseUrl}/u/user/createSubscription`, {
+            priceId: priceId
+        })
+            .then((response) => {
+                let subscriptionId = response.data.content.subscriptionId
+                let clientSecret = response.data.content.clientSecret
+                setSubscriptionData({ subscriptionId, clientSecret });
+            })
+            .catch((error) => {
+            });
 
-        setSubscriptionData({ subscriptionId, clientSecret });
     }
 
     if (subscriptionData) {

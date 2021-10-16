@@ -27,30 +27,16 @@ exports.config = async (req, res, next) => {
 
 
 exports.createCustomer = async (req, res, next) => {
-    // Simulate authenticated user. In practice this will be the
-    // Stripe Customer ID related to the authenticated user.
-    const customerId = req.cookies['customer'];
+    // Create a new customer object
+    const customer = await stripe.customers.create({
+        email: req.body.email,
+    });
 
-    // Create the subscription
-    const priceId = req.body.priceId;
+    // Save the customer.id in your database alongside your user.
+    // We're simulating authentication with a cookie.
+    res.cookie('customer', customer.id, { maxAge: 900000, httpOnly: true });
 
-    try {
-        const subscription = await stripe.subscriptions.create({
-            customer: customerId,
-            items: [{
-                price: priceId,
-            }],
-            payment_behavior: 'default_incomplete',
-            expand: ['latest_invoice.payment_intent'],
-        });
-
-        res.send({
-            subscriptionId: subscription.id,
-            clientSecret: subscription.latest_invoice.payment_intent.client_secret,
-        });
-    } catch (error) {
-        return res.status(400).send({ error: { message: error.message } });
-    }
+    res.status(200).send(codes(200, { customer: customer }));
 };
 
 exports.createSubscription = async (req, res, next) => {
@@ -69,11 +55,11 @@ exports.createSubscription = async (req, res, next) => {
             payment_behavior: 'default_incomplete',
             expand: ['latest_invoice.payment_intent'],
         });
-
-        res.send({
+        
+        res.status(200).send(codes(200, null,{
             subscriptionId: subscription.id,
             clientSecret: subscription.latest_invoice.payment_intent.client_secret,
-        });
+        }));
     } catch (error) {
         console.log(error)
         return res.status(400).send({ error: { message: error.message } });
