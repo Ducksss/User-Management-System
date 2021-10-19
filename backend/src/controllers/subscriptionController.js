@@ -61,8 +61,7 @@ exports.createSubscription = async (req, res, next) => {
             clientSecret: subscription.latest_invoice.payment_intent.client_secret,
         }));
     } catch (error) {
-        console.log(error)
-        return res.status(400).send({ error: { message: error.message } });
+        return res.status(400).send(codes(400));
     }
 };
 
@@ -75,10 +74,11 @@ exports.cancelSubscription = async (req, res, next) => {
         const deletedSubscription = await stripe.subscriptions.del(
             req.body.subscriptionId
         );
-
-        res.send({ subscription: deletedSubscription });
+        res.status(200).send(codes(200, null,{
+            subscription: deletedSubscription 
+        }));
     } catch (error) {
-        return res.status(400).send({ error: { message: error.message } });
+        return res.status(400).send(codes(400));
     }
 };
 

@@ -30,16 +30,6 @@ export default function Billing() {
     }, [])
 
     const createSubscription = async (priceId) => {
-        console.log("it is entering the frontend")
-        // const { subscriptionId, clientSecret } = await fetch(`${config.baseUrl}/u/user/createSubscription`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //         priceId
-        //     }),
-        // }).then(r => r.json());
         await axios.post(`${config.baseUrl}/u/user/createSubscription`, {
             priceId: priceId
         })
