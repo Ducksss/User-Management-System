@@ -1,9 +1,10 @@
 const subscriptionController = require('../controllers/subscriptionController');
 
 exports.route = router => {
-    router.get('/api/u/user/config', subscriptionController.config);
-    router.get('/api/u/user/createCustomer', subscriptionController.createCustomer);
-    router.post('/api/u/user/createSubscription', subscriptionController.createSubscription);
-    router.post('/api/u/user/cancelSubscription', subscriptionController.cancelSubscription);
-    router.get('/api/u/user/subscriptions', subscriptionController.subscriptions);
+    router.post('/api/u/subscription/webhook' , subscriptionController.webhook)
+    router.get('/api/u/subscription/config', subscriptionController.config);
+    router.get('/api/u/subscription/create_customer', subscriptionController.createCustomer);
+    router.post('/api/u/subscription/create', subscriptionController.createSubscription);
+    router.post('/api/u/subscription/cancel', subscriptionController.cancelSubscription);
+    router.get('/api/u/subscription/subscriptions', subscriptionController.subscriptions);
 }

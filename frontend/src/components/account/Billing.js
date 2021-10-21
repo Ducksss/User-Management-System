@@ -22,7 +22,7 @@ export default function Billing() {
 
     useEffect(() => {
         const fetchPrices = async () => {
-            const { prices } = await fetch(`${config.baseUrl}/u/user/config`).then(r => r.json());
+            const { prices } = await fetch(`${config.baseUrl}/u/subscription/config`).then(r => r.json());
             setPrices(prices);
             console.log(prices)
         };
@@ -30,7 +30,7 @@ export default function Billing() {
     }, [])
 
     const createSubscription = async (priceId) => {
-        await axios.post(`${config.baseUrl}/u/user/createSubscription`, {
+        await axios.post(`${config.baseUrl}/u/subscription/create`, {
             priceId: priceId
         })
             .then((response) => {

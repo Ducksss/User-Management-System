@@ -111,7 +111,7 @@ export default function AccountDetails(location) {
     const [subscriptions, setSubscriptions] = useState([]);
     const handleClick = async (e, subscriptionID) => {
         e.preventDefault();
-        await axios.post(`${config.baseUrl}/u/user/cancelSubscription`, {
+        await axios.post(`${config.baseUrl}/u/subscription/cancel`, {
             subscriptionId: subscriptionID
         })
             .then((response) => {
@@ -134,7 +134,7 @@ export default function AccountDetails(location) {
     //     
     useEffect(() => {
         const fetchData = async () => {
-            await axios.get(`${config.baseUrl}/u/user/subscriptions`)
+            await axios.get(`${config.baseUrl}/u/subscription/subscriptions`)
                 .then((response) => {
                     setSubscriptions(Object.values(response.data.subscriptions)[1]);
                 })
