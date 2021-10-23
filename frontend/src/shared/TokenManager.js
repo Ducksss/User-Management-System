@@ -16,8 +16,8 @@ const inMemoryJWTManager = () => {
     
     const getMessage = () => message
 
-    const setMessage = (message) => {
-        message = '';
+    const setMessage = (msg) => {
+        message = msg;
         return true;
     }
     
