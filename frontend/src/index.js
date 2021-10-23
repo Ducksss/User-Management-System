@@ -31,7 +31,7 @@ function Index() {
     .catch(error => TokenManager.setMessage(error.response.data.message))
     .finally(()=> setisLoading(false))
     // call refreshToken every 3 minutes to renew the authentication token.
-}, [])
+}, [TokenManager.getToken()])
 
 useEffect(() => {
     verifyUser()

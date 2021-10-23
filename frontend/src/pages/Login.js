@@ -1,5 +1,4 @@
-import React, {useEffect} from "react";
-
+import React, {useEffect, useState} from "react";
 
 // styling
 import styled from "styled-components";
@@ -73,7 +72,6 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   const submitButtonText = "Sign In";
   const SubmitButtonIcon = LoginIcon;
 
-  let { token, setToken } = useContext(TokenContext)
   const [publicKey, setPublicKey] = useState();
 
   useEffect(() => {
@@ -85,10 +83,6 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
         console.log(publicKey)
       });
   });
-
-  useEffect(() => {
-    // console.log(token);
-  }, [])
 
   // team's defined variables
   const history = useHistory();
@@ -114,6 +108,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
 
         localStorage.setItem('displayName', results.data.displayName);
         history.push({ pathname: "/" });
+        window.location.reload()
       })
       .catch((error) => {
         if (error.response.data.code == 500) {

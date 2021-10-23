@@ -83,7 +83,8 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const history = useHistory()
+  
   useEffect(() => {
     getList();
   }, [])
@@ -106,12 +107,27 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
       })
   }
 
+  const syncLogout = useCallback(event => {
+    if (event.key === 'logout') {
+      history.push('/')
+      window.location.reload()
+    }
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener("storage", syncLogout)
+    return () => {
+      window.removeEventListener("storage", syncLogout)
+    }
+  }, [syncLogout])
+
   const logoutHandler = () => {
     axios.get(`${config.baseUrl}/u/user/logout`, {
       withCredentials: true,
     }).then(() => {
       // setToken(false)
       window.localStorage.setItem("logout", Date.now())
+      window.location.reload()
     })
   }
 
