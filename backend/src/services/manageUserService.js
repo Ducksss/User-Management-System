@@ -10,7 +10,8 @@ module.exports.getEmail = (email) => {
                 resolve(err);
             } else {
                 let query = `SELECT 
-                                user_guid 
+                                user_guid,
+                                created_at
                             FROM 
                                 user_management_system.users 
                             where 
@@ -87,7 +88,7 @@ module.exports.addUser = (firstName, lastName, email, contact, privilege) => {
 };
 
 // adding user login information to the database
-module.exports.addUserLogin = (user_guid, password_hash, secret) => {
+module.exports.addUserLogin = (user_id, password_hash) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(async (err, connection) => {
             if (err) {
@@ -96,9 +97,9 @@ module.exports.addUserLogin = (user_guid, password_hash, secret) => {
                 try {
                     //stores current into repository of history
                     let query = `INSERT INTO user_management_system.logins(
-                                login_guid, user_guid, password_hash, secret, created_at, 
-                                    updated_at) VALUES (UUID(), ?, ?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())`;
-                    connection.query(query, [user_guid, password_hash, secret], (err, results) => {
+                                    user_id, password_hash, created_at, updated_at) 
+                                VALUES (?, ?, UTC_TIMESTAMP(), UTC_TIMESTAMP())`;
+                    connection.query(query, [user_id, password_hash], (err, results) => {
                         if (err) {
                             reject(err);
                         } else {
@@ -115,7 +116,35 @@ module.exports.addUserLogin = (user_guid, password_hash, secret) => {
     })
 };
 
-// adding speakeasy secret after adding user information
+module.exports.addTwoFactorAuthentication = (user_id, temporary_secret) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection(async (err, connection) => {
+            if (err) {
+                reject(err);
+            } else {
+                try {
+                    //stores current into repository of history
+                    let query = `INSERT INTO user_management_system.two_factor_authentication(
+                                    user_id, temporary_secret, created_at) 
+                                VALUES (?, ?, UTC_TIMESTAMP())`;
+                    connection.query(query, [user_id, temporary_secret], (err, results) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            console.log(results)
+                            resolve(results);
+                        }
+                        connection.release();
+                    });
+                } catch (error) {
+                    reject(error);
+                }
+            }
+        });
+    })
+};
+
+// adding speakeasy secret after adding user information - to be removed
 module.exports.add2FA = (user_guid, secret) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(async (err, connection) => {
@@ -149,7 +178,7 @@ module.exports.add2FA = (user_guid, secret) => {
 }
 
 // updating the number of login attempts
-module.exports.updateLoginAttempts = (login_attempt, user_guid) => {
+module.exports.updateLoginAttempts = (login_attempt, user_id) => {
     return new Promise((resolve, reject) => {
         pool.getConnection(async (err, connection) => {
             if (err) {
@@ -163,9 +192,9 @@ module.exports.updateLoginAttempts = (login_attempt, user_guid) => {
                                 SET 
                                     login_attempt = ?
                                 where 
-                                    user_guid = ?
+                                    user_id = ?
                                 `;
-                    connection.query(query, [login_attempt, user_guid], (err, results) => {
+                    connection.query(query, [login_attempt, user_id], (err, results) => {
                         if (err) {
                             reject(err);
                         } else {
@@ -192,10 +221,12 @@ module.exports.isLoggedIn = (user_guid) => {
                 try {
                     let query = `SELECT 
                                     *
-                                FROM 
-                                    user_management_system.users
-                                where 
-                                    user_guid = ?
+                                FROM
+                                    user_management_system.users as users,
+                                    user_management_system.logins as logins
+                                where
+                                    users.user_guid = ?
+                                    and users.user_id = logins.user_id
                                 `;
                     connection.query(query, [user_guid], (err, results) => {
                         if (err) {
@@ -225,7 +256,7 @@ module.exports.isSuspended = (user_guid) => {
                             from 
                                 user_management_system.logins 
                             where 
-                                user_guid = ? 
+                                user_id = ? 
                             `;
 
                 connection.query(query, [user_guid], (err, results) => {
@@ -242,7 +273,7 @@ module.exports.isSuspended = (user_guid) => {
     })
 }
 
-module.exports.getRole = (user_guid) => {
+module.exports.getRole = (user_id) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -253,7 +284,35 @@ module.exports.getRole = (user_guid) => {
                             FROM 
                                 user_management_system.users 
                             where 
-                                user_guid = ?;
+                                user_id = ?;
+                            `;
+                connection.query(query, [user_id], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
+module.exports.verifyVerificationEmailToken = (user_guid, created_at) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            SELECT 
+                                * 
+                            FROM 
+                                user_management_system.users 
+                            where 
+                                user_id = ?;
                             `;
                 connection.query(query, [user_guid], (err, results) => {
                     if (err) {
@@ -269,6 +328,33 @@ module.exports.getRole = (user_guid) => {
     })
 }
 
+module.exports.updateLoginStatus = (user_guid, status) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            UPDATE 
+                                user_management_system.logins 
+                            SET 
+                                status = ?
+                            WHERE 
+                                user_id = ?
+                            `;
+                connection.query(query, [status, user_guid], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
 
 //add refresh token into db
 module.exports.addRefreshToken = (userid, token) => {
@@ -286,7 +372,7 @@ module.exports.addRefreshToken = (userid, token) => {
                                 VALUES 
                                     (?,?, UTC_TIMESTAMP())         
                                 `
-                    connection.query(query, [userid,token], (err, result) => {
+                    connection.query(query, [userid, token], (err, result) => {
                         if (err) {
                             console.log(err);
                             reject(err);
@@ -346,9 +432,9 @@ module.exports.lockUser = (userid) => {
                 let query = `UPDATE 
                                 logins
                             SET
-                                status = 3
+                                status = 4
                             WHERE 
-                                user_guid = ?;
+                                user_id = ?;
                             `;
                 connection.query(query, [userid], (err, results) => {
                     if (err) {

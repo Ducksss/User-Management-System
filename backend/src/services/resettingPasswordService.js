@@ -17,7 +17,7 @@ module.exports.insertVerificationCode = (user_guid, token) => {
                             `;
                 connection.query(query, [user_guid, token], (err, results) => {
                     if (err) {
-                        reject(err)
+                        reject('Insertion of OTP has failed')
                     } else {
                         resolve(results)
                     }
@@ -45,7 +45,7 @@ module.exports.fetchInsertedVerificationCode = (user_guid, verificationCode) => 
                             `;
                 connection.query(query, [user_guid, verificationCode], (err, results) => {
                     if (err) {
-                        reject(err)
+                        reject('Insertion of OTP has failed')
                     } else {
                         console.log(results)
                         resolve(results)
@@ -105,7 +105,7 @@ module.exports.retriveUserPasswordHistory = (user_guid) => {
                             `;
                 connection.query(query, [user_guid], (err, results) => {
                     if (err) {
-                        reject(err)
+                        reject('none found')
                     } else {
                         resolve(results[0])
                     }
@@ -134,7 +134,7 @@ module.exports.updateCurrentPassword = (user_guid, hashedIncomingPassword, curre
                             `;
                 connection.query(query, [hashedIncomingPassword, currentPassword, oldPassword1, user_guid], (err, results) => {
                     if (err) {
-                        reject(err)
+                        reject('cannot update')
                     } else {
                         resolve(results)
                     }
@@ -161,7 +161,7 @@ module.exports.verificationCompleted = (verification_guid) => {
                             `;
                 connection.query(query, [verification_guid], (err, results) => {
                     if (err) {
-                        reject(err)
+                        reject('cannot update')
                     } else {
                         resolve(results)
                     }

@@ -1,5 +1,6 @@
 import React, {useEffect} from "react";
 
+
 // styling
 import styled from "styled-components";
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
@@ -17,10 +18,11 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
+import { resEncrypt } from '../RsaEncryption';
+import { SyncLoader } from "react-spinners";
 import { useHistory } from "react-router-dom";
 
 import { Formik, Form, useField } from 'formik';
-import { ClipLoader, HashLoader, FadeLoader, BeatLoader, SyncLoader } from "react-spinners";
 import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 import { Container as ContainerBase } from "components/misc/Layouts";
 import TokenManager from "shared/TokenManager.js";
@@ -71,6 +73,19 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   const submitButtonText = "Sign In";
   const SubmitButtonIcon = LoginIcon;
 
+  let { token, setToken } = useContext(TokenContext)
+  const [publicKey, setPublicKey] = useState();
+
+  useEffect(() => {
+    axios.get(`${config.baseUrl}/keys`)
+      .then((response) => {
+        let key = response.data.publicKey
+        console.log(response.data.publicKey);
+        setPublicKey(key);
+        console.log(publicKey)
+      });
+  });
+
   useEffect(() => {
     // console.log(token);
   }, [])
@@ -89,9 +104,9 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   const validateLogininformation = (values) => {
     axios
       .post(`${config.baseUrl}/u/user/signin`, {
-        email: values.email,
-        password: values.password,
-      }, {withCredentials: true})
+        email: resEncrypt(values.email, publicKey),
+        password: resEncrypt(values.password, publicKey),
+      }, { withCredentials: true })
       .then((results) => {
         //access token into context
         TokenManager.setToken(results.data.token)
@@ -101,28 +116,14 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
         history.push({ pathname: "/" });
       })
       .catch((error) => {
-        if (error.response.data.code === 401) {
-          if (error.response.data.message === "Banned.") {
-            setMessage({
-              data: "Your account has been banned. Please contact an administrator",
-              type: "alert-danger",
-            });
-          } else if (error.response.data.message === "Locked Out.") {
-            setMessage({
-              data: "Your account has been locked. Please reset your password before proceeding.",
-              type: "alert-danger",
-            });
-          } else {
-            setMessage({
-              data: "Your username or password is invalid.",
-              type: "alert-danger",
-            });
-          }
-        }
-
-        if (error.response.data.code === 500) {
+        if (error.response.data.code == 500) {
           setMessage({
             data: "Please contact an administrator for help.",
+            type: "alert-danger",
+          });
+        } else {
+          setMessage({
+            data: `${error.response.data.content}`,
             type: "alert-danger",
           });
         }
@@ -139,18 +140,20 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
       validateOnChange={false}
       validationSchema={LoginSchema}
       onSubmit={(values, { setSubmitting }) => {
-        var bt = document.getElementById('mySubmit');
-        bt.disabled = true;
-        validateLogininformation(values);
-        setSubmitting(false);
-        bt.disabled = false;
+        setTimeout(() => {
+          var bt = document.getElementById('mySubmit');
+          bt.disabled = true;
+          validateLogininformation(values);
+          setSubmitting(false);
+          bt.disabled = false;
+        }, 1000)
       }}
     >
       {({ isSubmitting }) => (
         <Form css={[tw.form`mx-auto max-w-xs`]}>
           {isSubmitting ? (
             <div css={[tw`flex flex-col min-h-48 justify-center items-center`]}>
-              <div >
+              <div>
                 <SyncLoader color={"#3c0d99"} loading={isSubmitting} size={150} speedMultiplier={0.5} size={15} />
               </div>
               <span css={[tw`mt-5 italic`]}>Authenticating...</span>
@@ -174,7 +177,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
 
           <SubmitButton type="submit" disabled={isSubmitting} id="mySubmit">
             <SubmitButtonIcon className="icon" />
-            <span className="text">{submitButtonText}</span>
+            <span className="text">{isSubmitting ? ("Signing in...") : (submitButtonText)}</span>
           </SubmitButton>
         </Form>
       )}

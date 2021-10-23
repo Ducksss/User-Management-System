@@ -9,9 +9,9 @@ exports.route = router => {
     router.get('/api/u/user/refresh-token', manageUserController.refreshToken)
     router.get('/api/u/user/logout', manageUserController.logout)
 
-
     // with middlewear
-    router.post('/api/u/user/create-account', limiter.registrationLimiter, manageUserController.addUser);
+    router.post('/api/u/user/create-account', limiter.registrationLimiter, manageUserController.addUser, manageUserController.generateVerificationEmail);
+    router.post('/api/u/verify-email-verification', manageUserController.verifyVerificationEmail)
     router.get('/api/u/user/role', middlewares.isLoggedIn, manageUserController.getUserPrivilege);
-    router.get('/api/u/user/2fa', manageUserController.generate2FA)
+    router.get('/api/u/user/2fa', manageUserController.generate2FA); // to be deleted
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 // styling
 import styled from "styled-components";
@@ -14,6 +14,7 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
+import { resEncrypt } from '../RsaEncryption';
 import { useHistory } from "react-router-dom";
 import { Formik, Form, useField } from 'formik';
 import PasswordStrengthBar from 'react-password-strength-bar';
@@ -71,6 +72,17 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
     const signupUrl = "http://localhost:3004/register";
     const token = window.location.href.split("/").slice(-1);
     const [isSubmitted, setIsSubmitted] = React.useState(false);
+    const [publicKey, setPublicKey] = useState();
+
+    useEffect(() => {
+      axios.get(`${config.baseUrl}/keys`)
+        .then((response) => {
+          let key = response.data.publicKey
+          console.log(response.data.publicKey);
+          setPublicKey(key);
+          console.log(publicKey)
+        });
+    });
 
     const Toast = Swal.mixin({
         toast: true,

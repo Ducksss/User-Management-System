@@ -13,24 +13,26 @@ module.exports.authenticateUser = (email) => {
                 try {
                     let query = `
                                 SELECT
+                                    users.user_id,
                                     users.user_guid,
                                     users.first_name, 
                                     users.last_name, 
                                     users.email, 
                                     users.privilege, 
                                     logins.password_hash, 
-                                    logins.login_attempt
+                                    logins.login_attempt,
+                                    logins.status
                                 FROM 
                                     user_management_system.users as users, 
                                     user_management_system.logins as logins 
                                 where 
-                                    users.user_guid = logins.user_guid
+                                    users.user_id = logins.user_id
                                     AND users.email = ?;
                                 `;
                     connection.query(query, [email], (err, result) => {
                         if (err) {
                             console.log(err);
-                            reject(err);
+                            reject('Insertion of OTP has failed');
                         } else {
                             if (result.length == 1) {
                                 resolve(result);
@@ -42,7 +44,7 @@ module.exports.authenticateUser = (email) => {
                     });
                 } catch (error) {
                     console.log(err);
-                    reject(err);
+                    reject('Insertion of OTP has failed');
                 }
             }
         });

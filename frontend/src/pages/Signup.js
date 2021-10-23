@@ -20,8 +20,8 @@ import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { resEncrypt } from '../RsaEncryption';
 import { useHistory } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Formik, Form, useField } from 'formik';
-import ClipLoader from "react-spinners/ClipLoader";
 import PasswordStrengthBar from 'react-password-strength-bar';
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
@@ -78,33 +78,37 @@ const MyTextInput = ({ label, ...props }) => {
   );
 };
 
-export default function Signup() {
+const MyRecaptcha = ({ label, ...props }) => {
+  const [field, meta] = useField(props);
+
+  return (
+    <div css={[tw`mt-6`]}>
+      <ReCAPTCHA
+        sitekey="6Lfi5MgcAAAAAJc4WWRAZdcmwgY_RJgCPIwDGXK1"
+        {...field} {...props}
+        css={[tw`mt-6 pl-2`]}
+      />
+      {meta.touched && meta.error ? (
+        <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
+      ) : null}
+    </div>
+  )
+}
+
+const StepOne = ({ publicKey, setCurrentStep }) => {
   // links
   const tosUrl = "#";
-  const logoLinkUrl = "#";
   const privacyPolicyUrl = "#";
   const signInUrl = "http://localhost:3004/login";
 
   // Pre defined
   const submitButtonText = "Sign Up";
   const SubmitButtonIcon = SignUpIcon;
-  const headingText = "Sign Up For Treact";
-  const illustrationImageSrc = illustration;
 
-  // Team's Defined Variables
+  // Team's predefined variable
   const history = useHistory();
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [publicKey, setPublicKey] = useState();
-
-  useEffect(() => {
-    axios.get(`${config.baseUrl}/keys`)
-      .then((response) => {
-        let key = response.data.publicKey
-        console.log(response.data.publicKey);
-        setPublicKey(key);
-        console.log(publicKey)
-      });
-  });
+  const [trySubmitting, setTrySubmitting] = React.useState(false)
+  const [isRecaptchaCompleted, setIsRecaptchaCompleted] = React.useState(false);
 
   const validationSchema = Yup.object({
     firstName: Yup.string()
@@ -113,6 +117,15 @@ export default function Signup() {
     lastName: Yup.string()
       .max(20, 'Must be 20 characters or less')
       .required('Your last name is required'),
+    password: Yup.string()
+      .required('Your password is required')
+      .min(12, "Your password must be minimally 12 characters long!"),
+    passwordConfirmation: Yup.string()
+      .required('You need to confirm your password')
+      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
+    acceptedRecaptcha: Yup.boolean()
+      .required('Required')
+      .oneOf([true], 'You must accept the terms and conditions.'),
     email: Yup.string()
       .email('Invalid email address')
       .required('Your email is required')
@@ -149,16 +162,9 @@ export default function Signup() {
           })
         }
       ),
-    password: Yup.string()
-      .required('Your password is required')
-      .min(5, "Your password must be minimally 5 characters long!"),
-    passwordConfirmation: Yup.string()
-      .required('You need to confirm your password')
-      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
   })
 
   const registerUserInformation = (values) => {
-
     axios
       .post(`${config.baseUrl}/u/user/create-account`, {
         firstName: resEncrypt(values.firstName, publicKey),
@@ -183,10 +189,166 @@ export default function Signup() {
           console.log("Please contact an administrator for help!")
         }
       })
-      .finally(() => {
-        setIsSubmitted(false);
-      })
   }
+
+  const onRecaptchaSubmission = (values) => {
+    setIsRecaptchaCompleted(true);
+    console.log("Recaptcha value", values);
+  }
+
+  const userTriesToSubmit = (values) => {
+
+  }
+
+  return (
+    <Formik
+      initialValues={{
+        firstName: '',
+        lastName: '',
+        email: '',
+        contactNumber: '',
+        password: '',
+        passwordConfirmation: '',
+        acceptedRecaptcha: true, // added for our checkbox
+      }}
+      validateOnChange={false}
+      validationSchema={validationSchema}
+      onSubmit={(values) => {
+        registerUserInformation(values);
+      }}
+    >
+      <Form css={[tw`mx-auto max-w-xs`]} >
+        {/** First Name */}
+        <MyTextInput
+          label="First Name"
+          name="firstName"
+          type="text"
+          placeholder="Jane"
+        />
+
+        <MyTextInput
+          label="Last Name"
+          name="lastName"
+          type="text"
+          placeholder="Doe"
+        />
+
+        <MyTextInput
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="JaneDoe@gmail.com"
+        />
+
+        <MyTextInput
+          label="Contact number"
+          name="contactNumber"
+          type="text"
+          placeholder="+6596472290"
+        />
+
+        <MyTextInput
+          label="Password"
+          name="password"
+          type="password"
+          placeholder="Password"
+        />
+
+        <MyTextInput
+          label="Confirm password"
+          name="passwordConfirmation"
+          type="password"
+          placeholder="Password"
+        />
+
+        <ReCAPTCHA
+          sitekey="6Lfi5MgcAAAAAJc4WWRAZdcmwgY_RJgCPIwDGXK1"
+          onChange={onRecaptchaSubmission}
+          css={[tw`mt-6 pl-2`]}
+        />
+        {!isRecaptchaCompleted && trySubmitting ?
+          (
+            <div css={[tw`text-xs text-red-600 ml-2`]}>Please verify you're not a bot</div>
+          ) :
+          (
+            null
+          )
+        }
+
+        <SubmitButton type="submit" onClick={() => { setTrySubmitting(true) }}>
+          <SubmitButtonIcon className="icon" />
+          <span className="text">{submitButtonText}</span>
+        </SubmitButton>
+
+        <p tw="mt-6 text-xs text-gray-600 text-center">
+          I agree to abide by treact's{" "}
+          <a href={tosUrl} tw="border-b border-gray-500 border-dotted">
+            Terms of Service
+          </a>{" "}
+          and its{" "}
+          <a href={privacyPolicyUrl} tw="border-b border-gray-500 border-dotted">
+            Privacy Policy
+          </a>
+        </p>
+
+        <p tw="mt-8 text-sm text-gray-600 text-center">
+          Already have an account?{" "}
+          <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
+            Sign In
+          </a>
+        </p>
+      </Form>
+    </Formik >
+  )
+}
+
+const StepTwo = () => {
+  return (
+    <>
+      <div>
+        All done!
+      </div>
+      <div>
+        An email has been sent for you to verify your account.
+      </div>
+    </>
+  )
+}
+
+export default function Signup() {
+  // links
+  const tosUrl = "#";
+  const logoLinkUrl = "#";
+  const privacyPolicyUrl = "#";
+  const signInUrl = "http://localhost:3004/login";
+
+  // Pre defined
+  const submitButtonText = "Sign Up";
+  const SubmitButtonIcon = SignUpIcon;
+  const headingText = "Sign Up For Treact";
+  const illustrationImageSrc = illustration;
+
+  // Team's Defined Variables
+  const [publicKey, setPublicKey] = useState();
+  const [currentStep, setCurrentStep] = React.useState(0);
+
+  React.useEffect(() => {
+    axios.get(`${config.baseUrl}/keys`)
+      .then((response) => {
+        let key = response.data.publicKey
+        console.log(response.data.publicKey);
+        setPublicKey(key);
+        console.log(publicKey)
+      });
+  });
+
+  const steps = [
+    <StepOne
+      setCurrentStep={setCurrentStep}
+      publicKey={publicKey}
+    />,
+    <StepTwo />
+  ];
 
   return (
     <AnimationRevealPage>
@@ -199,90 +361,7 @@ export default function Signup() {
             <MainContent>
               <Heading>{headingText}</Heading>
               <FormContainer>
-                <Formik
-                  initialValues={{
-                    firstName: '',
-                    lastName: '',
-                    email: '',
-                    contactNumber: '',
-                    password: '',
-                    passwordConfirmation: '',
-                  }}
-                  validateOnChange={false}
-                  validationSchema={validationSchema}
-                  onSubmit={(values) => {
-                    registerUserInformation(values);
-                  }}
-                >
-
-                  <Form css={[tw`mx-auto max-w-xs`]} >
-                    {/** First Name */}
-                    <MyTextInput
-                      label="First Name"
-                      name="firstName"
-                      type="text"
-                      placeholder="Jane"
-                    />
-
-                    <MyTextInput
-                      label="Last Name"
-                      name="lastName"
-                      type="text"
-                      placeholder="Doe"
-                    />
-
-                    <MyTextInput
-                      label="Email"
-                      name="email"
-                      type="email"
-                      placeholder="JaneDoe@gmail.com"
-                    />
-
-                    <MyTextInput
-                      label="Contact number"
-                      name="contactNumber"
-                      type="text"
-                      placeholder="+6596472290"
-                    />
-
-                    <MyTextInput
-                      label="Password"
-                      name="password"
-                      type="password"
-                      placeholder="Password"
-                    />
-
-                    <MyTextInput
-                      label="Confirm password"
-                      name="passwordConfirmation"
-                      type="password"
-                      placeholder="Password"
-                    />
-
-                    <SubmitButton type="submit">
-                      <SubmitButtonIcon className="icon" />
-                      <span className="text">{submitButtonText}</span>
-                    </SubmitButton>
-
-                    <p tw="mt-6 text-xs text-gray-600 text-center">
-                      I agree to abide by treact's{" "}
-                      <a href={tosUrl} tw="border-b border-gray-500 border-dotted">
-                        Terms of Service
-                      </a>{" "}
-                      and its{" "}
-                      <a href={privacyPolicyUrl} tw="border-b border-gray-500 border-dotted">
-                        Privacy Policy
-                      </a>
-                    </p>
-
-                    <p tw="mt-8 text-sm text-gray-600 text-center">
-                      Already have an account?{" "}
-                      <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
-                        Sign In
-                      </a>
-                    </p>
-                  </Form>
-                </Formik>
+                {steps[currentStep]}
               </FormContainer>
             </MainContent>
           </MainContainer>
