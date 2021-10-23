@@ -10,5 +10,4 @@ module.exports = (app, router) => {
     resettingPasswordRoute.route(router)
     encryptionRoute.route(router)
     subscriptionRoute.route(router)
-
 };

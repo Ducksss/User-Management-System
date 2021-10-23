@@ -5,6 +5,7 @@ const nodeMailer = require('nodemailer');
 const moment = require("moment");
 const config = require("../config/config");
 const { codes } = require('../config/codes');
+const validators = require('../middlewares/validators');
 
 // services
 const loginService = require('../services/loginService');

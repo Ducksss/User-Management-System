@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from "react";
+import React, {useContext, useEffect, useState} from "react";
 
 // styling
 import styled from "styled-components";
@@ -17,6 +17,7 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
+import { resEncrypt } from '../RsaEncryption';
 import { SyncLoader } from "react-spinners";
 import { useHistory } from "react-router-dom";
 
@@ -72,6 +73,17 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   const submitButtonText = "Sign In";
   const SubmitButtonIcon = LoginIcon;
   let {token, setToken} = useContext(TokenContext)
+  const [publicKey, setPublicKey] = useState();
+
+  useEffect(() => {
+    axios.get(`${config.baseUrl}/keys`)
+      .then((response) => {
+        let key = response.data.publicKey
+        console.log(response.data.publicKey);
+        setPublicKey(key);
+        console.log(publicKey)
+      });
+  });
 
   useEffect(() => {
     console.log(token);
@@ -91,8 +103,8 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   const validateLogininformation = (values) => {
     axios
       .post(`${config.baseUrl}/u/user/signin`, {
-        email: values.email,
-        password: values.password,
+        email: resEncrypt(values.email, publicKey),
+        password: resEncrypt(values.password, publicKey),
       }, {withCredentials: true})
       .then((results) => {
         //access token into context
