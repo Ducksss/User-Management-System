@@ -89,7 +89,7 @@ exports.addUser = async (req, res, next) => {
         let secret = speakeasy.generateSecret({ length: 20, });
 
         await manageUsers.addUserLogin(insertedUserInformation.insertId, hashedPassword);
-        await manageUsers.addTwoFactorAuthentication(insertedUserInformation.insertId, secret.base32)
+        await manageUsers.addTwoFactorAuthentication(insertedUserInformation.insertId, secret.base32);
 
         req.firstName = firstName;
         req.lastName = lastName;

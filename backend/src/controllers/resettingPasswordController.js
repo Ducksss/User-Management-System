@@ -32,28 +32,28 @@ exports.generateOTP = async (req, res, next) => {
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
         }
 
-        const { first_name, last_name, user_guid } = userInformation[0];
         const verificationCode = Math.floor(100000 + Math.random() * 900000);
+        const { first_name, last_name, user_id, user_guid } = userInformation[0];
 
-        await resettingPasswordService.insertVerificationCode(user_guid, verificationCode)
-            
-        const verificationInformation = await resettingPasswordService.fetchInsertedVerificationCode(user_guid, verificationCode)
+        await resettingPasswordService.insertVerificationCode(user_id, verificationCode);
+
+        const verificationInformation = await resettingPasswordService.fetchInsertedVerificationCode(user_id, verificationCode)
             .catch((error) => {
                 console.log(error);
             });
-        
-        const { verification_guid } = verificationInformation[0];
+
+        const { verification_id } = verificationInformation[0];
         const data = {
             token: jwt.sign(
                 {
                     user_guid: user_guid,
-                    verification_guid: verification_guid,
                     email: email,
+                    verification_guid: verification_id,
                     verificationCode: verificationCode
                 },
                 config.JWTKey,
                 {
-                    expiresIn: 600
+                    expiresIn: 1000
                 }
             )
         };
@@ -289,7 +289,7 @@ exports.generateOTP = async (req, res, next) => {
     } catch (e) {
         console.log(e)
 
-        if(e == 'Insertion of OTP has failed') return res.status(401).send(codes(401, 'Insertion of OTP has failed'))
+        if (e == 'Insertion of OTP has failed') return res.status(401).send(codes(401, 'Insertion of OTP has failed'))
 
         return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
     }
@@ -301,7 +301,9 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
         const jwtObject = jwt.verify(token, config.JWTKey);
         const { user_guid, verificationCode } = jwtObject;
 
-        let result = await resettingPasswordService.verifyToken(user_guid, verificationCode)
+        // Translator
+        let getUserData = await manageUsers.isLoggedIn(user_guid);
+        let result = await resettingPasswordService.verifyToken(getUserData[0].user_id, verificationCode)
 
         if (result.length !== 1) return res.status(403).send(codes(403));
 
@@ -310,13 +312,13 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
         }
 
         if (result[0].type === 1) return res.status(403).send(codes(403), "", "It has already been done");
-        
+
         const currentUTCTiming = moment.utc();
         const databaseTiming = moment.utc(result[0].created_at);
         const isPassedLimit = (currentUTCTiming - databaseTiming) / (10 * 60 * 100) > 5;
 
         if (isPassedLimit) {
-            return res.status(408).send(codes(408)); 
+            return res.status(408).send(codes(408));
         } else {
             if (part === "store") next();
             return res.status(204).send(codes(204));
@@ -336,39 +338,41 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
     try {
         const { token, incomingPassword, part } = req.body;
         const { user_guid, verification_guid } = jwt.verify(token, config.JWTKey);
-        const userPasswordHistory = await resettingPasswordService.retriveUserPasswordHistory(user_guid)
-        
-        let { currentPassword, oldPassword1, oldPassword2 } = userPasswordHistory
+
+        const userPasswordHistory = await manageUsers.isLoggedIn(user_guid);
+
+        let { user_id, password_hash, pasword_hash_history_1, pasword_hash_history_2 } = userPasswordHistory[0];
 
         if (!incomingPassword) {
             return res.status(400).send(codes(400));
         } else {
-            let isRepeated0 = await bcrypt.compare(incomingPassword, currentPassword)
-
+            let isRepeated0 = await bcrypt.compare(incomingPassword, password_hash)
             if (isRepeated0) return res.status(401).send(codes(401));
 
-            if (oldPassword1) {
-                let isRepeated1 = await bcrypt.compare(incomingPassword, oldPassword1)
-                if (isRepeated1) return res.status(401).send(codes(401));
+            if (pasword_hash_history_1) {
+                let isRepeated1 = await bcrypt.compare(incomingPassword, pasword_hash_history_1);
+                if (isRepeated1) return res.status(401).send(codes(401))
             }
 
-            if (oldPassword2) {
-                let isRepeated2 = await bcrypt.compare(incomingPassword, oldPassword2)
+            if (pasword_hash_history_2) {
+                let isRepeated2 = await bcrypt.compare(incomingPassword, pasword_hash_history_2)
                 if (isRepeated2) return res.status(401).send(codes(401));
             }
 
+
             if (part === "store") {
+                req.user_id = user_id;
                 req.user_guid = user_guid;
-                req.currentPassword = currentPassword;
-                req.oldPassword1 = oldPassword1;
-                req.verification_guid = verification_guid
+                req.currentPassword = password_hash;
+                req.oldPassword1 = pasword_hash_history_1;
+                req.verification_id = verification_guid;
                 next();
             } else {
                 return res.status(200).send(codes(200));
             }
         }
     } catch (error) {
-        if(error == 'none found') return res.status(404).semd(codes(404))
+        if (error == 'none found') return res.status(404).send(codes(404))
         return res.status(500).send(codes(500));
     }
 }
@@ -376,18 +380,19 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
 exports.updateNewPassword = async (req, res, next) => {
     try {
         const { incomingPassword } = req.body;
-        const { user_guid, currentPassword, oldPassword1, verification_guid } = req;
+        const { user_id, currentPassword, oldPassword1, verification_id } = req;
 
         const hashedIncomingPassword = await bcrypt.hash(incomingPassword, 10);
 
-        await manageUsers.updateLoginAttempts(0, user_guid);
-        await resettingPasswordService.verificationCompleted(verification_guid)
+        await manageUsers.updateLoginAttempts(0, user_id);
+        await resettingPasswordService.verificationCompleted(verification_id);
+        await resettingPasswordService.updateCurrentPassword(user_id, hashedIncomingPassword, currentPassword, oldPassword1);
 
-        await resettingPasswordService.updateCurrentPassword(user_guid, hashedIncomingPassword, currentPassword, oldPassword1)
+        console.log("FIN")
         return res.status(200).send(codes(200));
     } catch (err) {
-    
-        if(err = 'cannot update') return res.status(401).send(codes(401))
+        console.log(err)
+        if (err = 'cannot update') return res.status(401).send(codes(401))
         return res.status(500).send(codes(500));
     }
 }

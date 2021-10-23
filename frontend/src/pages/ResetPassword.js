@@ -75,13 +75,13 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
     const [publicKey, setPublicKey] = useState();
 
     useEffect(() => {
-      axios.get(`${config.baseUrl}/keys`)
-        .then((response) => {
-          let key = response.data.publicKey
-          console.log(response.data.publicKey);
-          setPublicKey(key);
-          console.log(publicKey)
-        });
+        axios.get(`${config.baseUrl}/keys`)
+            .then((response) => {
+                let key = response.data.publicKey
+                console.log(response.data.publicKey);
+                setPublicKey(key);
+                console.log(publicKey)
+            });
     });
 
     const Toast = Swal.mixin({
@@ -114,6 +114,8 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                             .catch((error) => {
                                 if (error.response.data.code === 401) {
                                     resolve(false);
+                                } else {
+                                    resolve(true);
                                 }
                             })
                     })
