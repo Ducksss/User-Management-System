@@ -33,26 +33,28 @@ exports.processUserLogin = async (req, res, next) => {
         let { email, password } = data;
 
         // Checking for invalid credentials
-        let results = await loginService.authenticateUser(email)
+        let results = await loginService.authenticateUser(email);
 
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
         }
 
+        console.log(results)
+
         // Check for pending users, i.e. haven't verified their account yet
         if (results[0].status == 2) {
-            return res.status(401).send(codes(401, 'Unverified.'));
+            return res.status(401).send(codes(401, 'Unverified.', 'Please check your email. You need to verify your account.'));
         }
 
         // Checking for banned user
         if (results[0].status == 1) {
-            return res.status(403).send(codes(403, 'Banned.'));
+            return res.status(403).send(codes(403, 'Banned.', "Your account has been banned. Please contact an administrator."));
         }
 
         // check for locked account
         if (results[0].login_attempt == 10) {
-            return res.status(403).send(codes(403, 'Locked Out.'));
+            return res.status(403).send(codes(403, 'Locked Out.', 'Your account has been locked. Please reset your password before proceeding.'));
         }
 
         if (bcrypt.compareSync(password, results[0].password_hash)) {
@@ -69,11 +71,14 @@ exports.processUserLogin = async (req, res, next) => {
                 })
             };
 
-            let refresh_token = jwt.sign({
-                _id: results[0].user_guid
-            }, config.REFRESH_TOKEN_SECRET, {
-                expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
-            })
+            let refresh_token = jwt.sign(
+                {
+                    _id: results[0].user_guid
+                }, config.REFRESH_TOKEN_SECRET,
+                {
+                    expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
+                }
+            )
 
             let insertRefreshToken = await manageUsers.addRefreshToken(results[0].user_guid, refresh_token)
 
@@ -85,20 +90,19 @@ exports.processUserLogin = async (req, res, next) => {
                     maxAge: 60 * 60 * 24 * 3 * 1000, //3 days
                     sameSite: "none",
                 })
-                
-                await manageUsers.updateLoginAttempts(0, results[0].user_guid);
-                return res.status(200).send(data);
 
+                await manageUsers.updateLoginAttempts(0, results[0].user_id);
+                return res.status(200).send(data);
             } else {
-                return res.status(401).send(codes(401, 'Login failed.'));
+                return res.status(401).send(codes(401, 'Login failed.', 'Your username or password is invalid.'));
             }
 
         } else {
-            await manageUsers.updateLoginAttempts(results[0].login_attempt, results[0].user_guid);
-            return res.status(401).send(codes(401, 'Login failed.'));
+            await manageUsers.updateLoginAttempts(results[0].login_attempt, results[0].user_id);
+            return res.status(401).send(codes(401, 'Login failed.', 'Your username or password is invalid.'));
         }
     } catch (error) {
         console.log(error)
-        return res.status(500).send(codes(500, 'Internal error'));
+        return res.status(500).send(codes(500, 'Internal error', 'Please contact an administrator for help.'));
     }
 }

@@ -82,22 +82,19 @@ exports.addUser = async (req, res, next) => {
         if (privilege == null) privilege = 4;
 
         // adding user info
-        await manageUsers.addUser(firstName, lastName, email, contact, privilege);
+        let insertedUserInformation = await manageUsers.addUser(firstName, lastName, email, contact, privilege);
 
         // adding login info
-        let results = await manageUsers.getEmail(email);
-
-        let { user_guid, created_at } = results[0];
         let hashedPassword = await bcrypt.hash(password, 10);
         let secret = speakeasy.generateSecret({ length: 20, });
 
-        await manageUsers.addUserLogin(user_guid, hashedPassword, secret.base32);
+        await manageUsers.addUserLogin(insertedUserInformation.insertId, hashedPassword);
+        await manageUsers.addTwoFactorAuthentication(insertedUserInformation.insertId, secret.base32)
 
         req.firstName = firstName;
         req.lastName = lastName;
         req.email = email;
-        req.user_guid = user_guid;
-        req.created_at = created_at;
+        req.user_id = insertedUserInformation.insertId;
         next();
     } catch (error) {
         console.log(error)
@@ -108,14 +105,13 @@ exports.addUser = async (req, res, next) => {
 // Generating email for user to verify themselves
 exports.generateVerificationEmail = async (req, res, next) => {
     try {
-        let { user_guid, firstName, lastName, created_at, email } = req;
+        let { user_id, firstName, lastName, email } = req;
 
         const data = {
             token: jwt.sign(
                 {
-                    user_guid: user_guid,
+                    user_id: user_id,
                     email: email,
-                    created_at: created_at
                 },
                 config.JWTKey,
                 {
@@ -361,11 +357,11 @@ exports.verifyVerificationEmail = async (req, res, next) => {
     try {
         const { token } = req.body;
         const jwtObject = jwt.verify(token[0], config.JWTKey);
+        console.log(jwtObject)
 
-        const { user_guid, email, created_at } = jwtObject;
-        console.log(user_guid)
+        const { user_id, email } = jwtObject;
 
-        let result = await manageUsers.verifyVerificationEmailToken(user_guid)
+        let result = await manageUsers.verifyVerificationEmailToken(user_id)
             .catch((error) => {
                 console.log(error);
                 return res.status(401).send(codes(401, 'Failed to verify.'));
@@ -375,7 +371,7 @@ exports.verifyVerificationEmail = async (req, res, next) => {
             return res.status(403).send(codes(403));
         }
 
-        await manageUsers.updateLoginStatus(user_guid, 0)
+        await manageUsers.updateLoginStatus(user_id, 0)
             .catch((error) => {
                 console.log(error);
                 return res.status(401).send(codes(401, 'Failed to verify.'));
@@ -475,20 +471,20 @@ exports.refreshToken = async (req, res) => {
 }
 
 exports.logout = async (req, res) => {
-    const { signedCookies = {} } = req
-    const { refreshToken } = signedCookies
+    const { signedCookies = {} } = req;
+    const { refreshToken } = signedCookies;
 
     if (refreshToken) {
         try {
-            let getUser = await manageUsers.findUserToken(refreshToken)
+            let getUser = await manageUsers.findUserToken(refreshToken);
 
             if (getUser.length == 1) {
-                await manageUsers.deleteRefreshToken(refreshToken)
-                res.clearCookie('refreshToken')
-                return res.status(204).send()
+                await manageUsers.deleteRefreshToken(refreshToken);
+                res.clearCookie('refreshToken');
+                return res.status(204).send();
             } else {
-                res.clearCookie('refreshToken')
-                return res.status(500).send(codes(500))
+                res.clearCookie('refreshToken');
+                return res.status(500).send(codes(500));
             }
         } catch (error) {
             console.log(error);
@@ -502,9 +498,10 @@ exports.logout = async (req, res) => {
 // Used by the header and other components to generate different view based on role
 exports.getUserPrivilege = async (req, res, next) => {
     try {
-        let { user_guid } = req;
-        let results = await manageUsers.getRole(user_guid);
+        let { user_id } = req;
+        let results = await manageUsers.getRole(user_id);
 
+        console.log("GET USER PRIVILEGE WAS HERE!!!")
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
         console.log(error)

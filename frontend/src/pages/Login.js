@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 // styling
 import styled from "styled-components";
@@ -72,7 +72,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   // styling
   const submitButtonText = "Sign In";
   const SubmitButtonIcon = LoginIcon;
-  let {token, setToken} = useContext(TokenContext)
+  let { token, setToken } = useContext(TokenContext)
   const [publicKey, setPublicKey] = useState();
 
   useEffect(() => {
@@ -105,7 +105,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
       .post(`${config.baseUrl}/u/user/signin`, {
         email: resEncrypt(values.email, publicKey),
         password: resEncrypt(values.password, publicKey),
-      }, {withCredentials: true})
+      }, { withCredentials: true })
       .then((results) => {
         //access token into context
         setToken(results.data.token)
@@ -115,38 +115,14 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
         history.push({ pathname: "/" });
       })
       .catch((error) => {
-        if (error.response.data.code === 401) {
-          if (error.response.data.message === "Banned.") {
-            setMessage({
-              data: "Your account has been banned. Please contact an administrator",
-              type: "alert-danger",
-            });
-          } else if (error.response.data.message === "Locked Out.") {
-            setMessage({
-              data: "Your account has been locked. Please reset your password before proceeding.",
-              type: "alert-danger",
-            });
-          } else if (error.response.data.description === "Unverified.") {
-            setMessage({
-              data: "You account needs to be verified. Please check your email.",
-              type: "alert-danger",
-            });
-          } else {
-            setMessage({
-              data: "Your username or password is invalid.",
-              type: "alert-danger",
-            });
-          }
-
-        } else if (error.response.data.code === 500) {
+        if (error.response.data.code == 500) {
           setMessage({
             data: "Please contact an administrator for help.",
             type: "alert-danger",
           });
-
         } else {
           setMessage({
-            data: "Please accept your",
+            data: `${error.response.data.content}`,
             type: "alert-danger",
           });
         }

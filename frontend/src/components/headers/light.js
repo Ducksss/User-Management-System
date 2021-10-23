@@ -80,7 +80,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
    * changing the defaultLinks variable below below.
    * If you manipulate links here, all the styling on the links is already done for you. If you pass links yourself though, you are responsible for styling the links or use the helper styled components that are defined here (NavLink)
    */
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -121,18 +121,18 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
       <NavLink href="/#">Blog</NavLink>
       <NavLink href="/#">Pricing</NavLink>
       <NavLink href="/#">Contact Us</NavLink>
-      {isLoggedIn ? 
-        <> 
+      {isLoggedIn ?
+        <>
           {/* profile and shit */}
           <NavLink href="/account" tw="lg:ml-12!">My Account</NavLink>
           <NavLink tw="lg:ml-12!" onClick={() => logoutHandler()}>Logout</NavLink>
-        </> 
-      :
+        </>
+        :
         <>
           <NavLink href="/login" tw="lg:ml-12!">Login</NavLink>
           <PrimaryLink css={roundedHeaderButton && tw`rounded-full`} href="/signup">Sign Up</PrimaryLink>
         </>
-      } 
+      }
     </NavLinks>
   ];
 
@@ -149,7 +149,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
   logoLink = logoLink || defaultLogoLink;
   links = links || defaultLinks;
 
-  return (    
+  return (
     <Header className={className || "header-light"}>
       <DesktopNavLinks css={collapseBreakpointCss.desktopNavLinks}>
         {logoLink}
@@ -165,7 +165,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
           {showNavLinks ? <CloseIcon tw="w-6 h-6" /> : <MenuIcon tw="w-6 h-6" />}
         </NavToggle>
       </MobileNavLinksContainer>
-    </Header>    
+    </Header>
   );
 };
 
