@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 // icons
 import logo from "../../images/logo.svg";
@@ -66,7 +66,7 @@ export const DesktopNavLinks = tw.nav`
 `;
 
 export default ({ roundedHeaderButton = false, logoLink, links, className, collapseBreakpointClass = "lg" }) => {
-  const { setToken } = useContext(TokenContext)
+
   /*
    * This header component accepts an optionals "links" prop that specifies the links to render in the navbar.
    * This links props should be an array of "NavLinks" components which is exported from this file.
@@ -110,7 +110,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
     axios.get(`${config.baseUrl}/u/user/logout`, {
       withCredentials: true,
     }).then(() => {
-      setToken(false)
+      // setToken(false)
       window.localStorage.setItem("logout", Date.now())
     })
   }

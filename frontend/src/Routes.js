@@ -2,7 +2,8 @@ import "tailwindcss/dist/base.css";
 import "styles/globalStyles.css";
 import 'sweetalert2/src/sweetalert2.scss'
 
-import React, { useContext, useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
+
 import { css } from "styled-components/macro"; //eslint-disable-line
 
 /*
@@ -116,20 +117,20 @@ import Subscribe from 'pages/Subscribe.js'
 // import Subscribe from 'pages/Subscribe.js'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import {ToastRefreshToken} from "shared/swal";
-import {TokenContext} from './components/TokenContext'
-import axios from "axios";
+import TokenManager from "shared/TokenManager";
 
 export default function App(props) {
   // If you want to disable the animation just use the disabled `prop` like below on your page's component
   // return <AnimationRevealPage disabled>xxxxxxxxxx</AnimationRevealPage>;
-  let {message} = useContext(TokenContext)
 
   useEffect(() => {
+    let message = TokenManager.getMessage
     if(message.length > 0) {
       ToastRefreshToken.fire({
         icon: 'warning',
         title: message
       })
+      TokenManager.setMessage('')
     }
   }, [])
 

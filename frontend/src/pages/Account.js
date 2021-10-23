@@ -28,7 +28,7 @@ export default function Account() {
     const tab = ['Account', 'Billing']
     const [activeTab, setActiveTab] = useState(tab[0]);
 
-    return (
+    return (   
         <>
         <AnimationRevealPage>
             <Header/>

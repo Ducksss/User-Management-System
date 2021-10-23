@@ -1,42 +1,37 @@
-import React, {useState, useEffect, useCallback, useContext} from "react";
+import React, {useState, useEffect, useCallback} from "react";
 import ReactDOM from "react-dom";
 import Routes from "./Routes";
 import Modal from "react-modal";
 import axios from "axios";
 import config from "Config";
-
-import { TokenProvider, TokenContext } from './components/TokenContext';
+import TokenManager from "shared/TokenManager";
 
 Modal.setAppElement("#root");
 
+
 ReactDOM.render(
-  <TokenProvider>
-    <Index />
-  </TokenProvider>,
+    <Index />,
   document.getElementById("root")
 );
 
 function Index() {
   const [isLoading, setisLoading] = useState(true)
-  const {token, setToken, setmessage} = useContext(TokenContext)
 
   const verifyUser = useCallback(() => {
     axios.get(`${config.baseUrl}/u/user/refresh-token`, {withCredentials: true})
     .then(response => {
         if(response.status == 200) {
-            setToken(response.data) 
+            TokenManager.setToken(response.data)
             axios.defaults.headers.common = { 'Authorization': `bearer ${response.data}` }
-            setTimeout(verifyUser, 2 * 60 * 1000) //reresh every 3 minutes
+            setTimeout(verifyUser, 10 * 1000) //reresh every 3 minutes
         } else {
-            setToken(false)
+            TokenManager.setToken(false)
         }
     })
-    .catch(error => {
-      setmessage(error.response.data.message)
-    })
+    .catch(error => TokenManager.setMessage(error.response.data.message))
     .finally(()=> setisLoading(false))
     // call refreshToken every 3 minutes to renew the authentication token.
-}, [setToken])
+}, [])
 
 useEffect(() => {
     verifyUser()
