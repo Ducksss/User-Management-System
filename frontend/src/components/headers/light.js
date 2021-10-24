@@ -84,7 +84,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const history = useHistory()
-  
+
   useEffect(() => {
     getList();
   }, [])
@@ -141,7 +141,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
         <>
           {/* profile and shit */}
           <NavLink href="/account" tw="lg:ml-12!">My Account</NavLink>
-          <NavLink tw="lg:ml-12!" onClick={() => logoutHandler()}>Logout</NavLink>
+          <NavLink href="#" tw="lg:ml-12!" onClick={() => logoutHandler()}>Logout</NavLink>
         </>
         :
         <>
