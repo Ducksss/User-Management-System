@@ -21,6 +21,9 @@ let transporter = nodeMailer.createTransport({
     }
 })
 
+/**
+ * Forgot Password
+ */
 exports.generateOTP = async (req, res, next) => {
     try {
         const { email } = req.params;
@@ -48,7 +51,7 @@ exports.generateOTP = async (req, res, next) => {
                 {
                     user_guid: user_guid,
                     email: email,
-                    verification_guid: verification_id,
+                    verification_id: verification_id,
                     verificationCode: verificationCode
                 },
                 config.JWTKey,
@@ -337,11 +340,10 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
 exports.verifyPasswordUniquness = async (req, res, next) => {
     try {
         const { token, incomingPassword, part } = req.body;
-        const { user_guid, verification_guid } = jwt.verify(token, config.JWTKey);
+        const { user_guid, verification_id } = jwt.verify(token, config.JWTKey);
 
         const userPasswordHistory = await manageUsers.isLoggedIn(user_guid);
-
-        let { user_id, password_hash, pasword_hash_history_1, pasword_hash_history_2 } = userPasswordHistory[0];
+        const { user_id, password_hash, pasword_hash_history_1, pasword_hash_history_2 } = userPasswordHistory[0];
 
         if (!incomingPassword) {
             return res.status(400).send(codes(400));
@@ -362,10 +364,9 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
 
             if (part === "store") {
                 req.user_id = user_id;
-                req.user_guid = user_guid;
                 req.currentPassword = password_hash;
                 req.oldPassword1 = pasword_hash_history_1;
-                req.verification_id = verification_guid;
+                req.verification_id = verification_id;
                 next();
             } else {
                 return res.status(200).send(codes(200));
@@ -388,7 +389,102 @@ exports.updateNewPassword = async (req, res, next) => {
         await resettingPasswordService.verificationCompleted(verification_id);
         await resettingPasswordService.updateCurrentPassword(user_id, hashedIncomingPassword, currentPassword, oldPassword1);
 
-        console.log("FIN")
+        return res.status(200).send(codes(200));
+    } catch (err) {
+        console.log(err)
+        if (err = 'cannot update') return res.status(401).send(codes(401))
+        return res.status(500).send(codes(500));
+    }
+}
+
+/**
+ * Reset Password
+ */
+exports.verifyCurrentAndOld = async (req, res, next) => {
+    try {
+        const { user_id, user_guid } = req;
+        const { incomingCurrent, incomingPassword, part } = req.body;
+
+        const userPasswordHistory = await manageUsers.isLoggedIn(user_guid);
+        const { password_hash, pasword_hash_history_1, pasword_hash_history_2 } = userPasswordHistory[0];
+
+        if (!incomingPassword) {
+            return res.status(400).send(codes(400));
+        } else {
+            // if current password doesn't match old password
+            const isCorrect = await bcrypt.compare(incomingCurrent, password_hash);
+            if (!isCorrect) return res.status(400).send(codes(400, null, "Error. Your current password was incorrect."));
+
+            if (part === "store") {
+                req.part = part;
+                req.user_id = user_id;
+                req.currentPassword = password_hash;
+                req.oldPassword1 = pasword_hash_history_1;
+                req.oldPassword2 = pasword_hash_history_2;
+                next();
+            } else {
+                return res.status(200).send(codes(200));
+            }
+        }
+    } catch (e) {
+        if (error == 'none found') return res.status(404).send(codes(404))
+        return res.status(500).send(codes(500));
+    }
+}
+
+exports.verifyResetPasswordUniqueness = async (req, res, next) => {
+    try {
+        const { incomingPassword, part } = req.body;
+        let { user_id, user_guid, currentPassword, oldPassword1, oldPassword2 } = req;
+
+        if (!incomingPassword) {
+            return res.status(400).send(codes(400));
+        } else {
+            if (!(currentPassword && oldPassword1 && oldPassword2)) {
+                const userPasswordHistory = await manageUsers.isLoggedIn(user_guid);
+                let { user_id, password_hash, pasword_hash_history_1, pasword_hash_history_2 } = userPasswordHistory[0];
+
+                currentPassword = password_hash;
+                oldPassword1 = pasword_hash_history_1;
+                oldPassword2 = pasword_hash_history_2;
+            }
+
+            let isRepeated0 = await bcrypt.compare(incomingPassword, currentPassword);
+            if (isRepeated0) return res.status(401).send(codes(401));
+
+            if (oldPassword1) {
+                let isRepeated1 = await bcrypt.compare(incomingPassword, oldPassword1);
+                if (isRepeated1) return res.status(401).send(codes(401))
+            }
+
+            if (oldPassword2) {
+                let isRepeated2 = await bcrypt.compare(incomingPassword, oldPassword2);
+                if (isRepeated2) return res.status(401).send(codes(401));
+            }
+
+            if (part === "store") {
+                console.log("ENTERING HERE")
+                next();
+            } else {
+                return res.status(200).send(codes(200));
+            }
+        }
+    } catch (e) {
+        if (e == 'none found') return res.status(404).send(codes(404));
+        return res.status(500).send(codes(500));
+    }
+}
+
+exports.updateResetNewPassword = async (req, res, next) => {
+    try {
+        console.log("please end me here")
+        const { incomingPassword } = req.body;
+        const { user_id, currentPassword, oldPassword1 } = req;
+        const hashedIncomingPassword = await bcrypt.hash(incomingPassword, 10);
+
+        await manageUsers.updateLoginAttempts(0, user_id);
+        await resettingPasswordService.updateCurrentPassword(user_id, hashedIncomingPassword, currentPassword, oldPassword1);
+
         return res.status(200).send(codes(200));
     } catch (err) {
         console.log(err)

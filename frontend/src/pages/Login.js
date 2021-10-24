@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
 // styling
 import styled from "styled-components";
@@ -141,7 +141,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
           validateLogininformation(values);
           setSubmitting(false);
           bt.disabled = false;
-        }, 1000)
+        }, 300)
       }}
     >
       {({ isSubmitting }) => (
