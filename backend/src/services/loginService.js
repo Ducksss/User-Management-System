@@ -13,6 +13,7 @@ module.exports.authenticateUser = (email) => {
                 try {
                     let query = `
                                 SELECT
+                                    users.user_id,
                                     users.user_guid,
                                     users.first_name, 
                                     users.last_name, 
@@ -25,18 +26,18 @@ module.exports.authenticateUser = (email) => {
                                     user_management_system.users as users, 
                                     user_management_system.logins as logins 
                                 where 
-                                    users.user_guid = logins.user_guid
+                                    users.user_id = logins.user_id
                                     AND users.email = ?;
                                 `;
                     connection.query(query, [email], (err, result) => {
                         if (err) {
                             console.log(err);
-                            reject('Insertion of OTP has failed');
+                            reject('User does not exist');
                         } else {
                             if (result.length == 1) {
                                 resolve(result);
                             } else {
-                                reject(result);
+                                reject('User does not exist');
                             }
                         }
                         connection.release();
