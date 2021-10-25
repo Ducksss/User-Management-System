@@ -20,10 +20,11 @@ function Index() {
   const verifyUser = useCallback(() => {
     axios.get(`${config.baseUrl}/u/user/refresh-token`, { withCredentials: true })
       .then(response => {
+        console.log(response.data);
         if (response.status == 200) {
           TokenManager.setToken(response.data)
           axios.defaults.headers.common = { 'Authorization': `bearer ${response.data}` }
-          setTimeout(verifyUser, 10 * 1000) //reresh every 3 minutes
+          setTimeout(verifyUser, 5 * 60 * 1000) //reresh every 3 minutes
         } else {
           TokenManager.setToken(false)
         }

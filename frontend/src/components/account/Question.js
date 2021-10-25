@@ -92,8 +92,6 @@ const Question = ({ title, info, header, content }) => {
                 })
             })
             .catch((error) => {
-                console.log("FAILURE HERE???")
-                console.log(error.response.data.code)
                 setMessage({
                     data: error.response.data.content,
                     type: "alert-danger"

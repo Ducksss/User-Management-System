@@ -218,6 +218,7 @@ export default function AccountDetails(location) {
                                 id={1}
                                 header={"Password"}
                                 content={"*".repeat(20)}
+                                sucess={"Your password have been successfully updated!"}
                                 title={'Do I have to allow the use of cookies?'}
                                 info={'Unicorn vinyl poutine brooklyn, next level direct trade iceland. Shaman copper mug church-key coloring book, whatever poutine normcore fixie cred kickstarter post-ironic street art.'}
                             />
