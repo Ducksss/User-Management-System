@@ -11,7 +11,6 @@ import Swal from "sweetalert2";
 import { AiOutlineMinus, AiOutlinePlus } from 'react-icons/ai'
 import Question from "./Question"
 
-const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
 const AccountRow = tw.div` grid w-full`
 const GridRow = tw.div`flex flex-wrap flex-row`
 const DetailRow = tw.div`border rounded-lg border-gray-400 my-3 w-8/12`
@@ -21,10 +20,10 @@ const CardContainer = tw.div`mt-10 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 sm:pr-10 md
 const InfoRow = tw.div`flex flex-row border-b border-gray-400 px-3 py-5`
 const InfoRowLast = tw.div`flex flex-row py-5 px-3`
 
-const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
-const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
-const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
 const Line = tw.hr`m-8 w-full h-0`
+const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
+const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
+const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
 const TabContent = tw(motion.div)`mt-6 flex flex-wrap sm:-mr-10 md:-mr-6 lg:-mr-12`;
 
 
@@ -117,22 +116,22 @@ export default function AccountDetails(location) {
     //     
     useEffect(() => {
         const fetchData = async () => {
-            // await axios.get(`${config.baseUrl}/u/user/subscriptions`)
-            //     .then((response) => {
-            //         setSubscriptions(Object.values(response.data.subscriptions)[1]);
-            //     })
-            //     .catch((error) => {
-            //         console.log(error);
-            //     })
+            await axios.get(`${config.baseUrl}/u/user/subscriptions`)
+                .then((response) => {
+                    setSubscriptions(Object.values(response.data.subscriptions)[1]);
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
 
-            // await axios.get(`${config.baseUrl}/u/user/information`)
-            //     .then((response) => {
-            //         setUserInformation(response.data.content[0])
-            //         console.log(response.data.content[0])
-            //     })
-            //     .catch((error) => {
-            //         console.log(error);
-            //     })
+            await axios.get(`${config.baseUrl}/u/user/information`)
+                .then((response) => {
+                    setUserInformation(response.data.content[0])
+                    console.log(response.data.content[0])
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
         }
         fetchData();
     }, []);
@@ -218,7 +217,6 @@ export default function AccountDetails(location) {
                                 id={1}
                                 header={"Password"}
                                 content={"*".repeat(20)}
-                                sucess={"Your password have been successfully updated!"}
                                 title={'Do I have to allow the use of cookies?'}
                                 info={'Unicorn vinyl poutine brooklyn, next level direct trade iceland. Shaman copper mug church-key coloring book, whatever poutine normcore fixie cred kickstarter post-ironic street art.'}
                             />

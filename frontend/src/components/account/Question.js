@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 
 import axios from "axios";
 import * as Yup from "yup";
-import tw from 'twin.macro';
 import config from "../../Config";
+import tw, { css } from "twin.macro";
 import styled from "styled-components";
 import { Formik, Form, useField } from 'formik';
 import { AiOutlineMinus, AiOutlinePlus, AiOutlineAlert } from 'react-icons/ai'
@@ -39,7 +39,7 @@ const MyTextInput = ({ label, ...props }) => {
     );
 };
 
-const Question = ({ title, info, header, content }) => {
+const Question = ({ header, content }) => {
     const [expanded, setExpanded] = useState(false);
     const [message, setMessage] = React.useState({ data: "", type: "alert-danger" });
     const [success, setSuccess] = React.useState({ data: "", type: "alert-danger" })
@@ -107,6 +107,7 @@ const Question = ({ title, info, header, content }) => {
                 <h4 style={{ fontWeight: "bold" }} onClick={() => setExpanded(!expanded)} className='question-title'>
                     {header}
                 </h4>
+                <div tw="w-8/12">{content}</div>
                 <button className='btn' onClick={() => setExpanded(!expanded)}>
                     {expanded ? <AiOutlineMinus /> : <AiOutlinePlus />}
                 </button>
@@ -133,7 +134,7 @@ const Question = ({ title, info, header, content }) => {
                         {success.data.length > 0 ? (
                             <div css={[tw`mt-5`]}>
                                 <div css={[tw`bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative`]} role="alert">
-                                    <span css={[tw`block sm:inline`]} style={{ display: "flex" }} > {success.data}</span>
+                                    <span css={[tw`block sm:inline`]} style={{ display: "flex" }} >{success.data}</span>
                                     {/* <span css={[tw`block sm:inline`]}>Something seriously bad happened.</span> */}
                                     <span css={[tw`absolute top-0 bottom-0 right-0 px-4 py-3`]} onClick={() => setMessage({ data: "", type: "" })}>
                                         <svg css={[tw`fill-current h-6 w-6 text-green-500`]} role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" /></svg>
