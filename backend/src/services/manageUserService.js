@@ -430,11 +430,19 @@ module.exports.lockUser = (userid) => {
                 resolve(err);
             } else {
                 let query = `UPDATE 
-                                logins
-                            SET
-                                status = 4
+                                user_management_system.logins 
+                            SET 
+                                status = 4 
                             WHERE 
-                                user_id = ?;
+                                user_id = (
+                                select 
+                                    user_id 
+                                from 
+                                    user_management_system.users 
+                                where 
+                                    user_guid = ?
+                                )
+                            ;
                             `;
                 connection.query(query, [userid], (err, results) => {
                     if (err) {
@@ -491,6 +499,36 @@ module.exports.deleteRefreshToken = (token) => {
                                 refresh_token = ?;
                             `;
                 connection.query(query, [token], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject(err)
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+
+module.exports.getAllUserInformation = (user_id) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err)
+            } else {
+                let query = `
+                SELECT 
+                    * 
+                    FROM 
+                    user_management_system.logins as logins, 
+                    user_management_system.users as users 
+                    where 
+                    users.user_id = logins.user_id 
+                    and users.user_id = ?;
+                `
+                connection.query(query, [user_id], (err, results) => {
                     if (err) {
                         console.log(err)
                         reject(err)

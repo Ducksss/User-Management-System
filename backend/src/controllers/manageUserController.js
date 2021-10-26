@@ -501,7 +501,31 @@ exports.getUserPrivilege = async (req, res, next) => {
         let { user_id } = req;
         let results = await manageUsers.getRole(user_id);
 
-        console.log("GET USER PRIVILEGE WAS HERE!!!")
+        return res.status(200).send(codes(200, null, results));
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
+}
+
+// Used by the header and other components to generate different view based on role
+exports.getUserPrivilege = async (req, res, next) => {
+    try {
+        let { user_id } = req;
+        let results = await manageUsers.getRole(user_id);
+
+        return res.status(200).send(codes(200, null, results));
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send(codes(500));
+    }
+}
+
+exports.getUserInformation = async (req, res, next) => {
+    try {
+        let { user_id } = req;
+        let results = await manageUsers.getAllUserInformation(user_id);
+
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
         console.log(error)

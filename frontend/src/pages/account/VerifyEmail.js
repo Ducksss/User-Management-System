@@ -10,12 +10,9 @@ import illustration from "images/login-illustration.svg";
 
 // imports
 import axios from "axios";
-import * as Yup from "yup";
 import config from "../../Config.js";
 import tw, { css } from "twin.macro";
-import { IoWarning } from "react-icons/io5";
 import { SyncLoader } from "react-spinners";
-import { useHistory } from "react-router-dom";
 import { Container as ContainerBase } from "components/misc/Layouts";
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center`;
