@@ -33,16 +33,13 @@ exports.config = async (req, res, next) => {
 exports.createCustomer = async (req, res, next) => {
     try {
         const { email, user_id } = req;
-
         // Create a new customer object
         const customer = await stripe.customers.create({ email: email });
         await subscriptionService.insertStripeCustomerInformation(customer.id, user_id)
-
         // Save the customer.id in your database alongside your user.
         // We're simulating authentication with a cookie.
         next();
     } catch (e) {
-
     }
 };
 
