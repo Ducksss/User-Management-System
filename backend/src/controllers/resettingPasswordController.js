@@ -6,6 +6,10 @@ const moment = require("moment");
 const config = require("../config/config");
 const { codes } = require('../config/codes');
 
+// import error handler 
+const resettingPasswordControllerErrorHandler = require('../middlewares/errorHandler')
+let displayError = resettingPasswordControllerErrorHandler.errorHandlerMiddleware
+
 // services
 const loginService = require('../services/loginService');
 const manageUsers = require('../services/manageUserService');
@@ -28,6 +32,7 @@ exports.generateOTP = async (req, res, next) => {
 
         // if no user, break and don't send any email
         if (userInformation.length != 1) {
+            console.log(new displayError(401, "Invalid Credentials").printError());
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
         }
 
@@ -284,13 +289,21 @@ exports.generateOTP = async (req, res, next) => {
                 </div>`
         });
 
+
+        console.log(new displayError(200, "Success").printError());
         return res.status(200).send(codes(200, "", data));
     } catch (e) {
         console.log(e)
 
-        if(e == 'Insertion of OTP has failed') return res.status(401).send(codes(401, 'Insertion of OTP has failed'))
+        if(e == 'Insertion of OTP has failed') {
+            console.log(new displayError(200, "Success").printError());
+            return res.status(401).send(codes(401, 'Insertion of OTP has failed'))
+        }
 
-        return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
+        else {
+            console.log(new displayError(500, "Unable to complete update (users) operation").printError());
+            return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
+        }
     }
 }
 
@@ -302,31 +315,48 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
 
         let result = await resettingPasswordService.verifyToken(user_guid, verificationCode)
 
-        if (result.length !== 1) return res.status(403).send(codes(403));
+        if (result.length !== 1) {
+            console.log(new displayError(403, "Forbidden").printError());
+            return res.status(403).send(codes(403));
+        }
+
 
         if (result[0].verification_code !== verificationCode) {
+            console.log(new displayError(403, "Forbidden").printError());
             return res.status(403).send(codes(403), "", "Your token has expired. Please try again");
         }
 
-        if (result[0].type === 1) return res.status(403).send(codes(403), "", "It has already been done");
+        if (result[0].type === 1) {
+            console.log(new displayError(403, "Forbidden").printError());
+            return res.status(403).send(codes(403), "", "It has already been done");
+        }
+        
         
         const currentUTCTiming = moment.utc();
         const databaseTiming = moment.utc(result[0].created_at);
         const isPassedLimit = (currentUTCTiming - databaseTiming) / (10 * 60 * 100) > 5;
 
         if (isPassedLimit) {
+            console.log(new displayError(408, "Request Timeout").printError());
             return res.status(408).send(codes(408)); 
         } else {
-            if (part === "store") next();
-            return res.status(204).send(codes(204));
+            if (part === "store") {
+                next();
+                console.log(new displayError(204, "No Content").printError());
+                return res.status(204).send(codes(204));
+            }
+            
+            
         }
 
     } catch (error) {
         if (error.name === "TokenExpiredError") {
+            console.log(new displayError(401, "Forbidden").printError());
             return res.status(401).send(codes(401))
         }
 
         console.log(error)
+        console.log(new displayError(500, "Internal Server Error").printError());
         return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
     }
 }
@@ -340,20 +370,32 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
         let { currentPassword, oldPassword1, oldPassword2 } = userPasswordHistory
 
         if (!incomingPassword) {
+            console.log(new displayError(400, "Bad Request").printError());
             return res.status(400).send(codes(400));
         } else {
             let isRepeated0 = await bcrypt.compare(incomingPassword, currentPassword)
 
-            if (isRepeated0) return res.status(401).send(codes(401));
+            if (isRepeated0) {
+                return res.status(401).send(codes(401));
+            }
+            
 
             if (oldPassword1) {
                 let isRepeated1 = await bcrypt.compare(incomingPassword, oldPassword1)
-                if (isRepeated1) return res.status(401).send(codes(401));
+                if (isRepeated1) {
+                    console.log(new displayError(401, "Unathorised").printError());
+                    return res.status(401).send(codes(401));
+                }
+                
             }
 
             if (oldPassword2) {
                 let isRepeated2 = await bcrypt.compare(incomingPassword, oldPassword2)
-                if (isRepeated2) return res.status(401).send(codes(401));
+                if (isRepeated2) {
+                    console.log(new displayError(401, "Unathorised").printError());
+                    return res.status(401).send(codes(401));
+                }
+                
             }
 
             if (part === "store") {
@@ -363,12 +405,22 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
                 req.verification_guid = verification_guid
                 next();
             } else {
+                console.log(new displayError(200, "Success").printError());
                 return res.status(200).send(codes(200));
             }
         }
     } catch (error) {
-        if(error == 'none found') return res.status(404).semd(codes(404))
-        return res.status(500).send(codes(500));
+        if(error == 'none found') {
+            console.log(new displayError(404, "Not Found").printError());
+            return res.status(404).semd(codes(404))
+        }
+
+        else {
+            console.log(new displayError(500, "Internal Server Error").printError());
+            return res.status(500).send(codes(500));
+        }
+        
+        
     }
 }
 
@@ -383,10 +435,19 @@ exports.updateNewPassword = async (req, res, next) => {
         await resettingPasswordService.verificationCompleted(verification_guid)
 
         await resettingPasswordService.updateCurrentPassword(user_guid, hashedIncomingPassword, currentPassword, oldPassword1)
+        console.log(new displayError(200, "Success").printError());
         return res.status(200).send(codes(200));
     } catch (err) {
     
-        if(err = 'cannot update') return res.status(401).send(codes(401))
-        return res.status(500).send(codes(500));
+        if(err = 'cannot update') {
+            console.log(new displayError(401, "Unathorised").printError());
+            return res.status(401).send(codes(401))
+        }
+
+        else {
+            console.log(new displayError(500, "Internal Server Error").printError());
+            return res.status(500).send(codes(500));
+        }
+        
     }
 }

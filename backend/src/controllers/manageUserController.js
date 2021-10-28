@@ -11,6 +11,10 @@ const validators = require('../middlewares/validators');
 // const rsaDecryption = require('../middlewares/rsaDecryption');
 // const key = require('../routes/encryptionRoute')
 
+// import error handler 
+const manageUserControllerErrorHandler = require('../middlewares/errorHandler')
+let displayError = manageUserControllerErrorHandler.errorHandlerMiddleware
+
 // services
 const manageUsers = require('../services/manageUserService')
 
@@ -30,11 +34,14 @@ exports.checkDuplicateEmails = async (req, res, next) => {
         let results = await manageUsers.getEmail(email);
 
         if (results.length === 1) {
+            console.log(new displayError(409, "The email has already been taken.").printError());
             return res.status(409).send(codes(409, null, "The email has already been taken."))
         } else {
+            console.log(new displayError(200, "Success").printError());
             return res.status(200).send(codes(200, null, results));
         }
     } catch (error) {
+        console.log(new displayError(500, "Internal Server Error").printError());
         console.log(error)
         return res.status(500).send(codes(500));
     }
@@ -47,11 +54,14 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
         let results = await manageUsers.getNumber(number);
 
         if (results.length === 1) {
+            console.log(new displayError(409, "The number has already been taken.").printError());
             return res.status(409).send(codes(409, null, "The number has already been taken."))
         } else {
+            console.log(new displayError(200, "Success").printError());
             return res.status(200).send(codes(200, null, results));
         }
     } catch (error) {
+        console.log(new displayError(500, "Internal Server Error").printError());
         console.log(error)
         return res.status(500).send(codes(500));
     }
@@ -71,6 +81,7 @@ exports.addUser = async (req, res, next) => {
                 contact: validators.validateInt(req.body.contact)
             }
         } catch (error) {
+            console.log(new displayError(406, "Not Acceptable").printError());
             console.log(error.message);
             return res.status(406).send(codes(406, 'Not Acceptable'));
         }
@@ -100,6 +111,7 @@ exports.addUser = async (req, res, next) => {
         next();
     } catch (error) {
         console.log(error)
+        console.log(new displayError(500, "Internal Server Error").printError());
         return res.status(500).send(codes(500));
     }
 };
@@ -349,8 +361,10 @@ exports.generateVerificationEmail = async (req, res, next) => {
                 </div>`
         });
 
+        console.log(new displayError(200, "Success").printError());
         return res.status(200).send(codes(200));
     } catch (error) {
+        console.log(new displayError(500, "Internal Server Error").printError());
         return res.status(500).send(codes(500));
     }
 }
@@ -367,21 +381,27 @@ exports.verifyVerificationEmail = async (req, res, next) => {
         let result = await manageUsers.verifyVerificationEmailToken(user_guid)
             .catch((error) => {
                 console.log(error);
+                console.log(new displayError(401, "Failed to verify.").printError());
                 return res.status(401).send(codes(401, 'Failed to verify.'));
             });
 
         if (result.length !== 1) {
+            console.log(new displayError(403, "Forbidden").printError());
             return res.status(403).send(codes(403));
         }
 
         await manageUsers.updateLoginStatus(user_guid, 0)
             .catch((error) => {
                 console.log(error);
+                console.log(new displayError(401, "Failed to verify.").printError());
                 return res.status(401).send(codes(401, 'Failed to verify.'));
             });
 
+        console.log(new displayError(200, "Success").printError());
         return res.status(200).send(codes(200));
+        
     } catch (error) {
+        console.log(new displayError(500, "Internal Server Error").printError());
         return res.status(500).send(codes(500));
     }
 }
@@ -397,9 +417,11 @@ exports.generate2FA = async (req, res, next) => {
         await manageUsers.add2FA(user_guid, secret.base32)
         let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
 
+        console.log(new displayError(200, "Success").printError());
         return res.status(200).send(codes(200, { qrcodeURL: qrcodeURL }));
     } catch (error) {
         console.log(error)
+        console.log(new displayError(500, "Internal Server Error").printError());
         return res.status(500).send(codes(500));
     }
 }
@@ -417,6 +439,7 @@ exports.refreshToken = async (req, res) => {
 
             if (payload && (payload.exp * 1000 <= now)) {
                 res.clearCookie('refreshToken')
+                console.log(new displayError(401, "Session Expired").printError());
                 return res.status(401).send(codes(401, 'Session Expired'))
             }
 
@@ -429,6 +452,7 @@ exports.refreshToken = async (req, res) => {
                     await manageUsers.lockUser(userId)
                     await manageUsers.deleteRefreshToken(refreshToken)
 
+                    console.log(new displayError(401, "Locked Out").printError());
                     return res.status(401).send(codes(401, 'locked out.'))
                 } else {
                     await manageUsers.updateTimesUsed(refreshToken, (getUser[0].times_used + 1))
@@ -458,17 +482,21 @@ exports.refreshToken = async (req, res) => {
                     maxAge: 60 * 60 * 24 * 3 * 1000,
                     sameSite: "none",
                 })
+                console.log(new displayError(200, "Success").printError());
                 return res.status(200).send(token);
             } else {
                 res.clearCookie('refreshToken')
+                console.log(new displayError(401, "Unathorised").printError());
                 return res.status(401).send(codes(401))
             }
 
         } catch (error) {
             console.log(error);
+            console.log(new displayError(500, "Internal Server Error").printError());
             return res.status(500).send(codes(500))
         }
     } else {
+        console.log(new displayError(401, "No token is detected").printError());
         return res.status(401).send(codes(401, 'No token is detected.'))
     }
 }
@@ -484,16 +512,20 @@ exports.logout = async (req, res) => {
             if (getUser.length == 1) {
                 await manageUsers.deleteRefreshToken(refreshToken)
                 res.clearCookie('refreshToken')
+                console.log(new displayError(204, "No content").printError());
                 return res.status(204).send()
             } else {
                 res.clearCookie('refreshToken')
+                console.log(new displayError(500, "Internal Server Error").printError());
                 return res.status(500).send(codes(500))
             }
         } catch (error) {
             console.log(error);
+            console.log(new displayError(500, "Internal Server Error").printError());
             return res.status(500).send(codes(500))
         }
     } else {
+        console.log(new displayError(500, "Internal Server Error").printError());
         return res.status(500).send(codes(500))
     }
 }
@@ -504,9 +536,11 @@ exports.getUserPrivilege = async (req, res, next) => {
         let { user_guid } = req;
         let results = await manageUsers.getRole(user_guid);
 
+        console.log(new displayError(200, "Success").printError());
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
         console.log(error)
+        console.log(new displayError(500, "Internal Server Error").printError());
         return res.status(500).send(codes(500));
     }
 }

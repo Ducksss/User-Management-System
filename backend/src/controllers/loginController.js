@@ -3,6 +3,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const config = require('../config/config');
 
+// error handler
+const loginControllerErrorHandler = require('../middlewares/errorHandler')
+let displayError = loginControllerErrorHandler.errorHandlerMiddleware
+//import internalErrorFn from '../controllers/errorHandler'
+//import loginControllerErrorHandler from '../controllers/errorHandler';
+
 // Importing service's layer
 const loginService = require('../services/loginService');
 const manageUsers = require('../services/manageUserService');
@@ -19,21 +25,25 @@ exports.processUserLogin = async (req, res, next) => {
 
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
+            console.log(new displayError(401, "Invalid Credentials").printError());
             return res.status(401).send(codes(401, 'Invalid Credentials.'));
         }
 
         // Check for pending users, i.e. haven't verified their account yet
         if (results[0].status == 2) {
+            console.log(new displayError(401, "Unverified").printError());
             return res.status(401).send(codes(401, 'Unverified.'));
         }
 
         // Checking for banned user
         if (results[0].status == 1) {
+            console.log(new displayError(403, "Banned").printError());
             return res.status(403).send(codes(403, 'Banned.'));
         }
 
         // check for locked account
         if (results[0].login_attempt == 10) {
+            console.log(new displayError(403, "Locked out ").printError());
             return res.status(403).send(codes(403, 'Locked Out.'));
         }
 
@@ -69,18 +79,23 @@ exports.processUserLogin = async (req, res, next) => {
                 })
                 
                 await manageUsers.updateLoginAttempts(0, results[0].user_guid);
+                console.log(new displayError(200, "Success").printError());
                 return res.status(200).send(data);
               
             } else {
+                console.log(new displayError(401, "Login failed").printError());
                 return res.status(401).send(codes(401, 'Login failed.'));
             }
 
         } else {
             await manageUsers.updateLoginAttempts(results[0].login_attempt, results[0].user_guid);
+            console.log(new displayError(401, "Login failed").printError());
             return res.status(401).send(codes(401, 'Login failed.'));
         }
-    } catch (error) {
-        console.log(error)
-        return res.status(500).send(codes(500, 'Internal error'));
+    } 
+    
+    catch (error) {
+        console.log(new displayError(500, "Internal Error").printError());
+        return res.status(500).send(codes(500, 'Internal Error'));
     }
 }

@@ -3,6 +3,9 @@ const cors = require('cors')
 const config = require('./src/config/config');
 const formData = require('express-form-data');
 const cookieParser = require('cookie-parser');
+
+const ErrorHandler = require('./src/middlewares/errorHandler')
+let displayError = ErrorHandler.errorHandlerMiddleware
 // const sockets = require('./src/socket')
 //const dummyUserFn = require('./src/middlewares/dummyUserFn');
 
@@ -70,7 +73,20 @@ router.use((err, req, res, next) => {
         //Handle file type and max size of image
         return res.send(err.message);
     }
+
+    if (err instanceof errorHandlerMiddleware) {
+        return res.status(err.code).send(err.printError());
+    }
 });
+
+// router.use(errorLogger);
+// router.use(errorResponse);
+
+
+// app.use((err, res, req, next) => {
+//     if (err instanceof errorHandlerMiddleware) 
+//     return res.status(err.code).send(err.printError());
+// });
 
 process.on('uncaughtException', function (error, origin) {
     //Handle the error safely. 

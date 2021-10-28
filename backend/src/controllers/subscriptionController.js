@@ -1,3 +1,7 @@
+// import error handler 
+const subscriptionControllerErrorHandler = require('../middlewares/errorHandler')
+let displayError = subscriptionControllerErrorHandler.errorHandlerMiddleware
+
 // Status codes
 const { codes } = require('../config/codes')
 const config = require('../config/config');
@@ -49,6 +53,7 @@ exports.createCustomer = async (req, res, next) => {
             clientSecret: subscription.latest_invoice.payment_intent.client_secret,
         });
     } catch (error) {
+        console.log(new displayError(400, "Bad Request").printError());
         return res.status(400).send({ error: { message: error.message } });
     }
 };
@@ -76,6 +81,7 @@ exports.createSubscription = async (req, res, next) => {
         });
     } catch (error) {
         console.log(error)
+        console.log(new displayError(400, "Bad Request").printError());
         return res.status(400).send({ error: { message: error.message } });
     }
 };
@@ -92,6 +98,7 @@ exports.cancelSubscription = async (req, res, next) => {
 
         res.send({ subscription: deletedSubscription });
     } catch (error) {
+        console.log(new displayError(400, "Bad Request").printError());
         return res.status(400).send({ error: { message: error.message } });
     }
 };
