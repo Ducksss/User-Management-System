@@ -2,7 +2,7 @@
 const config = require('../config/config');
 const pool = require('../config/database')
 
-module.exports.updateSubscription = (user_id, hashedIncomingPassword, currentPassword, oldPassword1) => {
+module.exports.updateSubscription = (stripeSubscriptionID, stripeStatus, currentPeriodEnd, customerID, productID) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -10,17 +10,72 @@ module.exports.updateSubscription = (user_id, hashedIncomingPassword, currentPas
             } else {
                 let query = `
                             UPDATE 
-                                user_management_system.logins 
+                                subscriptions
                             SET 
-                                password_hash = ?,
-                                pasword_hash_history_1 = ?,
-                                pasword_hash_history_2 = ?
+                                stripe_status = ?,
+                                current_period_end = ?,
+                                customer_id = ?,
+                                product_id = ?
                             WHERE 
-                                user_id = ?              
+                                stripe_subscription_id = ?              
                             `;
-                connection.query(query, [hashedIncomingPassword, currentPassword, oldPassword1, user_id], (err, results) => {
+                connection.query(query, [stripeStatus, currentPeriodEnd, customerID, productID, stripeSubscriptionID], (err, results) => {
                     if (err) {
+                        console.log(err)
                         reject('cannot update')
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+module.exports.createSubscription = (stripeSubscriptionID, stripeStatus, currentPeriodEnd, customerID, productID) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            INSERT INTO subscriptions (
+                                stripe_subscription_id, stripe_status, 
+                                current_period_end,
+                                customer_id, product_id) 
+                            values 
+                            (?, ?, ?, ?, ?)             
+                            `;
+                connection.query(query, [stripeSubscriptionID, stripeStatus, currentPeriodEnd, customerID, productID], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject('cannot update')
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+module.exports.findSubscription = (subscriptionID) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            SELECT 
+                                *
+                            FROM   
+                                subscriptions
+                            WHERE  
+                                stripe_subscription_id = ?           
+                            `;
+                connection.query(query, [subscriptionID], (err, results) => {
+                    if (err) {
+                        reject('No subscription')
                     } else {
                         resolve(results)
                     }

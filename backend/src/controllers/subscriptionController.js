@@ -2,6 +2,7 @@
 const { codes } = require('../config/codes')
 const config = require('../config/config');
 const cookieParser = require('cookie-parser');
+const subscriptionService = require('../services/subscriptionService')
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2020-08-27',
     appInfo: { // For sample support and debugging, not required for production:
@@ -198,10 +199,23 @@ exports.webhook = async (req, res, next) => {
             // If you want to manually send out invoices to your customers
             // or store them locally to reference to avoid hitting Stripe rate limits.
             break
+        
         case 'customer.subscription.updated':
+        case 'customer.subscription.deleted':
             const subscription = event.data.object;
             console.log(event.data.object)
-            subscriptionID = subscription.id
+            let stripeSubscriptionID = subscription.id
+            let subscriptionData = await subscriptionService.findSubscription(stripeSubscriptionID)
+            console.log(subscriptionData)
+            if(subscriptionData.length == 0){
+                console.log("it is entering here 1")
+                console.log(stripeSubscriptionID, subscription.status, subscription.current_period_end, subscription.customer, subscription.plan.product)
+                subscriptionData = await subscriptionService.createSubscription(stripeSubscriptionID, subscription.status, subscription.current_period_end, subscription.customer, subscription.plan.product )
+            }else{
+                console.log("it is entering here 2")
+                subscriptionData = await subscriptionService.updateSubscription(stripeSubscriptionID, subscription.status, subscription.current_period_end, subscription.customer, subscription.plan.product)
+            }
+            
             // If you want to manually send out invoices to your customers
             // or store them locally to reference to avoid hitting Stripe rate limits.
             break;
