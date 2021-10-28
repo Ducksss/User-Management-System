@@ -100,7 +100,6 @@ exports.subscriptions = async (req, res, next) => {
 exports.webhook = async (req, res, next) => {
     // Retrieve the event by verifying the signature using the raw body and secret.
     let event;
-    console.log(process.env.STRIPE_WEBHOOK_SECRET)
     try {
         event = stripe.webhooks.constructEvent(
             req.rawBody,
@@ -196,6 +195,13 @@ exports.webhook = async (req, res, next) => {
             break;
         case 'invoice.finalized':
             console.log(event.data.object)
+            // If you want to manually send out invoices to your customers
+            // or store them locally to reference to avoid hitting Stripe rate limits.
+            break
+        case 'customer.subscription.updated':
+            const subscription = event.data.object;
+            console.log(event.data.object)
+            subscriptionID = subscription.id
             // If you want to manually send out invoices to your customers
             // or store them locally to reference to avoid hitting Stripe rate limits.
             break;
