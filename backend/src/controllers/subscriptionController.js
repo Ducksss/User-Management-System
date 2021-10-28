@@ -127,8 +127,6 @@ exports.webhook = async (req, res, next) => {
     // Review important events for Billing webhooks
     // https://stripe.com/docs/billing/webhooks
     // Remove comment to see the various objects sent for this sample
-    console.log(event.type)
-    console.log("event type")
     switch (event.type) {
         case 'invoice.payment_succeeded':
             if (dataObject['billing_reason'] == 'subscription_create') {
@@ -207,32 +205,16 @@ exports.webhook = async (req, res, next) => {
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted':
             const subscription = event.data.object;
-            console.log(event.data.object)
             let stripeSubscriptionID = subscription.id
             let subscriptionData = await subscriptionService.findSubscription(stripeSubscriptionID)
-            console.log(subscriptionData)
             if(subscriptionData.length == 0){
-                console.log("it is entering here 1")
-                console.log(stripeSubscriptionID, subscription.status, subscription.current_period_end, subscription.customer, subscription.plan.product)
                 subscriptionData = await subscriptionService.createSubscription(stripeSubscriptionID, subscription.status, subscription.current_period_end, subscription.customer, subscription.plan.product )
             }else{
-                console.log("it is entering here 2")
                 subscriptionData = await subscriptionService.updateSubscription(stripeSubscriptionID, subscription.status, subscription.current_period_end, subscription.customer, subscription.plan.product)
             }
             
             // If you want to manually send out invoices to your customers
             // or store them locally to reference to avoid hitting Stripe rate limits.
-            break;
-        case 'customer.subscription.deleted':
-            if (event.request != null) {
-                console.log(event.data.object)
-                // handle a subscription cancelled by your request
-                // from above.
-            } else {
-                console.log(event.data.object)
-                // handle subscription cancelled automatically based
-                // upon your subscription settings.
-            }
             break;
         case 'customer.subscription.trial_will_end':
             console.log(event.data.object)
@@ -241,5 +223,5 @@ exports.webhook = async (req, res, next) => {
         default:
         // Unexpected event type
     }
-    res.sendStatus(200);
+    res.status(200).send(codes(200));
 };
