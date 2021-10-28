@@ -12,6 +12,9 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
     }
 });
 
+// Services
+const subscriptionService = require('../services/subscriptionService')
+
 // Get customerID when register is done.
 // Get user information
 exports.config = async (req, res, next) => {
@@ -28,16 +31,19 @@ exports.config = async (req, res, next) => {
 
 
 exports.createCustomer = async (req, res, next) => {
-    // Create a new customer object
-    const customer = await stripe.customers.create({
-        email: req.body.email,
-    });
+    try {
+        const { email, user_id } = req;
 
-    // Save the customer.id in your database alongside your user.
-    // We're simulating authentication with a cookie.
-    res.cookie('customer', customer.id, { maxAge: 900000, httpOnly: true });
+        // Create a new customer object
+        const customer = await stripe.customers.create({ email: email });
+        await subscriptionService.insertStripeCustomerInformation(customer.id, user_id)
 
-    res.status(200).send(codes(200, { customer: customer }));
+        // Save the customer.id in your database alongside your user.
+        // We're simulating authentication with a cookie.
+        next();
+    } catch (e) {
+
+    }
 };
 
 exports.createSubscription = async (req, res, next) => {
@@ -98,6 +104,7 @@ exports.subscriptions = async (req, res, next) => {
     });
     res.json({ subscriptions });
 };
+
 exports.webhook = async (req, res, next) => {
     // Retrieve the event by verifying the signature using the raw body and secret.
     let event;

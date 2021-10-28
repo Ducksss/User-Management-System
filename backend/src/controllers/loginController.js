@@ -7,6 +7,7 @@ const validators = require('../middlewares/validators');
 // Importing service's layer
 const loginService = require('../services/loginService');
 const manageUsers = require('../services/manageUserService');
+const subscriptionService = require('../services/subscriptionService')
 
 // Status codes
 const { codes } = require('../config/codes')
@@ -81,6 +82,8 @@ exports.processUserLogin = async (req, res, next) => {
             let insertRefreshToken = await manageUsers.addRefreshToken(results[0].user_guid, refresh_token)
 
             if (insertRefreshToken) {
+                let customerInformation = await subscriptionService.getCustomerInformation(results[0].user_id);
+
                 res.cookie('refreshToken', refresh_token, {
                     httpOnly: true,
                     secure: true,
@@ -89,6 +92,10 @@ exports.processUserLogin = async (req, res, next) => {
                     sameSite: "none",
                 })
 
+                res.cookie('customer', customerInformation[0].customer_stripe_id, {
+                    maxAge: 900000, httpOnly: true
+                });
+
                 await manageUsers.updateLoginAttempts(0, results[0].user_id);
                 return res.status(200).send(data);
             } else {
@@ -96,7 +103,7 @@ exports.processUserLogin = async (req, res, next) => {
             }
 
         } else {
-            await manageUsers.updateLoginAttempts(results[0].login_attempt, results[0].user_id);
+            await manageUsers.updateLoginAttempts(results[0].login_attempt + 1, results[0].user_id);
             return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
         }
     } catch (error) {
