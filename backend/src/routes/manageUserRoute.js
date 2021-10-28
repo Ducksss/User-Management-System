@@ -1,4 +1,5 @@
 const manageUserController = require('../controllers/manageUserController');
+const subscriptionController = require('../controllers/subscriptionController')
 const middlewares = require('../middlewares/middleware');
 const limiter = require('../middlewares/rateLimiter');
 
@@ -10,7 +11,7 @@ exports.route = router => {
     router.get('/api/u/user/logout', manageUserController.logout)
 
     // with middlewear
-    router.post('/api/u/user/create-account', limiter.registrationLimiter, manageUserController.addUser, manageUserController.generateVerificationEmail);
+    router.post('/api/u/user/create-account', limiter.registrationLimiter, manageUserController.addUser, subscriptionController.createCustomer, manageUserController.generateVerificationEmail);
     router.get('/api/u/user/information', middlewares.isLoggedIn, manageUserController.getUserInformation);
     router.post('/api/u/verify-email-verification', manageUserController.verifyVerificationEmail);
     router.get('/api/u/user/role', middlewares.isLoggedIn, manageUserController.getUserPrivilege);
