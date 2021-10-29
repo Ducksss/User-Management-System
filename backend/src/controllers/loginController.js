@@ -44,25 +44,25 @@ exports.processUserLogin = async (req, res, next) => {
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
             console.log(new displayError(401, "Invalid Credentials").printError());
-            return res.status(401).send(codes(401, 'Invalid Credentials.'));
+            return res.status(401).send(codes(401, 'Invalid Credentials.', 'Your email or password is invalid.'));
         }
 
         // Check for pending users, i.e. haven't verified their account yet
         if (results[0].status == 2) {
             console.log(new displayError(401, "Unverified").printError());
-            return res.status(401).send(codes(401, 'Unverified.'));
+            return res.status(401).send(codes(401, 'Unverified.', 'Please check your email. You need to verify your account.'));
         }
 
         // Checking for banned user
         if (results[0].status == 1) {
             console.log(new displayError(403, "Banned").printError());
-            return res.status(403).send(codes(403, 'Banned.'));
+            return res.status(403).send(codes(403, 'Banned.', "Your account has been banned. Please contact an administrator."));
         }
 
         // check for locked account
         if (results[0].login_attempt == 10) {
             console.log(new displayError(403, "Locked out ").printError());
-            return res.status(403).send(codes(403, 'Locked Out.'));
+            return res.status(403).send(codes(403, 'Locked Out.', 'Your account has been locked. Please reset your password before proceeding.'));
         }
 
         if (bcrypt.compareSync(password, results[0].password_hash)) {
@@ -104,18 +104,18 @@ exports.processUserLogin = async (req, res, next) => {
                 return res.status(200).send(data);
             } else {
                 console.log(new displayError(401, "Login failed").printError());
-                return res.status(401).send(codes(401, 'Login failed.'));
+                return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
             }
 
         } else {
             await manageUsers.updateLoginAttempts(results[0].login_attempt, results[0].user_guid);
             console.log(new displayError(401, "Login failed").printError());
-            return res.status(401).send(codes(401, 'Login failed.'));
+            return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
         }
     } 
     
     catch (error) {
         console.log(new displayError(500, "Internal Error").printError());
-        return res.status(500).send(codes(500, 'Internal Error'));
+        return res.status(500).send(codes(500, 'Internal Error', 'Please contact an administrator for help.'));
     }
 }
