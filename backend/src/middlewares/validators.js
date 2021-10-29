@@ -16,7 +16,7 @@ module.exports.validateText = (encrypted) => {
     let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
 
     if (validator.isEmpty(decrypted)) throw new Error("Missing Field");
-    if (!validator.isAlphanumeric(decrypted)) throw new Error("Input is not Alpha Numeric");
+    if (!validator.isAscii(decrypted)) throw new Error("Input is not valid");
     
     decrypted = validator.escape(decrypted)
     decrypted = validator.trim(decrypted)
@@ -28,7 +28,7 @@ module.exports.validateInt = (encrypted) => {
     let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
 
     if (validator.isEmpty(decrypted)) throw new Error("Missing Field");
-    if (!validator.isNumeric(decrypted)) throw new Error("Input is not a number");
+    if (!validator.isAscii(decrypted)) throw new Error("Input is not valid");
     
     decrypted = validator.escape(decrypted)
     decrypted = validator.trim(decrypted)
@@ -40,7 +40,7 @@ module.exports.validatePassword = (encrypted) => {
     let decrypted = rsaDecryption.resDecrypt(encrypted, key.privateKey);
 
     if (validator.isEmpty(decrypted)) throw new Error("Missing Field"); 
-    if (!validator.isAscii(decrypted)) throw new Error("Input is not Ascii");
+    if (!validator.isAscii(decrypted)) throw new Error("Password not accepted");
     
     return decrypted
 }

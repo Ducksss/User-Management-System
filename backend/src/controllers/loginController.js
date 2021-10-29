@@ -2,6 +2,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const config = require('../config/config');
+const validators = require('../middlewares/validators');
 
 // error handler
 const loginControllerErrorHandler = require('../middlewares/errorHandler')
@@ -18,10 +19,27 @@ const { codes } = require('../config/codes')
 
 // Get user information
 exports.processUserLogin = async (req, res, next) => {
-    const { email, password } = req.body;
+
     try {
+        //Decryption, Validation and Sanitization
+        let data = {}
+        try {
+            validators.validateEmail(req.body.email);
+            validators.validatePassword(req.body.password);
+
+            data = {
+                email: validators.validateEmail(req.body.email),
+                password: validators.validatePassword(req.body.password),
+            }
+        } catch (error) {
+            console.log(error.message);
+            return res.status(406).send(codes(406, 'Not Acceptable'));
+        }
+
+        let { email, password } = data;
+
         // Checking for invalid credentials
-        let results = await loginService.authenticateUser(email)
+        let results = await loginService.authenticateUser(email);
 
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
@@ -61,15 +79,18 @@ exports.processUserLogin = async (req, res, next) => {
                 })
             };
 
-            let refresh_token = jwt.sign({
-                _id: results[0].user_guid
-                }, config.REFRESH_TOKEN_SECRET, {
-                expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
-            })
+            let refresh_token = jwt.sign(
+                {
+                    _id: results[0].user_guid
+                }, config.REFRESH_TOKEN_SECRET,
+                {
+                    expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
+                }
+            )
 
             let insertRefreshToken = await manageUsers.addRefreshToken(results[0].user_guid, refresh_token)
 
-            if(insertRefreshToken) {
+            if (insertRefreshToken) {
                 res.cookie('refreshToken', refresh_token, {
                     httpOnly: true,
                     secure: true,
@@ -81,7 +102,6 @@ exports.processUserLogin = async (req, res, next) => {
                 await manageUsers.updateLoginAttempts(0, results[0].user_guid);
                 console.log(new displayError(200, "Success").printError());
                 return res.status(200).send(data);
-              
             } else {
                 console.log(new displayError(401, "Login failed").printError());
                 return res.status(401).send(codes(401, 'Login failed.'));

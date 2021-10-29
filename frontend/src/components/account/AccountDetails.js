@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { motion } from "framer-motion";
 import { Link, withRouter } from 'react-router-dom';
 import { Pencil } from 'react-bootstrap-icons'
 import tw from 'twin.macro';
@@ -7,21 +8,24 @@ import axios from "axios";
 //component
 import Slider from './Slider';
 import Swal from "sweetalert2";
-const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
-const AccountRow = tw.div` grid w-11/12`
+import { AiOutlineMinus, AiOutlinePlus } from 'react-icons/ai'
+import Question from "./Question"
+
+const AccountRow = tw.div` grid w-full`
 const GridRow = tw.div`flex flex-wrap flex-row`
-const DetailRow = tw.div`border rounded-lg border-gray-400  w-8/12 my-3`
-const LeftHeader = tw.div` text-xl font-black w-4/12`
+const DetailRow = tw.div`border rounded-lg border-gray-400 my-3 w-8/12`
+const LeftHeader = tw.div` text-xl font-black w-3/12`
+const CardContainer = tw.div`mt-10 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 sm:pr-10 md:pr-6 lg:pr-12`;
 
 const InfoRow = tw.div`flex flex-row border-b border-gray-400 px-3 py-5`
 const InfoRowLast = tw.div`flex flex-row py-5 px-3`
 
-const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
-const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
-const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
 const Line = tw.hr`m-8 w-full h-0`
+const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
+const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
+const Edit = tw.div`w-2/12 whitespace-nowrap text-right cursor-pointer`
+const TabContent = tw(motion.div)`mt-6 flex flex-wrap sm:-mr-10 md:-mr-6 lg:-mr-12`;
 
-// ^ dont cock up my tailwind i swear
 
 export default function AccountDetails(location) {
     let Toast = Swal.mixin({
@@ -37,13 +41,12 @@ export default function AccountDetails(location) {
         },
     });
 
+    const [userInformation, setUserInformation] = useState([]);
+
     const [data, setData] = useState({
         info: {
             title: 'Personal Info',
             data: {
-                Name: 'cao ni ma',
-                Email: 'nima@gmail.com',
-                Phone: '112323589234789'
             }
         },
         username: {
@@ -69,28 +72,7 @@ export default function AccountDetails(location) {
     const [showModal, setShowModal] = useState(false)
     const [sendData, setsendData] = useState('')
     const [edited, setedited] = useState(false)
-
-    const getUserDetails = () => {
-        //personal info has 3 keys, so have to loop to get all of it to display
-        if (data) {
-            let text = []
-            for (let i in data.info.data) {
-                text.push(data.info.data[i], <br />)
-            }
-            return text
-        } else {
-            return ''
-        }
-    }
-
-    const getRandom = () => {
-        let num = (Math.floor(Math.random() * 20))
-        let text = ''
-        for (let i = 0; i < num; i++) {
-            text += '*'
-        }
-        return text
-    }
+    const [expanded, setExpanded] = useState(false)
 
     const handleEdit = (e) => {
         setShowModal(true)
@@ -141,6 +123,15 @@ export default function AccountDetails(location) {
                 .catch((error) => {
                     console.log(error);
                 })
+
+            await axios.get(`${config.baseUrl}/u/user/information`)
+                .then((response) => {
+                    setUserInformation(response.data.content[0])
+                    console.log(response.data.content[0])
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
         }
         fetchData();
     }, []);
@@ -148,8 +139,23 @@ export default function AccountDetails(location) {
     if (!subscriptions) return '';
 
     const AccountSubscription = ({ subscription }) => {
-        return (              
-            <DetailRow>
+        return (
+            <DetailRow
+                key={1}
+                variants={{
+                    current: {
+                        opacity: 1,
+                        scale: 1,
+                        display: "flex",
+                    },
+                    hidden: {
+                        opacity: 0,
+                        scale: 0.8,
+                        display: "none",
+                    }
+                }}
+                transition={{ duration: 0.4 }}
+            >
                 <InfoRow>
                     <Header>Subscription ID:</Header>
                     <Content>{subscription.id}</Content>
@@ -175,54 +181,66 @@ export default function AccountDetails(location) {
             </DetailRow>
         )
     }
+
     return (
-        <MainContent>
+        <TabContent>
             <AccountRow>
                 {/* account details section */}
                 <GridRow>
                     <LeftHeader>Your Account</LeftHeader>
                     <DetailRow>
                         <InfoRow>
-                            <Header>Personal Info</Header>
-                            <Content>{getUserDetails()}</Content>
-                            <Edit onClick={() => handleEdit(data.info)}><Pencil /></Edit>
+                            <Header>First name</Header>
+                            <Content>{userInformation.first_name}</Content>
+                            <Edit onClick={() => handleEdit({
+                                title: 'Personal Info',
+                                data: {
+                                    "First Name": userInformation.first_name
+                                }
+                            })}><Pencil /></Edit>
                         </InfoRow>
                         <InfoRow>
-                            <Header>Username</Header>
-                            <Content>{data.username.data.Username}</Content>
-                            <Edit onClick={() => handleEdit(data.username)}><Pencil /></Edit>
+                            <Header>Last name</Header>
+                            <Content>{userInformation.last_name}</Content>
+                            <Edit onClick={() => handleEdit({
+                                title: 'Last name',
+                                data: {
+                                    "Last Name": userInformation.last_name
+                                }
+                            })}>
+                                <Pencil />
+                            </Edit>
                         </InfoRow>
-                        <InfoRow>
-                            <Header>Password</Header>
-                            <Content>{getRandom()}</Content>
-                            <Edit onClick={() => handleEdit(data.password)}><Pencil /></Edit>
-                        </InfoRow>
+                        <InfoRow style={{ display: "grid" }}>
+                            <Question
+                                key={3}
+                                id={1}
+                                header={"Password"}
+                                content={"*".repeat(20)}
+                                title={'Do I have to allow the use of cookies?'}
+                                info={'Unicorn vinyl poutine brooklyn, next level direct trade iceland. Shaman copper mug church-key coloring book, whatever poutine normcore fixie cred kickstarter post-ironic street art.'}
+                            />
 
-                        {/* inforowlast is used to remove the border bottom */}
-                        <InfoRowLast>
-                            <Header>TimeZone</Header>
-                            <Content>{data.timezone.data.Timezone}</Content>
-                            <Edit onClick={() => handleEdit(data.timezone)}><Pencil /></Edit>
-                        </InfoRowLast>
+                        </InfoRow>
                     </DetailRow>
                 </GridRow>
                 <Line />
                 <GridRow >
                     {subscriptions.map((s, i) => {
                         return (
-                        <>
-                            <LeftHeader>{i == 0 ? 'Subscriptions' : ''}</LeftHeader>
-                            <AccountSubscription key={s.id} subscription={s} />
-                        </>
+                            <>
+                                <LeftHeader>{i == 0 ? 'Subscriptions' : ''}</LeftHeader>
+                                <AccountSubscription key={s.id} subscription={s} />
+                            </>
                         )
                     })}
 
                 </GridRow>
                 {/* any other sections here */}
-                </AccountRow>
-                
+            </AccountRow>
+
             {/* slider */}
             <Slider show={showModal} hide={setShowModal} data={sendData} getData={e => newdata(e)} />
-        </MainContent>
+        </TabContent>
     )
 }

@@ -10,12 +10,9 @@ import illustration from "images/login-illustration.svg";
 
 // imports
 import axios from "axios";
-import * as Yup from "yup";
 import config from "../../Config.js";
 import tw, { css } from "twin.macro";
-import { IoWarning } from "react-icons/io5";
 import { SyncLoader } from "react-spinners";
-import { useHistory } from "react-router-dom";
 import { Container as ContainerBase } from "components/misc/Layouts";
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center`;
@@ -30,8 +27,7 @@ const FormContainer = tw.div`w-full flex-1 mt-8`;
 export default function VerifyEmail() {
     // Pre Defined Variables
     const logoLinkUrl = "http://localhost:3004/";
-    const signupUrl = "http://localhost:3004/signup";
-    const forgotPasswordUrl = "http://localhost:3004/account/forgot_password";
+    const signInUrl = "http://localhost:3004/login";
 
     // Team's Defined Variables
     const [currentStep, setCurrentStep] = React.useState(0);
@@ -79,9 +75,9 @@ export default function VerifyEmail() {
                         </div>
                         <FormContainer>
                             <p tw="mt-8 text-sm text-gray-600 text-center">
-                                Dont have an account?{" "}
-                                <a href={signupUrl} tw="border-b border-gray-500 border-dotted">
-                                    Sign Up
+                                Already have an account?{" "}
+                                <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
+                                    Sign In
                                 </a>
                             </p>
                         </FormContainer>

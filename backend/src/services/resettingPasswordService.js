@@ -3,7 +3,7 @@ config = require('../config/config');
 const pool = require('../config/database')
 
 // verify if email has been taken and translating email to UUID
-module.exports.insertVerificationCode = (user_guid, token) => {
+module.exports.insertVerificationCode = (user_id, token) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -11,11 +11,11 @@ module.exports.insertVerificationCode = (user_guid, token) => {
             } else {
                 let query = `
                             INSERT INTO user_management_system.verifications
-                                (verification_guid, user_guid, verification_code, created_at) 
+                                (user_id, verification_code, created_at) 
                             values 
-                                (UUID(), ?, ?, UTC_TIMESTAMP());
+                                (?, ?, UTC_TIMESTAMP());
                             `;
-                connection.query(query, [user_guid, token], (err, results) => {
+                connection.query(query, [user_id, token], (err, results) => {
                     if (err) {
                         reject('Insertion of OTP has failed')
                     } else {
@@ -28,7 +28,7 @@ module.exports.insertVerificationCode = (user_guid, token) => {
     })
 }
 
-module.exports.fetchInsertedVerificationCode = (user_guid, verificationCode) => {
+module.exports.fetchInsertedVerificationCode = (user_id, verificationCode) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -40,10 +40,10 @@ module.exports.fetchInsertedVerificationCode = (user_guid, verificationCode) => 
                             FROM 
                                 user_management_system.verifications 
                             WHERE 
-                                user_guid = ?
+                                user_id = ?
                                 and verification_code = ?                     
                             `;
-                connection.query(query, [user_guid, verificationCode], (err, results) => {
+                connection.query(query, [user_id, verificationCode], (err, results) => {
                     if (err) {
                         reject('Insertion of OTP has failed')
                     } else {
@@ -57,7 +57,7 @@ module.exports.fetchInsertedVerificationCode = (user_guid, verificationCode) => 
     })
 };
 
-module.exports.verifyToken = (user_guid, verificationCode) => {
+module.exports.verifyToken = (user_id, verificationCode) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -70,11 +70,11 @@ module.exports.verifyToken = (user_guid, verificationCode) => {
                                 user_management_system.verifications 
                             where 
                                 verification_code = ? 
-                                and user_guid = ? 
+                                and user_id = ? 
                             order by 
                                 created_at desc;         
                             `;
-                connection.query(query, [verificationCode, user_guid], (err, results) => {
+                connection.query(query, [verificationCode, user_id], (err, results) => {
                     if (err) {
                         reject(err)
                     } else {
@@ -87,7 +87,7 @@ module.exports.verifyToken = (user_guid, verificationCode) => {
     })
 }
 
-module.exports.retriveUserPasswordHistory = (user_guid) => {
+module.exports.retriveUserPasswordHistory = (user_id) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -101,9 +101,9 @@ module.exports.retriveUserPasswordHistory = (user_guid) => {
                             FROM 
                                 user_management_system.logins 
                             where 
-                                user_guid = ?;       
+                                user_id = ?;       
                             `;
-                connection.query(query, [user_guid], (err, results) => {
+                connection.query(query, [user_id], (err, results) => {
                     if (err) {
                         reject('none found')
                     } else {
@@ -116,7 +116,7 @@ module.exports.retriveUserPasswordHistory = (user_guid) => {
     })
 }
 
-module.exports.updateCurrentPassword = (user_guid, hashedIncomingPassword, currentPassword, oldPassword1) => {
+module.exports.updateCurrentPassword = (user_id, hashedIncomingPassword, currentPassword, oldPassword1) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -130,9 +130,9 @@ module.exports.updateCurrentPassword = (user_guid, hashedIncomingPassword, curre
                                 pasword_hash_history_1 = ?,
                                 pasword_hash_history_2 = ?
                             WHERE 
-                                user_guid = ?              
+                                user_id = ?              
                             `;
-                connection.query(query, [hashedIncomingPassword, currentPassword, oldPassword1, user_guid], (err, results) => {
+                connection.query(query, [hashedIncomingPassword, currentPassword, oldPassword1, user_id], (err, results) => {
                     if (err) {
                         reject('cannot update')
                     } else {
@@ -145,7 +145,7 @@ module.exports.updateCurrentPassword = (user_guid, hashedIncomingPassword, curre
     })
 }
 
-module.exports.verificationCompleted = (verification_guid) => {
+module.exports.verificationCompleted = (verification_id) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -157,9 +157,9 @@ module.exports.verificationCompleted = (verification_guid) => {
                             SET 
                                 type = 1
                             WHERE 
-                                verification_guid = ?
+                                verification_id = ?
                             `;
-                connection.query(query, [verification_guid], (err, results) => {
+                connection.query(query, [verification_id], (err, results) => {
                     if (err) {
                         reject('cannot update')
                     } else {

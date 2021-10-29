@@ -17,10 +17,11 @@ exports.isLoggedIn = async (req, res, next) => {
         let { user_guid, email } = payload
         let getLoggedInData = await manageUserService.isLoggedIn(user_guid);
         if (getLoggedInData.length == 1) {
-            let getSuspendedAccount = await manageUserService.isSuspended(user_guid);
+            let getSuspendedAccount = await manageUserService.isSuspended(getLoggedInData[0].user_id);
             if (getSuspendedAccount[0].status == 0) {
                 // not banned
                 req.user_guid = user_guid;
+                req.user_id = getLoggedInData[0].user_id;
                 req.email = email;
                 next();
             } else {
