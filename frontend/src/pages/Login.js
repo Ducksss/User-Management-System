@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from "react";
+import React, { useEffect, useState } from "react";
 
 // styling
 import styled from "styled-components";
@@ -17,14 +17,14 @@ import * as Yup from "yup";
 import Swal from 'sweetalert2';
 import config from "../Config.js";
 import tw, { css } from "twin.macro";
+import { resEncrypt } from '../RsaEncryption';
 import { SyncLoader } from "react-spinners";
 import { useHistory } from "react-router-dom";
 
 import { Formik, Form, useField } from 'formik';
 import { Toast, swalWithBootstrapButtons } from '../shared/swal';
 import { Container as ContainerBase } from "components/misc/Layouts";
-import { TokenContext } from "../components/TokenContext";
-
+import TokenManager from "shared/TokenManager.js";
 
 const Container = tw(ContainerBase)`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
 const Content = tw.div`max-w-screen-xl m-0 sm:mx-20 sm:my-16 bg-white text-gray-900 shadow sm:rounded-lg flex justify-center flex-1`;
@@ -71,11 +71,18 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   // styling
   const submitButtonText = "Sign In";
   const SubmitButtonIcon = LoginIcon;
-  let {token, setToken} = useContext(TokenContext)
+
+  const [publicKey, setPublicKey] = useState();
 
   useEffect(() => {
-    console.log(token);
-  }, [])
+    axios.get(`${config.baseUrl}/keys`)
+      .then((response) => {
+        let key = response.data.publicKey
+        console.log(response.data.publicKey);
+        setPublicKey(key);
+        console.log(publicKey)
+      });
+  });
 
   // team's defined variables
   const history = useHistory();
@@ -91,50 +98,27 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
   const validateLogininformation = (values) => {
     axios
       .post(`${config.baseUrl}/u/user/signin`, {
-        email: values.email,
-        password: values.password,
-      }, {withCredentials: true})
+        email: resEncrypt(values.email, publicKey),
+        password: resEncrypt(values.password, publicKey),
+      }, { withCredentials: true })
       .then((results) => {
         //access token into context
-        setToken(results.data.token)
+        TokenManager.setToken(results.data.token)
         // localStorage.setItem('token', results.data.token);
 
         localStorage.setItem('displayName', results.data.displayName);
         history.push({ pathname: "/" });
+        window.location.reload()
       })
       .catch((error) => {
-        if (error.response.data.code === 401) {
-          if (error.response.data.message === "Banned.") {
-            setMessage({
-              data: "Your account has been banned. Please contact an administrator",
-              type: "alert-danger",
-            });
-          } else if (error.response.data.message === "Locked Out.") {
-            setMessage({
-              data: "Your account has been locked. Please reset your password before proceeding.",
-              type: "alert-danger",
-            });
-          } else if (error.response.data.description === "Unverified.") {
-            setMessage({
-              data: "You account needs to be verified. Please check your email.",
-              type: "alert-danger",
-            });
-          } else {
-            setMessage({
-              data: "Your username or password is invalid.",
-              type: "alert-danger",
-            });
-          }
-
-        } else if (error.response.data.code === 500) {
+        if (error.response.data.code == 500) {
           setMessage({
             data: "Please contact an administrator for help.",
             type: "alert-danger",
           });
-
         } else {
           setMessage({
-            data: "Please accept your",
+            data: `${error.response.data.content}`,
             type: "alert-danger",
           });
         }
@@ -157,7 +141,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
           validateLogininformation(values);
           setSubmitting(false);
           bt.disabled = false;
-        }, 1000)
+        }, 300)
       }}
     >
       {({ isSubmitting }) => (
