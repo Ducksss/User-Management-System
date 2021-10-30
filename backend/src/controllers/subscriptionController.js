@@ -52,6 +52,7 @@ exports.createSubscription = async (req, res, next) => {
 
     try {
         const subscription = await stripe.subscriptions.create({
+            //pz insert here
             customer: "cus_KNJSNtDx8Szceq",
             items: [{
                 price: priceId,
