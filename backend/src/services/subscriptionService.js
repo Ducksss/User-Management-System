@@ -85,7 +85,90 @@ module.exports.findSubscription = (subscriptionID) => {
         })
     })
 }
-
+module.exports.updateInvoice = (stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            UPDATE 
+                                invoices
+                            SET 
+                                subscription_status = ?,
+                                amount_paid = ?,
+                                amount_remaining = ?,
+                                paid_at = ?
+                                fk_customer_id = ?
+                            WHERE 
+                                stripe_subscription_id = ?              
+                            `;
+                connection.query(query, [status, amountPaid, amountRemaining, paidAt, customerID, stripeSubscriptionID], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject('cannot update')
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+module.exports.createInvoice = (stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            INSERT INTO invoices (
+                                subscription_id, subscription_status, 
+                                amount_paid, amount_remaining,
+                                paid_at, fk_customer_id) 
+                            values 
+                            (?, ?, ?, ?, ?, ?)             
+                            `;
+                connection.query(query, [stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID], (err, results) => {
+                    if (err) {
+                        console.log(err)
+                        reject('cannot update')
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
+module.exports.findInvoice = (subscriptionID) => {
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                resolve(err);
+            } else {
+                let query = `
+                            SELECT 
+                                *
+                            FROM   
+                                invoices
+                            WHERE  
+                                subscription_id = ?           
+                            `;
+                connection.query(query, [subscriptionID], (err, results) => {
+                    if (err) {
+                        reject('No subscription')
+                    } else {
+                        resolve(results)
+                    }
+                    connection.release()
+                })
+            }
+        })
+    })
+}
 module.exports.insertStripeCustomerInformation = (stripe_customer_id, user_id) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
