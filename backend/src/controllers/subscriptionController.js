@@ -74,7 +74,6 @@ exports.invoicePreview = async (req, res, next) => {
     let customerID = "cus_KNJSNtDx8Szceq"
     try {
         let invoiceData = await subscriptionService.findInvoice(customerID)
-        console.log(invoiceData)
         res.status(200).send(codes(200, null, {
             invoiceData
         }));
@@ -111,7 +110,6 @@ exports.subscriptions = async (req, res, next) => {
         status: 'all',
         expand: ['data.default_payment_method'],
     });
-    console.log(subscriptions)
     res.json({ subscriptions });
 };
 
