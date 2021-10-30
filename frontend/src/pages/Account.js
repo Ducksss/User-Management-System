@@ -13,6 +13,7 @@ import TabGrid from "components/cards/TabCardGrid.js";
 //components
 import AccountDetails from 'components/account/AccountDetails';
 import Billing from 'components/account/Billing';
+import BillingHistory from 'components/account/BillingHistory';
 
 const MainContainer = tw.div`w-full`;
 const Headers = tw(SectionHeading)``;
@@ -30,7 +31,7 @@ const TabControl = styled.div`
 `;
 
 export default function Account() {
-    const tab = ['Account', 'Billing']
+    const tab = ['Account', 'Billing',"Billing History"]
     const [activeTab, setActiveTab] = useState(tab[0]);
 
     return (
@@ -51,7 +52,7 @@ export default function Account() {
                     </HeaderRow>
 
                     {/* content here  */}
-                    {activeTab == tab[0] ? <AccountDetails /> : <Billing />}
+                    {activeTab == tab[0] ? <AccountDetails /> : activeTab == tab[1] ? <Billing /> : <BillingHistory/>  }
                 </ContentWithPaddingXl>
             </Container>
             <Footer />

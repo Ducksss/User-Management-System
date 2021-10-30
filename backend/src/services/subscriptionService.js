@@ -155,7 +155,7 @@ module.exports.findInvoice = (subscriptionID) => {
                             FROM   
                                 invoices
                             WHERE  
-                                subscription_id = ?           
+                                fk_customer_id = ?           
                             `;
                 connection.query(query, [subscriptionID], (err, results) => {
                     if (err) {

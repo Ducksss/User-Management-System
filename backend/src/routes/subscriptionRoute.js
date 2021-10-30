@@ -6,5 +6,6 @@ exports.route = router => {
     router.get('/api/u/subscription/create-customer', subscriptionController.createCustomer);
     router.post('/api/u/subscription/create', subscriptionController.createSubscription);
     router.post('/api/u/subscription/cancel', subscriptionController.cancelSubscription);
+    router.get('/api/u/subscription/invoice', subscriptionController.invoicePreview);
     router.get('/api/u/subscription/subscriptions', subscriptionController.subscriptions);
 }

@@ -70,6 +70,17 @@ exports.createSubscription = async (req, res, next) => {
 };
 
 exports.invoicePreview = async (req, res, next) => {
+    //pz change this
+    let customerID = "cus_KNJSNtDx8Szceq"
+    try {
+        let invoiceData = await subscriptionService.findInvoice(customerID)
+        console.log(invoiceData)
+        res.status(200).send(codes(200, null, {
+            invoiceData
+        }));
+    } catch (error) {
+        return res.status(400).send(codes(400));
+    }
 };
 
 exports.cancelSubscription = async (req, res, next) => {
@@ -95,10 +106,12 @@ exports.subscriptions = async (req, res, next) => {
     // const customerId = req.cookies['customer'];
 
     const subscriptions = await stripe.subscriptions.list({
+        //pz enter customer id below
         customer: "cus_KNJSNtDx8Szceq",
         status: 'all',
         expand: ['data.default_payment_method'],
     });
+    console.log(subscriptions)
     res.json({ subscriptions });
 };
 
@@ -129,8 +142,6 @@ exports.webhook = async (req, res, next) => {
     // Remove comment to see the various objects sent for this sample
     switch (event.type) {
         case 'invoice.payment_succeeded':
-            console.log("payment succeeded")
-            console.log(event.data.object)
             const Invoice = event.data.object;
             let stripeSubscriptionID = Invoice.id;
             let status = Invoice.status;
@@ -174,66 +185,6 @@ exports.webhook = async (req, res, next) => {
             // };
 
             break;
-        case 'invoice.payment_failed':
-            console.log("invoice payment failed")
-            console.log(event.data.object)
-
-            const subscriptionID = invoice.subscription;
-            // If the payment fails due to card authentication required,
-            // an invoice.payment_failed event is sent, the subscription becomes past_due.
-            // Use this webhook to notify user that their payment has
-            // failed and to retrieve new card details.
-
-            const amount = parseFloat(invoice.amount_due / 100).toFixed(2);
-            const currentPeriodStart = dayjs(invoice.period_start * 1000).toDate();
-            const currentPeriodEnd = dayjs(invoice.period_end * 1000).toDate();
-
-            // Check if invoice exists in our Database already
-            const invoiceExists = await findInvoice(invoice.id);
-            if (invoiceExists) {
-                // Update invoice
-                await updateInvoice(invoice.id, {
-                    stripe_payment_intent_status: 'requires_action',
-                    stripe_reference_number: invoice.number,
-                    amount,
-                    balance: parseFloat(invoice.ending_balance / 100).toFixed(2),
-                    fk_stripe_subscription_id: subscriptionID,
-                });
-            } else {
-                const paymentIntentID = invoice.payment_intent;
-                const paymentIntent = await findPaymentIntent(paymentIntentID);
-                const clientSecret = paymentIntent.client_secret;
-
-                // Insert invoice
-                await createInvoice({
-                    stripe_invoice_id: invoice.id,
-                    stripe_reference_number: invoice.number,
-                    stripe_payment_intent_id: paymentIntentID,
-                    stripe_client_secret: clientSecret,
-                    stripe_payment_intent_status: 'requires_action',
-                    amount,
-                    balance: parseFloat(invoice.ending_balance / 100).toFixed(2),
-                    fk_stripe_subscription_id: subscriptionID,
-                });
-            }
-            // If the payment fails or the customer does not have a valid payment method,
-            //  an invoice.payment_failed event is sent, the subscription becomes past_due.
-            // Use this webhook to notify your user that their payment has
-            // failed and to retrieve new card details.
-            break;
-        case 'invoice.finalized':
-            console.log("invoice finalized")
-            console.log(event.data.object)
-            // If you want to manually send out invoices to your customers
-            // or store them locally to reference to avoid hitting Stripe rate limits.
-            try {
-
-            } catch (error) {
-
-            }
-
-            break
-
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted':
             try {
@@ -253,10 +204,6 @@ exports.webhook = async (req, res, next) => {
             }
             // If you want to manually send out invoices to your customers
             // or store them locally to reference to avoid hitting Stripe rate limits.
-            break;
-        case 'customer.subscription.trial_will_end':
-            console.log(event.data.object)
-            // Send notification to your user that the trial will end
             break;
         default:
         // Unexpected event type
