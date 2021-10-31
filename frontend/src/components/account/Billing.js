@@ -31,8 +31,9 @@ export default function Billing() {
 
     const createSubscription = async (priceId) => {
         await axios.post(`${config.baseUrl}/u/subscription/create`, {
-            priceId: priceId
-        })
+            priceId: priceId,
+        }, { withCredentials: true }
+        )
             .then((response) => {
                 let subscriptionId = response.data.content.subscriptionId
                 let clientSecret = response.data.content.clientSecret

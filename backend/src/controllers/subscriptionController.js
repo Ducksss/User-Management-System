@@ -53,7 +53,7 @@ exports.createSubscription = async (req, res, next) => {
     try {
         const subscription = await stripe.subscriptions.create({
             //pz insert here
-            customer: "cus_KNJSNtDx8Szceq",
+            customer: req.cookies.customer,
             items: [{
                 price: priceId,
             }],
@@ -71,8 +71,7 @@ exports.createSubscription = async (req, res, next) => {
 };
 
 exports.invoicePreview = async (req, res, next) => {
-    //pz change this
-    let customerID = "cus_KNJSNtDx8Szceq"
+    let customerID = req.cookies.customer;
     try {
         let invoiceData = await subscriptionService.findInvoice(customerID)
         res.status(200).send(codes(200, null, {
@@ -104,10 +103,8 @@ exports.subscriptions = async (req, res, next) => {
     // Simulate authenticated user. In practice this will be the
     // Stripe Customer ID related to the authenticated user.
     // const customerId = req.cookies['customer'];
-
     const subscriptions = await stripe.subscriptions.list({
-        //pz enter customer id below
-        customer: "cus_KNJSNtDx8Szceq",
+        customer: req.cookies.customer,
         status: 'all',
         expand: ['data.default_payment_method'],
     });

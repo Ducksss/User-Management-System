@@ -22,7 +22,7 @@ export default function AccountDetails(location) {
     const [subscriptions, setSubscriptions] = useState([]);
     useEffect(() => {
         const fetchData = async () => {
-            await axios.get(`${config.baseUrl}/u/subscription/invoice`)
+            await axios.get(`${config.baseUrl}/u/subscription/invoice`, { withCredentials: true })
                 .then((response) => {
                     console.log(response.data.content.invoiceData)
                     setSubscriptions(response.data.content.invoiceData);

@@ -91,7 +91,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
 
   const getList = async () => {
     await axios
-      .get(`${config.baseUrl}/u/user/role`)
+      .get(`${config.baseUrl}/u/user/role`, { withCredentials: true })
       .then((result) => {
         console.log(result);
         setIsLoggedIn(true);

@@ -93,7 +93,7 @@ exports.processUserLogin = async (req, res, next) => {
                 })
 
                 res.cookie('customer', customerInformation[0].customer_stripe_id, {
-                    maxAge: 900000, httpOnly: true
+                    maxAge: 60 * 60 * 24 * 3 * 1000, httpOnly: true
                 });
 
                 await manageUsers.updateLoginAttempts(0, results[0].user_id);
