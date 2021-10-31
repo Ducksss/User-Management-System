@@ -116,7 +116,7 @@ import Account from 'pages/Account.js'
 import Subscribe from 'pages/Subscribe.js'
 // import Subscribe from 'pages/Subscribe.js'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import {ToastRefreshToken} from "shared/swal";
+import { ToastRefreshToken } from "shared/swal";
 import TokenManager from "shared/TokenManager";
 
 export default function App(props) {
@@ -125,7 +125,7 @@ export default function App(props) {
 
   useEffect(() => {
     let message = TokenManager.getMessage
-    if(message.length > 0) {
+    if (message.length > 0) {
       ToastRefreshToken.fire({
         icon: 'warning',
         title: message
@@ -139,62 +139,62 @@ export default function App(props) {
       window.location.reload()
     }
   }, [])
- 
+
   useEffect(() => {
     window.addEventListener("storage", syncLogout)
     return () => {
       window.removeEventListener("storage", syncLogout)
     }
   }, [syncLogout])
-  
+
   return (
     <>
-    <Router {...props}>
-      <Switch>
+      <Router {...props}>
+        <Switch>
 
-        <Route path='/login'>
-          <LoginPage />
-        </Route>
-        <Route path='/signup'>
-          <SignupPage />
-        </Route>
-        <Route path="/account/verify_email">
-          <VerifyEmail />
-        </Route>
+          <Route path='/login'>
+            <LoginPage />
+          </Route>
+          <Route path='/signup'>
+            <SignupPage />
+          </Route>
+          <Route path="/account/verify_email">
+            <VerifyEmail />
+          </Route>
 
-        <Route path="/account/forgot_password">
-          <ForgotPassword />
-        </Route>
-        <Route path="/acccount/reset_password">
-          <ResetPassword />
-        </Route>
+          <Route path="/account/forgot_password">
+            <ForgotPassword />
+          </Route>
+          <Route path="/acccount/reset_password">
+            <ResetPassword />
+          </Route>
 
-        <Route path="/components/:type/:subtype/:name">
-          <ComponentRenderer />
-        </Route>
-        <Route path="/components/:type/:name">
-          <ComponentRenderer />
-        </Route>
-        <Route path="/thank-you">
-          <ThankYouPage />
-        </Route>
+          <Route path="/components/:type/:subtype/:name">
+            <ComponentRenderer />
+          </Route>
+          <Route path="/components/:type/:name">
+            <ComponentRenderer />
+          </Route>
+          <Route path="/thank-you">
+            <ThankYouPage />
+          </Route>
 
-        <Route path="/guide">
-          <MainLandingPage />
-        </Route>
+          <Route path="/guide">
+            <MainLandingPage />
+          </Route>
 
-        <Route path='/account'>
-          <Account />
-        </Route>
-        <Route path='/subscribe'>
-          <Subscribe />
-        </Route>
+          <Route path='/account'>
+            <Account />
+          </Route>
+          <Route path='/subscribe'>
+            <Subscribe />
+          </Route>
 
-        <Route path="/" >
-          <ServiceLandingPage />
-        </Route>
-      </Switch>
-    </Router>
+          <Route path="/" >
+            <ServiceLandingPage />
+          </Route>
+        </Switch>
+      </Router>
     </>
   );
 }

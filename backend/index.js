@@ -48,7 +48,14 @@ app.set("view engine", "pug");
 app.set("views", path.resolve("./src/views"));
 
 //Request Parsing
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+    verify: function (req, res, buf) {
+      var url = req.originalUrl;
+      if (url.startsWith('/webhook')) {
+         req.rawBody = buf.toString();
+      }
+    }
+  }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //Express Router

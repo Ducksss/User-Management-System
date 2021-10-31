@@ -12,7 +12,7 @@ exports.isLoggedIn = async (req, res, next) => {
         let token = auth.split(' ')[1];
         let payload = jwt.verify(token, config.JWTKey);
 
-        if(!payload) return res.status(401).send(codes(401));
+        if (!payload) return res.status(401).send(codes(401));
 
         let { user_guid, email } = payload
         let getLoggedInData = await manageUserService.isLoggedIn(user_guid);
