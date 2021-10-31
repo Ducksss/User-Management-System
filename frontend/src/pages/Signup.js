@@ -32,6 +32,9 @@ const LogoImage = tw.img`h-12 mx-auto`;
 const MainContent = tw.div`mt-12 flex flex-col items-center`;
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold`;
 const FormContainer = tw.div`w-full flex-1 mt-8`;
+const Subheading = tw.h5`font-bold text-primary-500`
+const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
+const DividerText = tw.div`leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform -translate-y-1/2 absolute inset-x-0 top-1/2 bg-transparent`;
 
 const Input = tw.input`w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5 first:mt-0`;
 const SubmitButton = styled.button`
@@ -174,11 +177,7 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
         contact: resEncrypt(values.contactNumber, publicKey),
       })
       .then((results) => {
-        console.log(results)
-        history.push({
-          pathname: "/login",
-          state: "success"
-        });
+        setCurrentStep(1)
       })
       .catch((error) => {
         if (error.response.data.message === "Invalid Credentials.") {
@@ -303,13 +302,22 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
 }
 
 const StepTwo = () => {
+  const signinUrl = "http://localhost:3004/login";
+
   return (
     <>
       <div>
-        All done!
-      </div>
-      <div>
-        An email has been sent for you to verify your account.
+        <Subheading css={[tw`text-center`]}>
+          All done! An email has been sent for you to verify your account.
+        </Subheading>
+        <DividerTextContainer>
+          <DividerText css={[tw`leading-normal`]}>
+            Verified and ready to go?{" "}
+            <a href={signinUrl} tw="border-b border-gray-500 border-dotted">
+              Sign in
+            </a>
+          </DividerText>
+        </DividerTextContainer>
       </div>
     </>
   )
