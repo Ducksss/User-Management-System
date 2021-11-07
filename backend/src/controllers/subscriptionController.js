@@ -141,8 +141,8 @@ exports.webhook = async (req, res, next) => {
             const Invoice = event.data.object;
             let stripeSubscriptionID = Invoice.id;
             let status = Invoice.status;
-            let amountPaid = Invoice.amount_paid;
-            let amountRemaining = Invoice.amount_remaining;
+            let amountPaid = parseFloat(Invoice.amount_paid / 100).toFixed(2);
+            let amountRemaining = parseFloat(Invoice.amount_remaining / 100).toFixed(2);
             let paidAt = dayjs(Invoice.status_transitions.paid_at * 1000).toDate();
             let customerID = Invoice.customer;
 

@@ -65,13 +65,13 @@ export default function AccountDetails(location) {
                 </InfoRow>
 
                 <InfoRow>
-                    <Header>Amount Paid</Header>
-                    <Content>{subscription.amount_paid}</Content>
+                    <Header>Amount Paid:</Header>
+                    <Content>$ {subscription.amount_paid} USD</Content>
                 </InfoRow>
 
                 <InfoRow>
                     <Header>Amount Remaining:</Header>
-                    <Content> {subscription.amount_remaining}</Content>
+                    <Content>$ {subscription.amount_remaining} USD</Content>
                 </InfoRow>
 
                 <InfoRowLast>

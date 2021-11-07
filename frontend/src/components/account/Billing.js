@@ -64,7 +64,7 @@ export default function Billing() {
                                     <Header>{price.product.name}</Header>
 
                                     <Content>
-                                        ${price.unit_amount / 100} / month
+                                        ${price.unit_amount / 100} USD / month
                                     </Content>
 
                                     <button onClick={() => createSubscription(price.id)}>
