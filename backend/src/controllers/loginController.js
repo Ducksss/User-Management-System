@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const config = require('../config/config');
 const validators = require('../middlewares/validators');
 
+// error handler
+const loginControllerErrorHandler = require('../middlewares/errorHandler')
+
 // Importing service's layer
 const loginService = require('../services/loginService');
 const manageUsers = require('../services/manageUserService');
@@ -11,6 +14,7 @@ const subscriptionService = require('../services/subscriptionService')
 
 // Status codes
 const { codes } = require('../config/codes')
+const { InvalidCredentialsError, StatusError } = require('../errors/AuthError');
 
 // Get user information
 exports.processUserLogin = async (req, res, next) => {
@@ -27,8 +31,9 @@ exports.processUserLogin = async (req, res, next) => {
                 password: validators.validatePassword(req.body.password),
             }
         } catch (error) {
-            console.log(error.message);
-            return res.status(406).send(codes(406, 'Not Acceptable'));
+            // console.log(error.message);
+            // return res.status(406).send(codes(406, 'Not Acceptable'));
+            throw new InvalidCredentialsError();
         }
 
         let { email, password } = data;
@@ -38,22 +43,26 @@ exports.processUserLogin = async (req, res, next) => {
 
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
-            return res.status(401).send(codes(401, 'Invalid Credentials.', 'Your email or password is invalid.'));
+            // return res.status(401).send(codes(401, 'Invalid Credentials.', 'Your email or password is invalid.'));
+            throw new InvalidCredentialsError();
         }
 
         // Check for pending users, i.e. haven't verified their account yet
         if (results[0].status == 2) {
-            return res.status(401).send(codes(401, 'Unverified.', 'Please check your email. You need to verify your account.'));
+            // return res.status(401).send(codes(401, 'Unverified.', 'Please check your email. You need to verify your account.'));
+            throw new StatusError('Unverified');
         }
 
         // Checking for banned user
         if (results[0].status == 1) {
-            return res.status(403).send(codes(403, 'Banned.', "Your account has been banned. Please contact an administrator."));
+            // return res.status(403).send(codes(403, 'Banned.', "Your account has been banned. Please contact an administrator."));
+            throw new StatusError('Banned');
         }
 
         // check for locked account
         if (results[0].login_attempt == 10) {
-            return res.status(403).send(codes(403, 'Locked Out.', 'Your account has been locked. Please reset your password before proceeding.'));
+            // return res.status(403).send(codes(403, 'Locked Out.', 'Your account has been locked. Please reset your password before proceeding.'));
+            throw new StatusError('Locked out');
         }
 
         if (bcrypt.compareSync(password, results[0].password_hash)) {
