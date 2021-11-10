@@ -38,20 +38,24 @@ class InvalidCredentialsError extends AuthError {
         this.message = 'Your email or password is invalid.';
     }
 }
+
+class VerificationError extends AuthError {
+    constructor(){
+        super();
+        this.name = "Verification Error";
+        this.message = "Failed to verify.";
+    }
+}
  
-module.exports = { AuthError, StatusError, InvalidCredentialsError }
+module.exports = { AuthError, StatusError, InvalidCredentialsError, VerificationError }
  
-// Not Acceptable
-// Failed to verify
-// Forbidden
-// Session Expired - done
-// Unathorised, token dont exist - done
-// No token is detected - done
- 
-// Insertion of OTP has failed (system passaway not user prob lmao)
+// 403 Forbidden - resetting line 326
+// Locked out - outdated
+
 // Unable to complete update (users) operation
 // Forbidden, Your token has expired. Please try again
 // Forbidden, It has already been done
 // Request Timeout
 // Forbidden, TokenExpiredError
 // Bad Request
+

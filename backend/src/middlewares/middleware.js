@@ -6,7 +6,8 @@ const manageUserService = require('../services/manageUserService')
 
 exports.isLoggedIn = async (req, res, next) => {
     let auth = req.headers.authorization;
-    if (!auth) return res.status(400).send(codes(400, 'Invalid Request'));
+    if (!auth) 
+    return res.status(400).send(codes(400, 'Invalid Request'));
 
     try {
         let token = auth.split(' ')[1];
@@ -33,6 +34,7 @@ exports.isLoggedIn = async (req, res, next) => {
         }
     } catch (error) {
         console.log(error)
+        console.log(req.originalUrl)
         if (error.expiredAt) {
             return res.status(401).send(codes(401));
         }

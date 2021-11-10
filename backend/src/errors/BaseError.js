@@ -17,7 +17,7 @@ class BaseError extends Error {
             message: this.message,
             name: this.name,
             summary: this.summary,
-            // content: [],
+            content: [],
             datetime: moment().utc().format('MMMM Do YYYY, h:mm:ss a')
         }
     }

@@ -108,18 +108,22 @@ exports.processUserLogin = async (req, res, next) => {
                 await manageUsers.updateLoginAttempts(0, results[0].user_id);
                 return res.status(200).send(data);
             } else {
-                return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
+                // return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
+                throw new InvalidCredentialsError();
             }
 
         } else {
             await manageUsers.updateLoginAttempts(results[0].login_attempt + 1, results[0].user_id);
-            return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
+            // return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
+            throw new InvalidCredentialsError();
         }
     } catch (error) {
         if (error == "User does not exist") {
-            return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
+            // return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
+            next(new InvalidCredentialsError());
         }
 
-        return res.status(500).send(codes(500, 'Internal error', 'Please contact an administrator for help.'));
+        // return res.status(500).send(codes(500, 'Internal error', 'Please contact an administrator for help.'));
+        next(error);
     }
 }

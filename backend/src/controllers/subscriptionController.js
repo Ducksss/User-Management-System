@@ -66,7 +66,8 @@ exports.createSubscription = async (req, res, next) => {
             clientSecret: subscription.latest_invoice.payment_intent.client_secret,
         }));
     } catch (error) {
-        return res.status(400).send(codes(400));
+        // return res.status(400).send(codes(400));
+        next(error);
     }
 };
 
@@ -78,7 +79,8 @@ exports.invoicePreview = async (req, res, next) => {
             invoiceData
         }));
     } catch (error) {
-        return res.status(400).send(codes(400));
+        // return res.status(400).send(codes(400));
+        next(error);
     }
 };
 
@@ -92,7 +94,8 @@ exports.cancelSubscription = async (req, res, next) => {
             subscription: deletedSubscription
         }));
     } catch (error) {
-        return res.status(400).send(codes(400));
+        // return res.status(400).send(codes(400));
+        next(error);
     }
 };
 
@@ -120,13 +123,14 @@ exports.webhook = async (req, res, next) => {
             req.headers['stripe-signature'],
             process.env.STRIPE_WEBHOOK_SECRET
         );
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        console.log(error);
         console.log(`⚠️  Webhook signature verification failed.`);
         console.log(
             `⚠️  Check the env file and enter the correct webhook secret.`
         );
-        return res.status(400).send(codes(400));
+        // return res.status(400).send(codes(400));
+        next(error);
     }
 
     // Extract the object from the event.

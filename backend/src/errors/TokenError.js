@@ -10,11 +10,19 @@ class TokenError extends BaseError {
     }
 }
 
-class ExpiredSessionError extends TokenError {
+class ExpiredTokenError extends TokenError {
     constructor(){
         super();
-        this.name = "Expired Session Error";
-        this.message = "Your session has expired.";
+        this.name = "Expired Token Error";
+        this.message = "Your token has expired.";
+    }
+}
+
+class InvalidTokenError extends TokenError {
+    constructor(){
+        super();
+        this.name = "Invalid Token Error";
+        this.message = "The token is invalid."
     }
 }
 
@@ -26,4 +34,4 @@ class NoTokenError extends TokenError {
     }
 }
 
-module.exports = { TokenError, ExpiredSessionError }
+module.exports = { TokenError, ExpiredTokenError, InvalidTokenError, NoTokenError }

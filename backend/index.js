@@ -31,6 +31,8 @@ const PORT = 8003;
 const path = require("path");
 const bodyParser = require("body-parser");
 const bootstrap = require("./src/bootstrap");
+const { logging } = require("./src/middlewares/logging");
+const { errorHandler } = require("./src/middlewares/errorHandler");
 
 //Parse data with connect-multiparty. 
 app.use(formData.parse({}));
@@ -78,6 +80,9 @@ router.use((err, req, res, next) => {
         return res.send(err.message);
     }
 });
+
+router.use(logging);
+router.use(errorHandler);
 
 process.on('uncaughtException', function (error, origin) {
     //Handle the error safely. 
