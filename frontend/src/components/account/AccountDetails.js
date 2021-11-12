@@ -123,11 +123,10 @@ export default function AccountDetails(location) {
                 .catch((error) => {
                     console.log(error);
                 })
-
+            
             await axios.get(`${config.baseUrl}/u/user/information`, { withCredentials: true })
                 .then((response) => {
                     setUserInformation(response.data.content[0])
-                    console.log(response.data.content[0])
                 })
                 .catch((error) => {
                     console.log(error);

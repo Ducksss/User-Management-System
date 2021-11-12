@@ -6,9 +6,9 @@ const cookieParser = require('cookie-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2020-08-27',
     appInfo: { // For sample support and debugging, not required for production:
-        name: "stripe-samples/subscription-use-cases/fixed-price",
+        name: "User Management System",
         version: "0.0.1",
-        url: "https://github.com/stripe-samples/subscription-use-cases/fixed-price"
+        url: "https://github.com/Ducksss/User-Management-System"
     }
 });
 
@@ -108,8 +108,24 @@ exports.subscriptions = async (req, res, next) => {
         status: 'all',
         expand: ['data.default_payment_method'],
     });
+    const activeSubscriptions = await stripe.subscriptions.list({
+        customer: req.cookies.customer,
+        status: 'active',
+        expand: ['data.default_payment_method'],
+    });
+    console.log(activeSubscriptions.data)
     res.json({ subscriptions });
 };
+
+exports.getActiveSubscriptions = async (req, res, next) => {
+    //gets active subscriptions only
+    const activeSubscriptions = await stripe.subscriptions.list({
+        customer: req.cookies.customer,
+        status: 'active',
+        expand: ['data.default_payment_method'],
+    });
+    return res.status(200).send(codes(200, null, activeSubscriptions.data));
+}
 
 exports.webhook = async (req, res, next) => {
     // Retrieve the event by verifying the signature using the raw body and secret.

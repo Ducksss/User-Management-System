@@ -4,7 +4,7 @@ import { Redirect } from 'react-router-dom';
 import config from "../../Config.js";
 import tw from 'twin.macro';
 import axios from "axios";
-
+import Swal from "sweetalert2";
 const MainContent = tw.div`mt-12 flex flex-col items-center w-full`;
 const AccountRow = tw.div` grid grid-rows-3 w-11/12`
 const GridRow = tw.div`flex`
@@ -17,35 +17,64 @@ const InfoRowLast = tw.div`flex flex-row py-5 px-3`
 const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
 const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
 export default function Billing() {
+    let Toast = Swal.mixin({
+        toast: true,
+        position: "top",
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 1500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+    });
     const [prices, setPrices] = useState([]);
     const [subscriptionData, setSubscriptionData] = useState(null);
-
+    const [activeSubscription, setActiveSubscription] = useState(null);
     useEffect(() => {
         const fetchPrices = async () => {
+
             const { prices } = await fetch(`${config.baseUrl}/u/subscription/config`).then(r => r.json());
             setPrices(prices);
-            console.log(prices)
         };
         fetchPrices();
     }, [])
 
     const createSubscription = async (priceId) => {
-        await axios.post(`${config.baseUrl}/u/subscription/create`, {
-            priceId: priceId,
-        }, { withCredentials: true }
-        )
+        await axios.get(`${config.baseUrl}/u/subscription/active-subscriptions`, { withCredentials: true })
             .then((response) => {
-                let subscriptionId = response.data.content.subscriptionId
-                let clientSecret = response.data.content.clientSecret
-                setSubscriptionData({ subscriptionId, clientSecret });
+                console.log("response")
+                console.log(response)
+                setActiveSubscription(response.data);
             })
             .catch((error) => {
+                console.log(error);
+            })
+        console.log(activeSubscription)
+        if (activeSubscription) {
+            await axios.post(`${config.baseUrl}/u/subscription/create`, {
+                priceId: priceId,
+            }, { withCredentials: true }
+            )
+                .then((response) => {
+                    let subscriptionId = response.data.content.subscriptionId
+                    let clientSecret = response.data.content.clientSecret
+                    setSubscriptionData({ subscriptionId, clientSecret });
+                })
+                .catch((error) => {
+                });
+        } else {
+            Toast.fire({
+                icon: "error",
+                title: "Error!",
+                text: "You currently have an active subscription, please cancel it if you want to get a different subscription",
             });
+        }
 
     }
 
     if (subscriptionData) {
-        console.log(subscriptionData)
         return <Redirect to={{
             pathname: '/subscribe',
             state: subscriptionData
