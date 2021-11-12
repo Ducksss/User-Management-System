@@ -31,10 +31,8 @@ export default function Billing() {
     });
     const [prices, setPrices] = useState([]);
     const [subscriptionData, setSubscriptionData] = useState(null);
-    const [activeSubscription, setActiveSubscription] = useState(null);
     useEffect(() => {
         const fetchPrices = async () => {
-
             const { prices } = await fetch(`${config.baseUrl}/u/subscription/config`).then(r => r.json());
             setPrices(prices);
         };
@@ -43,35 +41,30 @@ export default function Billing() {
 
     const createSubscription = async (priceId) => {
         await axios.get(`${config.baseUrl}/u/subscription/active-subscriptions`, { withCredentials: true })
-            .then((response) => {
-                console.log("response")
-                console.log(response)
-                setActiveSubscription(response.data);
+            .then(async(response) => {
+                if (response.data.content.length != 0) {
+                    Toast.fire({
+                        icon: "error",
+                        title: "Error!",
+                        text: "You currently have an active subscription, please cancel it if you want to get a different subscription",
+                    });
+                } else {
+                    await axios.post(`${config.baseUrl}/u/subscription/create`, {
+                        priceId: priceId,
+                    }, { withCredentials: true }
+                    )
+                        .then((response) => {
+                            let subscriptionId = response.data.content.subscriptionId
+                            let clientSecret = response.data.content.clientSecret
+                            setSubscriptionData({ subscriptionId, clientSecret });
+                        })
+                        .catch((error) => {
+                        });
+                }
             })
             .catch((error) => {
                 console.log(error);
             })
-        console.log(activeSubscription)
-        if (activeSubscription) {
-            await axios.post(`${config.baseUrl}/u/subscription/create`, {
-                priceId: priceId,
-            }, { withCredentials: true }
-            )
-                .then((response) => {
-                    let subscriptionId = response.data.content.subscriptionId
-                    let clientSecret = response.data.content.clientSecret
-                    setSubscriptionData({ subscriptionId, clientSecret });
-                })
-                .catch((error) => {
-                });
-        } else {
-            Toast.fire({
-                icon: "error",
-                title: "Error!",
-                text: "You currently have an active subscription, please cancel it if you want to get a different subscription",
-            });
-        }
-
     }
 
     if (subscriptionData) {

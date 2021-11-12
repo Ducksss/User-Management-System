@@ -113,7 +113,6 @@ exports.subscriptions = async (req, res, next) => {
         status: 'active',
         expand: ['data.default_payment_method'],
     });
-    console.log(activeSubscriptions.data)
     res.json({ subscriptions });
 };
 
@@ -175,26 +174,6 @@ exports.webhook = async (req, res, next) => {
             } catch (error) {
                 console.log(error)
             }
-            // if (dataObject['billing_reason'] == 'subscription_create') {
-            //     // The subscription automatically activates after successful payment
-            //     // Set the payment method used to pay the first invoice
-            //     // as the default payment method for that subscription
-            //     const subscription_id = dataObject['subscription']
-            //     const payment_intent_id = dataObject['payment_intent']
-
-            //     // Retrieve the payment intent used to pay the subscription
-            //     const payment_intent = await stripe.paymentIntents.retrieve(payment_intent_id);
-            //     console.log("payment Intent")
-            //     console.log(payment_intent)
-            //     const subscription = await stripe.subscriptions.update(
-            //         subscription_id,
-            //         {
-            //             default_payment_method: payment_intent.payment_method,
-            //         },
-            //     );
-
-            //     console.log("Default payment method set for subscription:" + payment_intent.payment_method);
-            // };
 
             break;
         case 'customer.subscription.updated':
