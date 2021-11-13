@@ -2,18 +2,23 @@ const jwt = require("jsonwebtoken");
 const config = require('../config/config');
 const { codes } = require('../config/codes')
 
-const manageUserService = require('../services/manageUserService')
+const manageUserService = require('../services/manageUserService');
+const { InvalidTokenError, NoTokenError } = require("../errors/TokenError");
+const { StatusError } = require("../errors/AuthError");
 
 exports.isLoggedIn = async (req, res, next) => {
     let auth = req.headers.authorization;
     if (!auth) 
-    return res.status(400).send(codes(400, 'Invalid Request'));
+    // return res.status(400).send(codes(400, 'Invalid Request'));
+    throw new InvalidTokenError();
 
     try {
         let token = auth.split(' ')[1];
         let payload = jwt.verify(token, config.JWTKey);
 
-        if (!payload) return res.status(401).send(codes(401));
+        if (!payload)
+        // return res.status(401).send(codes(401));
+        throw new NoTokenError();
 
         let { user_guid, email } = payload
         let getLoggedInData = await manageUserService.isLoggedIn(user_guid);
@@ -27,17 +32,21 @@ exports.isLoggedIn = async (req, res, next) => {
                 next();
             } else {
                 // banned
-                return res.status(403).send(codes(403));
+                // return res.status(403).send(codes(403));
+                throw new StatusError("Banned");
             }
         } else {
-            return res.status(401).send(codes(401));
+            // return res.status(401).send(codes(401));
+            throw new StatusError("Locked Out");
         }
     } catch (error) {
         console.log(error)
         console.log(req.originalUrl)
         if (error.expiredAt) {
-            return res.status(401).send(codes(401));
+            // return res.status(401).send(codes(401));
+            next(error);
         }
-        return res.status(400).send(codes(400));
+            // return res.status(400).send(codes(400));
+            next(error);
     }
 }

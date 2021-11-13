@@ -44,4 +44,12 @@ class ValidationError extends ParamError {
     }
 }
 
-module.exports = { ParamError, DuplicateError, RepeatedPasswordError, MissingError, ValidationError }
+class InvalidInputError extends ParamError {
+    constructor(){
+        super();
+        this.name = "Invalid Input Error";
+        this.message = "Input is not valid."
+    }
+}
+
+module.exports = { ParamError, DuplicateError, RepeatedPasswordError, MissingError, ValidationError, InvalidInputError }

@@ -485,16 +485,22 @@ exports.verifyResetPasswordUniqueness = async (req, res, next) => {
             }
 
             let isRepeated0 = await bcrypt.compare(incomingPassword, currentPassword);
-            if (isRepeated0) return res.status(401).send(codes(401));
+                if (isRepeated0) 
+                // return res.status(401).send(codes(401));
+                throw new RepeatedPasswordError();
 
             if (oldPassword1) {
                 let isRepeated1 = await bcrypt.compare(incomingPassword, oldPassword1);
-                if (isRepeated1) return res.status(401).send(codes(401))
+                if (isRepeated1) 
+                // return res.status(401).send(codes(401))
+                throw new RepeatedPasswordError(); 
             }
 
             if (oldPassword2) {
                 let isRepeated2 = await bcrypt.compare(incomingPassword, oldPassword2);
-                if (isRepeated2) return res.status(401).send(codes(401));
+                if (isRepeated2) 
+                // return res.status(401).send(codes(401));
+                throw new RepeatedPasswordError(); 
             }
 
             if (part === "store") {

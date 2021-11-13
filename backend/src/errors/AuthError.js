@@ -48,14 +48,3 @@ class VerificationError extends AuthError {
 }
  
 module.exports = { AuthError, StatusError, InvalidCredentialsError, VerificationError }
- 
-// 403 Forbidden - resetting line 326
-// Locked out - outdated
-
-// Unable to complete update (users) operation
-// Forbidden, Your token has expired. Please try again
-// Forbidden, It has already been done
-// Request Timeout
-// Forbidden, TokenExpiredError
-// Bad Request
-
