@@ -12,7 +12,7 @@ const validators = require('../middlewares/validators');
 // const key = require('../routes/encryptionRoute')
 
 // services
-const manageUsers = require('../services/manageUserService')
+const manageUsers = require('../services/manageUserService');
 
 // configs
 const transporter = nodeMailer.createTransport({
@@ -30,15 +30,15 @@ exports.checkDuplicateEmails = async (req, res, next) => {
         let results = await manageUsers.getEmail(email);
 
         if (results.length === 1) {
-            return res.status(409).send(codes(409, null, "The email has already been taken."))
+            return res.status(409).send(codes(409, null, "The email has already been taken."));
         } else {
             return res.status(200).send(codes(200, null, results));
         }
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return res.status(500).send(codes(500));
     }
-}
+};
 
 // Checks for duplicate numbers before user registration
 exports.checkDuplicateNumbers = async (req, res, next) => {
@@ -47,21 +47,21 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
         let results = await manageUsers.getNumber(number);
 
         if (results.length === 1) {
-            return res.status(409).send(codes(409, null, "The number has already been taken."))
+            return res.status(409).send(codes(409, null, "The number has already been taken."));
         } else {
             return res.status(200).send(codes(200, null, results));
         }
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return res.status(500).send(codes(500));
     }
-}
+};
 
 // Used by the secondary admin to add the user into the account with valid check
 exports.addUser = async (req, res, next) => {
     try {
         //Decryption, Validation and Sanitization
-        let data = {}
+        let data = {};
 
         try {
             data = {
@@ -70,7 +70,7 @@ exports.addUser = async (req, res, next) => {
                 email: validators.validateEmail(req.body.email),
                 password: validators.validatePassword(req.body.password),
                 contact: validators.validateInt(req.body.contact)
-            }
+            };
         } catch (error) {
             console.log(error.message);
             return res.status(406).send(codes(406, 'Not Acceptable'));
@@ -97,7 +97,7 @@ exports.addUser = async (req, res, next) => {
         req.user_id = insertedUserInformation.insertId;
         next();
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return res.status(500).send(codes(500));
     }
 };
@@ -350,14 +350,14 @@ exports.generateVerificationEmail = async (req, res, next) => {
     } catch (error) {
         return res.status(500).send(codes(500));
     }
-}
+};
 
 // Verifying the verification token in the param
 exports.verifyVerificationEmail = async (req, res, next) => {
     try {
         const { token } = req.body;
         const jwtObject = jwt.verify(token[0], config.JWTKey);
-        console.log(jwtObject)
+        console.log(jwtObject);
 
         const { user_id, email } = jwtObject;
 
@@ -381,7 +381,7 @@ exports.verifyVerificationEmail = async (req, res, next) => {
     } catch (error) {
         return res.status(500).send(codes(500));
     }
-}
+};
 
 // Generating 2FA QRCode
 exports.generate2FA = async (req, res, next) => {
@@ -390,45 +390,45 @@ exports.generate2FA = async (req, res, next) => {
 
         let secret = speakeasy.generateSecret({ length: 20, });
 
-        console.log(secret.base32)
-        await manageUsers.add2FA(user_guid, secret.base32)
+        console.log(secret.base32);
+        await manageUsers.add2FA(user_guid, secret.base32);
         let qrcodeURL = await qrcode.toDataURL(secret.otpauth_url);
 
         return res.status(200).send(codes(200, { qrcodeURL: qrcodeURL }));
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return res.status(500).send(codes(500));
     }
-}
+};
 
 //refresh token
 exports.refreshToken = async (req, res) => {
-    const { signedCookies = {} } = req //get the cookie from the request header
-    const { refreshToken } = signedCookies //get the cookie by key
+    const { signedCookies = {} } = req; //get the cookie from the request header
+    const { refreshToken } = signedCookies; //get the cookie by key
 
     if (refreshToken) {
         try {
-            const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET)
-            const userId = payload._id
-            const now = Date.now().valueOf()
+            const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET);
+            const userId = payload._id;
+            const now = Date.now().valueOf();
 
             if (payload && (payload.exp * 1000 <= now)) {
-                res.clearCookie('refreshToken')
-                return res.status(401).send(codes(401, 'Session Expired'))
+                res.clearCookie('refreshToken');
+                return res.status(401).send(codes(401, 'Session Expired'));
             }
 
-            let getUser = await manageUsers.findUserToken(refreshToken)
+            let getUser = await manageUsers.findUserToken(refreshToken);
 
             if (getUser.length == 1) { //if token is same 
                 if (getUser[0].times_used > 0) {
                     // lock user out 
                     //delete token
-                    await manageUsers.lockUser(userId)
-                    await manageUsers.deleteRefreshToken(refreshToken)
+                    await manageUsers.lockUser(userId);
+                    await manageUsers.deleteRefreshToken(refreshToken);
 
-                    return res.status(401).send(codes(401, 'locked out.'))
+                    return res.status(401).send(codes(401, 'locked out.'));
                 } else {
-                    await manageUsers.updateTimesUsed(refreshToken, (getUser[0].times_used + 1))
+                    await manageUsers.updateTimesUsed(refreshToken, (getUser[0].times_used + 1));
                 }
 
                 //create access token
@@ -440,13 +440,13 @@ exports.refreshToken = async (req, res) => {
                     config.JWTKey, {
                     expiresIn: 60 * 3
                     // 3 minutes expiry
-                })
+                });
 
                 const refresh_token = jwt.sign({ _id: userId }, config.REFRESH_TOKEN_SECRET, {
                     expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
-                })
+                });
 
-                await manageUsers.addRefreshToken(getUser[0].user_guid, refresh_token)
+                await manageUsers.addRefreshToken(getUser[0].user_guid, refresh_token);
 
                 res.cookie('refreshToken', refresh_token, {
                     httpOnly: true,
@@ -454,21 +454,21 @@ exports.refreshToken = async (req, res) => {
                     signed: true,
                     maxAge: 60 * 60 * 24 * 3 * 1000,
                     sameSite: "none",
-                })
+                });
                 return res.status(200).send(token);
             } else {
-                res.clearCookie('refreshToken')
-                return res.status(401).send(codes(401))
+                res.clearCookie('refreshToken');
+                return res.status(401).send(codes(401));
             }
 
         } catch (error) {
             console.log(error);
-            return res.status(500).send(codes(500))
+            return res.status(500).send(codes(500));
         }
     } else {
-        return res.status(401).send(codes(401, 'No token is detected.'))
+        return res.status(401).send(codes(401, 'No token is detected.'));
     }
-}
+};
 
 exports.logout = async (req, res) => {
     const { signedCookies = {} } = req;
@@ -488,12 +488,12 @@ exports.logout = async (req, res) => {
             }
         } catch (error) {
             console.log(error);
-            return res.status(500).send(codes(500))
+            return res.status(500).send(codes(500));
         }
     } else {
-        return res.status(500).send(codes(500))
+        return res.status(500).send(codes(500));
     }
-}
+};
 
 // Used by the header and other components to generate different view based on role
 exports.getUserPrivilege = async (req, res, next) => {
@@ -503,10 +503,10 @@ exports.getUserPrivilege = async (req, res, next) => {
 
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return res.status(500).send(codes(500));
     }
-}
+};
 
 // Used by the header and other components to generate different view based on role
 exports.getUserPrivilege = async (req, res, next) => {
@@ -516,10 +516,10 @@ exports.getUserPrivilege = async (req, res, next) => {
 
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return res.status(500).send(codes(500));
     }
-}
+};
 
 exports.getUserInformation = async (req, res, next) => {
     try {
@@ -528,7 +528,7 @@ exports.getUserInformation = async (req, res, next) => {
 
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return res.status(500).send(codes(500));
     }
-}
+};

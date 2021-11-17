@@ -29,7 +29,7 @@ const LogoLink = tw.a``;
 const LogoImage = tw.img`h-12 mx-auto`;
 const MainContent = tw.div`mt-12 flex flex-col items-center`;
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold`;
-const Subheading = tw.h5`font-bold text-primary-500`
+const Subheading = tw.h5`font-bold text-primary-500`;
 const FormContainer = tw.div`w-full flex-1 mt-8`;
 
 const SubmitButton = styled.button`
@@ -77,10 +77,10 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
     useEffect(() => {
         axios.get(`${config.baseUrl}/keys`)
             .then((response) => {
-                let key = response.data.publicKey
+                let key = response.data.publicKey;
                 console.log(response.data.publicKey);
                 setPublicKey(key);
-                console.log(publicKey)
+                console.log(publicKey);
             });
     });
 
@@ -91,8 +91,8 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
         timer: 3000,
         timerProgressBar: true,
         didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
         }
     });
 
@@ -103,13 +103,13 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
             .test('Unique Password', 'New password can\'t be your old password.', // <- key, message
                 function (value, context) {
                     return new Promise((resolve, reject) => {
-                        console.log(context)
+                        console.log(context);
                         axios.post(`http://localhost:8003/api/u/user/reset-password/verify-password-uniqueness`, {
                             token: token[0],
                             incomingPassword: value
                         })
                             .then((res) => {
-                                resolve(true)
+                                resolve(true);
                             })
                             .catch((error) => {
                                 if (error.response.data.code === 401) {
@@ -117,8 +117,8 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                                 } else {
                                     resolve(true);
                                 }
-                            })
-                    })
+                            });
+                    });
                 }
             ),
         passwordConfirmation: Yup.string()
@@ -144,7 +144,7 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                     Toast.fire({
                         icon: 'error',
                         title: `Please contact an administrator for help!`
-                    })
+                    });
 
                     // setMessage({ color: "red", message: "Please contact an administrator for help!" })
                 }
@@ -153,8 +153,8 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                 setMessage("");
                 setCurrentStep(1);
                 setIsSubmitted(false);
-            })
-    }
+            });
+    };
 
     return (
         <Formik
@@ -198,8 +198,8 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                 </p>
             </Form>
         </Formik>
-    )
-}
+    );
+};
 
 export default function ResetPassword() {
     const history = useHistory();
@@ -211,7 +211,7 @@ export default function ResetPassword() {
             })
             .catch((error) => {
                 if (error.response.data.code === 401) {
-                    history.push("/")
+                    history.push("/");
                     // Expired
                 }
 
@@ -219,21 +219,21 @@ export default function ResetPassword() {
                     // Forbidden - either it has already been done or fail
                     if (error.response.data.message === "filler") {
                         // Reset already accomplished
-                        history.push("/")
+                        history.push("/");
                     } else {
                         // Token mismatch error
-                        history.push("/")
+                        history.push("/");
                     }
                 }
 
                 if (error.response.data.code === 500) {
                     // General failure
-                    history.push("/")
+                    history.push("/");
                 }
 
                 console.log(error.response);
-            })
-    })
+            });
+    });
 
     // Pre Defined Variables
     const illustrationImageSrc = illustration;
@@ -241,13 +241,13 @@ export default function ResetPassword() {
 
     // Team's Defined Variable
     const [currentStep, setCurrentStep] = React.useState(0);
-    const [message, setMessage] = React.useState("To reset your password, please provide your Twilio SendGrid username.")
+    const [message, setMessage] = React.useState("To reset your password, please provide your Twilio SendGrid username.");
     const steps = [
         <StepOne
             setMessage={setMessage}
             setCurrentStep={setCurrentStep}
         />,
-    ]
+    ];
 
     return (
         <AnimationRevealPage>
@@ -275,5 +275,5 @@ export default function ResetPassword() {
                 </Content>
             </Container>
         </AnimationRevealPage >
-    )
+    );
 }

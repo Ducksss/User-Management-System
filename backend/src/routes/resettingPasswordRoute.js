@@ -21,4 +21,4 @@ exports.route = router => {
     router.post('/api/u/user/account/reset-password/verify-password-uniqueness', middlewares.isLoggedIn, resettingPasswordController.verifyResetPasswordUniqueness);
     // updates password
     router.post('/api/u/user/account/reset-password/change-password', middlewares.isLoggedIn, resettingPasswordController.verifyCurrentAndOld, resettingPasswordController.verifyResetPasswordUniqueness, resettingPasswordController.updateResetNewPassword);
-}
+};
