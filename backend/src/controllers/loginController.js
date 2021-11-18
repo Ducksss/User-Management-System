@@ -37,6 +37,7 @@ exports.processUserLogin = async (req, res, next) => {
 
         // Checking for invalid credentials
         if ((password == null) || (results[0] == null)) {
+            console.log('here1');
             return res.status(401).send(codes(401, 'Invalid Credentials.', 'Your email or password is invalid.'));
         }
 
@@ -98,10 +99,12 @@ exports.processUserLogin = async (req, res, next) => {
                 await manageUsers.updateLoginAttempts(0, results[0].user_id);
                 return res.status(200).send(data);
             } else {
+                console.log('here2');
                 return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
             }
 
         } else {
+            console.log('here3');
             await manageUsers.updateLoginAttempts(results[0].login_attempt + 1, results[0].user_id);
             return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
         }
