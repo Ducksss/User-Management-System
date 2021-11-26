@@ -105,7 +105,7 @@ exports.subscriptions = async (req, res, next) => {
     // const customerId = req.cookies['customer'];
     const subscriptions = await stripe.subscriptions.list({
         customer: req.cookies.customer,
-        status: 'all',
+        status: 'active',
         expand: ['data.default_payment_method'],
     });
     const activeSubscriptions = await stripe.subscriptions.list({
