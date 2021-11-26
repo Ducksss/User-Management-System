@@ -7,8 +7,10 @@ exports.route = router => {
     // insert api here
     router.post('/api/u/subscription/create', subscriptionController.createSubscription);
     router.post('/api/u/subscription/cancel', subscriptionController.cancelSubscription);
+    
     // insert api here
     router.get('/api/u/subscription/invoice', subscriptionController.invoicePreview);
     // insert api here
     router.get('/api/u/subscription/subscriptions', subscriptionController.subscriptions);
-};
+    router.get('/api/u/subscription/active-subscriptions', subscriptionController.getActiveSubscriptions);
+}
