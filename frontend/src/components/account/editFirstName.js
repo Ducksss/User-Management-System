@@ -39,7 +39,7 @@ const MyTextInput = ({ label, ...props }) => {
     );
 };
 
-const Question = ({ header, content }) => {
+const editFirstName = ({ header, content }) => {
     const [expanded, setExpanded] = useState(false);
     const [message, setMessage] = React.useState({ data: "", type: "alert-danger" });
     const [success, setSuccess] = React.useState({ data: "", type: "alert-danger" });
@@ -190,4 +190,4 @@ const Question = ({ header, content }) => {
     );
 };
 
-export default Question;
+export default editFirstName;

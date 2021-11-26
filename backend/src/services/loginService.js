@@ -1,6 +1,6 @@
 // imports
 const config = require('../config/config');
-const pool = require('../config/database')
+const pool = require('../config/database');
 
 // Authenticates whether the user does exist and whether their email and password matches
 module.exports.authenticateUser = (email) => {
@@ -49,4 +49,4 @@ module.exports.authenticateUser = (email) => {
             }
         });
     }); // End of getConnection
-} // End of authenticate
+}; // End of authenticate

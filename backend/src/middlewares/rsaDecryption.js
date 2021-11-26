@@ -4,8 +4,8 @@ const NodeRSA = require('node-rsa');
 module.exports.resDecrypt = (text, key) => {
     let keyPrivate = new NodeRSA(key);
     let decrypted = keyPrivate.decrypt(text, 'utf8');
-    return decrypted
-}
+    return decrypted;
+};
 
 module.exports.rsaKeys = () => {
     const keys = new NodeRSA({ b: 512 });
@@ -16,5 +16,5 @@ module.exports.rsaKeys = () => {
     return {
         publicKey: publicKey,
         privateKey: privateKey
-    }
-}
+    };
+};

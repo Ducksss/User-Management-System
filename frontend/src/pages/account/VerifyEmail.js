@@ -40,19 +40,19 @@ export default function VerifyEmail() {
                 token: token
             })
             .then((results) => {
-                console.log(results)
+                console.log(results);
                 setMessage({
                     data: "Your account is now verified!",
                     type: "Verified"
-                })
+                });
             })
             .catch((error) => {
                 setMessage({
                     data: "Your account is now verified!",
                     type: "Verified"
-                })
-            })
-    })
+                });
+            });
+    });
 
     return (
         <Container>
@@ -85,5 +85,5 @@ export default function VerifyEmail() {
                 </MainContainer>
             </Content>
         </Container >
-    )
+    );
 }

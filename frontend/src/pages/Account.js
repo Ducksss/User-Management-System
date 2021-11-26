@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import tw from "twin.macro";
 import styled from "styled-components";
 
@@ -31,7 +31,7 @@ const TabControl = styled.div`
 `;
 
 export default function Account() {
-    const tab = ['Account', 'Billing',"Billing History"]
+    const tab = ['Account', 'Billing', "Billing History"];
     const [activeTab, setActiveTab] = useState(tab[0]);
 
     return (
@@ -52,10 +52,10 @@ export default function Account() {
                     </HeaderRow>
 
                     {/* content here  */}
-                    {activeTab == tab[0] ? <AccountDetails /> : activeTab == tab[1] ? <Billing /> : <BillingHistory/>  }
+                    {activeTab == tab[0] ? <AccountDetails /> : activeTab == tab[1] ? <Billing /> : <BillingHistory />}
                 </ContentWithPaddingXl>
             </Container>
             <Footer />
         </AnimationRevealPage>
-    )
+    );
 }

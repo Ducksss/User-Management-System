@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 const config = require('../config/config');
-const { codes } = require('../config/codes')
+const { codes } = require('../config/codes');
 
-const manageUserService = require('../services/manageUserService')
+const manageUserService = require('../services/manageUserService');
 
 exports.isLoggedIn = async (req, res, next) => {
     let auth = req.headers.authorization;
@@ -14,7 +14,7 @@ exports.isLoggedIn = async (req, res, next) => {
 
         if (!payload) return res.status(401).send(codes(401));
 
-        let { user_guid, email } = payload
+        let { user_guid, email } = payload;
         let getLoggedInData = await manageUserService.isLoggedIn(user_guid);
         if (getLoggedInData.length == 1) {
             let getSuspendedAccount = await manageUserService.isSuspended(getLoggedInData[0].user_id);
@@ -32,10 +32,10 @@ exports.isLoggedIn = async (req, res, next) => {
             return res.status(401).send(codes(401));
         }
     } catch (error) {
-        console.log(error)
+        console.log(error);
         if (error.expiredAt) {
             return res.status(401).send(codes(401));
         }
         return res.status(400).send(codes(400));
     }
-}
+};

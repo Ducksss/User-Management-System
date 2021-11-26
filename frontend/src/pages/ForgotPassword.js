@@ -34,7 +34,7 @@ const LogoLink = tw.a``;
 const LogoImage = tw.img`h-12 mx-auto`;
 const MainContent = tw.div`mt-12 flex flex-col items-center`;
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold`;
-const Subheading = tw.h5`font-bold text-primary-500`
+const Subheading = tw.h5`font-bold text-primary-500`;
 const FormContainer = tw.div`w-full flex-1 mt-8`;
 
 const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
@@ -87,8 +87,8 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
         timer: 3000,
         timerProgressBar: true,
         didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
         }
     });
 
@@ -109,15 +109,15 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                     Toast.fire({
                         icon: 'error',
                         title: `Please contact an administrator for help!`
-                    })
+                    });
                 }
             })
             .finally(() => {
                 setMessage("");
                 setCurrentStep(1);
                 setIsSubmitted(false);
-            })
-    }
+            });
+    };
 
     return (
         <Formik
@@ -159,8 +159,8 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
                 /> */}
             </Form>
         </Formik>
-    )
-}
+    );
+};
 
 const StepTwo = () => {
     return (
@@ -174,8 +174,8 @@ const StepTwo = () => {
                 </DividerText>
             </DividerTextContainer>
         </FormContainer>
-    )
-}
+    );
+};
 
 export default function BeginPasswordReset() {
     // Pre Defined Variables
@@ -184,13 +184,13 @@ export default function BeginPasswordReset() {
 
     // Team's Defined Variable
     const [currentStep, setCurrentStep] = React.useState(0);
-    const [message, setMessage] = React.useState("To reset your password, please provide your Twilio SendGrid username.")
+    const [message, setMessage] = React.useState("To reset your password, please provide your Twilio SendGrid username.");
     const steps = [
         <StepOne
             setMessage={setMessage}
             setCurrentStep={setCurrentStep}
         />,
-        <StepTwo />]
+        <StepTwo />];
 
     return (
         <AnimationRevealPage>
@@ -218,5 +218,5 @@ export default function BeginPasswordReset() {
                 </Content>
             </Container>
         </AnimationRevealPage >
-    )
+    );
 }

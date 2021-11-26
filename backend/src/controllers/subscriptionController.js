@@ -1,6 +1,6 @@
 // Status codes
-const { codes } = require('../config/codes')
-const dayjs = require('dayjs')
+const { codes } = require('../config/codes');
+const dayjs = require('dayjs');
 const config = require('../config/config');
 const cookieParser = require('cookie-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
@@ -13,7 +13,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
 });
 
 // Services
-const subscriptionService = require('../services/subscriptionService')
+const subscriptionService = require('../services/subscriptionService');
 
 // Get customerID when register is done.
 // Get user information
@@ -35,7 +35,7 @@ exports.createCustomer = async (req, res, next) => {
         const { email, user_id } = req;
         // Create a new customer object
         const customer = await stripe.customers.create({ email: email });
-        await subscriptionService.insertStripeCustomerInformation(customer.id, user_id)
+        await subscriptionService.insertStripeCustomerInformation(customer.id, user_id);
         // Save the customer.id in your database alongside your user.
         // We're simulating authentication with a cookie.
         next();
@@ -73,7 +73,7 @@ exports.createSubscription = async (req, res, next) => {
 exports.invoicePreview = async (req, res, next) => {
     let customerID = req.cookies.customer;
     try {
-        let invoiceData = await subscriptionService.findInvoice(customerID)
+        let invoiceData = await subscriptionService.findInvoice(customerID);
         res.status(200).send(codes(200, null, {
             invoiceData
         }));
@@ -162,17 +162,17 @@ exports.webhook = async (req, res, next) => {
             let customerID = Invoice.customer;
 
             try {
-                let subscriptionData = await subscriptionService.findInvoice(stripeSubscriptionID)
+                let subscriptionData = await subscriptionService.findInvoice(stripeSubscriptionID);
                 if (subscriptionData.length == 0) {
                     //Create subscription with relevant data
-                    subscriptionData = await subscriptionService.createInvoice(stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID)
+                    subscriptionData = await subscriptionService.createInvoice(stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID);
                 } else {
                     //Update subscription
-                    subscriptionData = await subscriptionService.updateInvoice(stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID)
+                    subscriptionData = await subscriptionService.updateInvoice(stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID);
                 }
 
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
 
             break;
@@ -180,18 +180,18 @@ exports.webhook = async (req, res, next) => {
         case 'customer.subscription.deleted':
             try {
                 const subscription = event.data.object;
-                let stripeSubscriptionID = subscription.id
-                let subscriptionData = await subscriptionService.findSubscription(stripeSubscriptionID)
+                let stripeSubscriptionID = subscription.id;
+                let subscriptionData = await subscriptionService.findSubscription(stripeSubscriptionID);
                 if (subscriptionData.length == 0) {
                     //Create subscription with relevant data
-                    subscriptionData = await subscriptionService.createSubscription(stripeSubscriptionID, subscription.status, dayjs(subscription.current_period_end * 1000).toDate(), subscription.customer, subscription.plan.product)
+                    subscriptionData = await subscriptionService.createSubscription(stripeSubscriptionID, subscription.status, dayjs(subscription.current_period_end * 1000).toDate(), subscription.customer, subscription.plan.product);
                 } else {
                     //Update subscription
-                    subscriptionData = await subscriptionService.updateSubscription(stripeSubscriptionID, subscription.status, dayjs(subscription.current_period_end * 1000).toDate(), subscription.customer, subscription.plan.product)
+                    subscriptionData = await subscriptionService.updateSubscription(stripeSubscriptionID, subscription.status, dayjs(subscription.current_period_end * 1000).toDate(), subscription.customer, subscription.plan.product);
                 }
 
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
             // If you want to manually send out invoices to your customers
             // or store them locally to reference to avoid hitting Stripe rate limits.

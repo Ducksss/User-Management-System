@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
 import tw from 'twin.macro';
 import config from "../../Config.js";
 import axios from "axios";
 
 
-const AccountRow = tw.div` grid w-full`
-const GridRow = tw.div`flex flex-wrap flex-row`
-const DetailRow = tw.div`border rounded-lg border-gray-400 my-3 w-8/12`
-const LeftHeader = tw.div` text-xl font-black w-3/12`
+const AccountRow = tw.div` grid w-full`;
+const GridRow = tw.div`flex flex-wrap flex-row`;
+const DetailRow = tw.div`border rounded-lg border-gray-400 my-3 w-8/12`;
+const LeftHeader = tw.div` text-xl font-black w-3/12`;
 
-const InfoRow = tw.div`flex flex-row border-b border-gray-400 px-3 py-5`
-const InfoRowLast = tw.div`flex flex-row py-5 px-3`
+const InfoRow = tw.div`flex flex-row border-b border-gray-400 px-3 py-5`;
+const InfoRowLast = tw.div`flex flex-row py-5 px-3`;
 
-const Content = tw.div`w-8/12 px-8 whitespace-nowrap`
-const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`
+const Content = tw.div`w-8/12 px-8 whitespace-nowrap`;
+const Header = tw.h2`text-base w-2/12 whitespace-nowrap font-bold`;
 const TabContent = tw(motion.div)`mt-6 flex flex-wrap sm:-mr-10 md:-mr-6 lg:-mr-12`;
 
 
@@ -24,13 +24,13 @@ export default function AccountDetails(location) {
         const fetchData = async () => {
             await axios.get(`${config.baseUrl}/u/subscription/invoice`, { withCredentials: true })
                 .then((response) => {
-                    console.log(response.data.content.invoiceData)
+                    console.log(response.data.content.invoiceData);
                     setSubscriptions(response.data.content.invoiceData);
                 })
                 .catch((error) => {
                     console.log(error);
-                })
-        }
+                });
+        };
         fetchData();
     }, []);
 
@@ -79,8 +79,8 @@ export default function AccountDetails(location) {
                     <Content> {subscription.paid_at}</Content>
                 </InfoRowLast>
             </DetailRow>
-        )
-    }
+        );
+    };
 
     return (
         <TabContent>
@@ -92,7 +92,7 @@ export default function AccountDetails(location) {
                                 <LeftHeader>{i == 0 ? 'Billing History' : ''}</LeftHeader>
                                 <AccountSubscription key={s.id} subscription={s} />
                             </>
-                        )
+                        );
                     })}
 
                 </GridRow>
@@ -100,5 +100,5 @@ export default function AccountDetails(location) {
             </AccountRow>
 
         </TabContent>
-    )
+    );
 }

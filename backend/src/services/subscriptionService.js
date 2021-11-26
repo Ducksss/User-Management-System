@@ -1,6 +1,6 @@
 // imports
 const config = require('../config/config');
-const pool = require('../config/database')
+const pool = require('../config/database');
 
 module.exports.updateSubscription = (stripeSubscriptionID, stripeStatus, currentPeriodEnd, customerID, productID) => {
     return new Promise((resolve, reject) => {
@@ -21,17 +21,17 @@ module.exports.updateSubscription = (stripeSubscriptionID, stripeStatus, current
                             `;
                 connection.query(query, [stripeStatus, currentPeriodEnd, customerID, productID, stripeSubscriptionID], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject('cannot update')
+                        console.log(err);
+                        reject('cannot update');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 module.exports.createSubscription = (stripeSubscriptionID, stripeStatus, currentPeriodEnd, customerID, productID) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
@@ -48,17 +48,17 @@ module.exports.createSubscription = (stripeSubscriptionID, stripeStatus, current
                             `;
                 connection.query(query, [stripeSubscriptionID, stripeStatus, currentPeriodEnd, customerID, productID], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject('cannot update')
+                        console.log(err);
+                        reject('cannot update');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 module.exports.findSubscription = (subscriptionID) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
@@ -75,16 +75,16 @@ module.exports.findSubscription = (subscriptionID) => {
                             `;
                 connection.query(query, [subscriptionID], (err, results) => {
                     if (err) {
-                        reject('No subscription')
+                        reject('No subscription');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 module.exports.updateInvoice = (stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
@@ -105,17 +105,17 @@ module.exports.updateInvoice = (stripeSubscriptionID, status, amountPaid, amount
                             `;
                 connection.query(query, [status, amountPaid, amountRemaining, paidAt, customerID, stripeSubscriptionID], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject('cannot update')
+                        console.log(err);
+                        reject('cannot update');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 module.exports.createInvoice = (stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
@@ -132,17 +132,17 @@ module.exports.createInvoice = (stripeSubscriptionID, status, amountPaid, amount
                             `;
                 connection.query(query, [stripeSubscriptionID, status, amountPaid, amountRemaining, paidAt, customerID], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject('cannot update')
+                        console.log(err);
+                        reject('cannot update');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 module.exports.findInvoice = (subscriptionID) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
@@ -159,16 +159,16 @@ module.exports.findInvoice = (subscriptionID) => {
                             `;
                 connection.query(query, [subscriptionID], (err, results) => {
                     if (err) {
-                        reject('No subscription')
+                        reject('No subscription');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 module.exports.insertStripeCustomerInformation = (stripe_customer_id, user_id) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
@@ -183,16 +183,16 @@ module.exports.insertStripeCustomerInformation = (stripe_customer_id, user_id) =
                             `;
                 connection.query(query, [stripe_customer_id, user_id], (err, results) => {
                     if (err) {
-                        reject('Insertion of OTP has failed')
+                        reject('Insertion of OTP has failed');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.getCustomerInformation = (user_id) => {
     return new Promise((resolve, reject) => {
@@ -210,13 +210,13 @@ module.exports.getCustomerInformation = (user_id) => {
                             `;
                 connection.query(query, [user_id], (err, results) => {
                     if (err) {
-                        reject('Fail to query for results')
+                        reject('Fail to query for results');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};

@@ -63,14 +63,14 @@ const httpCodeObj = {
         message: 'Internal Server Error',
         content: []
     },
-}
+};
 
 module.exports.codes = (statusCode, message, content) => {
-    let httpCode = httpCodeObj[statusCode]
+    let httpCode = httpCodeObj[statusCode];
 
-    if (message) httpCode.message = message
-    
-    if (content) httpCode.content = content
-    
-    return httpCode
-}
+    if (message) httpCode.message = message;
+
+    if (content) httpCode.content = content;
+
+    return httpCode;
+};
