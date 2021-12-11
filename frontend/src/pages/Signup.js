@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // styling 
-import "../styles/globalStyles.css"
+import "../styles/globalStyles.css";
 import styled from "styled-components";
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { Container as ContainerBase } from "components/misc/Layouts";
@@ -32,7 +32,7 @@ const LogoImage = tw.img`h-12 mx-auto`;
 const MainContent = tw.div`mt-12 flex flex-col items-center`;
 const Heading = tw.h1`text-2xl xl:text-3xl font-extrabold`;
 const FormContainer = tw.div`w-full flex-1 mt-8`;
-const Subheading = tw.h5`font-bold text-primary-500`
+const Subheading = tw.h5`font-bold text-primary-500`;
 const DividerTextContainer = tw.div`my-12 border-b text-center relative`;
 const DividerText = tw.div`leading-none px-2 inline-block text-sm text-gray-600 tracking-wide font-medium bg-white transform -translate-y-1/2 absolute inset-x-0 top-1/2 bg-transparent`;
 
@@ -62,322 +62,323 @@ const IllustrationImage = styled.div`
 `;
 
 const MyTextInput = ({ label, ...props }) => {
-  // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
-  // which we can spread on <input> and alse replace ErrorMessage entirely.
-  const [field, meta] = useField(props);
+    // useField() returns [formik.getFieldProps(), formik.getFieldMeta()]
+    // which we can spread on <input> and alse replace ErrorMessage entirely.
+    const [field, meta] = useField(props);
 
-  return (
-    <div css={[tw`mt-6`]}>
-      <label htmlFor={props.id || props.name} css={[tw`font-bold`]}>{label}</label>
-      <input css={[tw`w-full px-6 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white focus:border-solid focus:border-blue-400 first:mt-0 invalid:border-solid invalid:border-red-500 `]} {...field} {...props} />
-      {field.name === "password" ? (
-        <PasswordStrengthBar
-          password={meta.value}
-        />) : (null)}
-      {meta.touched && meta.error ? (
-        <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
-      ) : null}
-    </div>
-  );
+    return (
+        <div css={[tw`mt-6`]}>
+            <label htmlFor={props.id || props.name} css={[tw`font-bold`]}>{label}</label>
+            <input css={[tw`w-full px-6 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white focus:border-solid focus:border-blue-400 first:mt-0 invalid:border-solid invalid:border-red-500 `]} {...field} {...props} />
+            {field.name === "password" ? (
+                <PasswordStrengthBar
+                    password={meta.value}
+                />) : (null)}
+            {meta.touched && meta.error ? (
+                <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
+            ) : null}
+        </div>
+    );
 };
 
 const MyRecaptcha = ({ label, ...props }) => {
-  const [field, meta] = useField(props);
+    const [field, meta] = useField(props);
 
-  return (
-    <div css={[tw`mt-6`]}>
-      <ReCAPTCHA
-        sitekey="6Lfi5MgcAAAAAJc4WWRAZdcmwgY_RJgCPIwDGXK1"
-        {...field} {...props}
-        css={[tw`mt-6 pl-2`]}
-      />
-      {meta.touched && meta.error ? (
-        <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
-      ) : null}
-    </div>
-  )
-}
+    return (
+        <div css={[tw`mt-6`]}>
+            <ReCAPTCHA
+                sitekey="6Lfi5MgcAAAAAJc4WWRAZdcmwgY_RJgCPIwDGXK1"
+                {...field} {...props}
+                css={[tw`mt-6 pl-2`]}
+            />
+            {meta.touched && meta.error ? (
+                <div css={[tw`text-xs text-red-600`]}>{meta.error}</div>
+            ) : null}
+        </div>
+    );
+};
 
 const StepOne = ({ publicKey, setCurrentStep }) => {
-  // links
-  const tosUrl = "#";
-  const privacyPolicyUrl = "#";
-  const signInUrl = "http://localhost:3004/login";
+    // links
+    const tosUrl = "#";
+    const privacyPolicyUrl = "#";
+    const signInUrl = "http://localhost:3004/login";
 
-  // Pre defined
-  const submitButtonText = "Sign Up";
-  const SubmitButtonIcon = SignUpIcon;
+    // Pre defined
+    const submitButtonText = "Sign Up";
+    const SubmitButtonIcon = SignUpIcon;
 
-  // Team's predefined variable
-  const history = useHistory();
-  const [trySubmitting, setTrySubmitting] = React.useState(false)
-  const [isRecaptchaCompleted, setIsRecaptchaCompleted] = React.useState(false);
+    // Team's predefined variable
+    const history = useHistory();
+    const [trySubmitting, setTrySubmitting] = React.useState(false);
+    const [isRecaptchaCompleted, setIsRecaptchaCompleted] = React.useState(false);
 
-  const validationSchema = Yup.object({
-    firstName: Yup.string()
-      .max(15, 'Must be 15 characters or less')
-      .required('Your first name is required'),
-    lastName: Yup.string()
-      .max(20, 'Must be 20 characters or less')
-      .required('Your last name is required'),
-    password: Yup.string()
-      .required('Your password is required')
-      .min(12, "Your password must be minimally 12 characters long!"),
-    passwordConfirmation: Yup.string()
-      .required('You need to confirm your password')
-      .oneOf([Yup.ref('password'), null], 'Passwords must match'),
-    acceptedRecaptcha: Yup.boolean()
-      .required('Required')
-      .oneOf([true], 'You must accept the terms and conditions.'),
-    email: Yup.string()
-      .email('Invalid email address')
-      .required('Your email is required')
-      .test('Unique Email', 'The email has already been taken', // <- key, message
-        function (value) {
-          return new Promise((resolve, reject) => {
-            axios.get(`http://localhost:8003/api/u/user/email/${value}/available`)
-              .then((res) => {
-                resolve(true)
-              })
-              .catch((error) => {
-                if (error.response.data.content === "The email has already been taken.") {
-                  resolve(false);
+    const validationSchema = Yup.object({
+        firstName: Yup.string()
+            .max(15, 'Must be 15 characters or less')
+            .required('Your first name is required'),
+        lastName: Yup.string()
+            .max(20, 'Must be 20 characters or less')
+            .required('Your last name is required'),
+        password: Yup.string()
+            .required('Your password is required')
+            .min(12, "Your password must be minimally 12 characters long!"),
+        passwordConfirmation: Yup.string()
+            .required('You need to confirm your password')
+            .oneOf([Yup.ref('password'), null], 'Passwords must match'),
+        acceptedRecaptcha: Yup.boolean()
+            .required('Required')
+            .oneOf([true], 'You must accept the terms and conditions.'),
+        email: Yup.string()
+            .email('Invalid email address')
+            .required('Your email is required')
+            .test('Unique Email', 'The email has already been taken', // <- key, message
+                function (value) {
+                    return new Promise((resolve, reject) => {
+                        axios.get(`http://localhost:8003/api/u/user/email/${value}/available`)
+                            .then((res) => {
+                                resolve(true);
+                            })
+                            .catch((error) => {
+                                if (error.response.data.content === "The email has already been taken.") {
+                                    resolve(false);
+                                }
+                            });
+                    });
                 }
-              })
-          })
-        }
-      ),
-    contactNumber: Yup.string()
-      .matches(/^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/, "Must be a phone number")
-      .required('Your contact number is required')
-      .test('Unique Number', 'The number has already been taken', // <- key, message
-        function (value) {
-          return new Promise((resolve, reject) => {
-            axios.get(`${config.baseUrl}/u/user/number/${value}/available`)
-              .then((res) => {
-                resolve(true)
-              })
-              .catch((error) => {
-                if (error.response.data.code === 409) {
-                  resolve(false);
+            ),
+        contactNumber: Yup.string()
+            .matches(/^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/, "Must be a phone number")
+            .required('Your contact number is required')
+            .test('Unique Number', 'The number has already been taken', // <- key, message
+                function (value) {
+                    return new Promise((resolve, reject) => {
+                        axios.get(`${config.baseUrl}/u/user/number/${value}/available`)
+                            .then((res) => {
+                                resolve(true);
+                            })
+                            .catch((error) => {
+                                if (error.response.data.code === 409) {
+                                    resolve(false);
+                                }
+                            });
+                    });
                 }
-              })
-          })
-        }
-      ),
-  })
+            ),
+    });
 
-  const registerUserInformation = (values) => {
-    axios
-      .post(`${config.baseUrl}/u/user/create-account`, {
-        firstName: resEncrypt(values.firstName, publicKey),
-        lastName: resEncrypt(values.lastName, publicKey),
-        email: resEncrypt(values.email, publicKey),
-        password: resEncrypt(values.password, publicKey),
-        contact: resEncrypt(values.contactNumber, publicKey),
-      })
-      .then((results) => {
-        setCurrentStep(1)
-      })
-      .catch((error) => {
-        if (error.response.data.message === "Invalid Credentials.") {
-          console.log("Please key in a your valid credentials")
-        }
+    const registerUserInformation = (values) => {
+        axios
+            .post(`${config.baseUrl}/u/user/create-account`, {
+                firstName: resEncrypt(values.firstName, publicKey),
+                lastName: resEncrypt(values.lastName, publicKey),
+                email: resEncrypt(values.email, publicKey),
+                password: resEncrypt(values.password, publicKey),
+                contact: resEncrypt(values.contactNumber, publicKey),
+            })
+            .then((results) => {
+                setCurrentStep(1);
+            })
+            .catch((error) => {
+                if (error.response.data.message === "Invalid Credentials.") {
+                    console.log("Please key in a your valid credentials");
+                }
 
-        if (error.response.data.message === "Internal error") {
-          console.log("Please contact an administrator for help!")
-        }
-      })
-  }
+                if (error.response.data.message === "Internal error") {
+                    console.log("Please contact an administrator for help!");
+                }
+            });
+    };
 
-  const onRecaptchaSubmission = (values) => {
-    setIsRecaptchaCompleted(true);
-    console.log("Recaptcha value", values);
-  }
+    const onRecaptchaSubmission = (values) => {
+        setIsRecaptchaCompleted(true);
+        console.log("Recaptcha value", values);
+    };
 
-  const userTriesToSubmit = (values) => {
+    const userTriesToSubmit = (values) => {
 
-  }
+    };
 
-  return (
-    <Formik
-      initialValues={{
-        firstName: '',
-        lastName: '',
-        email: '',
-        contactNumber: '',
-        password: '',
-        passwordConfirmation: '',
-        acceptedRecaptcha: true, // added for our checkbox
-      }}
-      validateOnChange={false}
-      validationSchema={validationSchema}
-      onSubmit={(values) => {
-        registerUserInformation(values);
-      }}
-    >
-      <Form css={[tw`mx-auto max-w-xs`]} >
-        {/** First Name */}
-        <MyTextInput
-          label="First Name"
-          name="firstName"
-          type="text"
-          placeholder="Jane"
-        />
+    return (
+        <Formik
+            initialValues={{
+                firstName: '',
+                lastName: '',
+                email: '',
+                contactNumber: '',
+                password: '',
+                passwordConfirmation: '',
+                acceptedRecaptcha: true, // added for our checkbox
+            }}
+            validateOnChange={false}
+            validationSchema={validationSchema}
+            onSubmit={(values) => {
+                registerUserInformation(values);
+            }}
+        >
+            <Form css={[tw`mx-auto max-w-xs`]} >
+                {/** First Name */}
+                <MyTextInput
+                    label="First Name"
+                    name="firstName"
+                    type="text"
+                    placeholder="Jane"
+                />
 
-        <MyTextInput
-          label="Last Name"
-          name="lastName"
-          type="text"
-          placeholder="Doe"
-        />
+                <MyTextInput
+                    label="Last Name"
+                    name="lastName"
+                    type="text"
+                    placeholder="Doe"
+                />
 
-        <MyTextInput
-          label="Email"
-          name="email"
-          type="email"
-          placeholder="JaneDoe@gmail.com"
-        />
+                <MyTextInput
+                    label="Email"
+                    name="email"
+                    type="email"
+                    placeholder="JaneDoe@gmail.com"
+                />
 
-        <MyTextInput
-          label="Contact number"
-          name="contactNumber"
-          type="text"
-          placeholder="+6596472290"
-        />
+                <MyTextInput
+                    label="Contact number"
+                    name="contactNumber"
+                    type="text"
+                    placeholder="+6596472290"
+                />
 
-        <MyTextInput
-          label="Password"
-          name="password"
-          type="password"
-          placeholder="Password"
-        />
+                <MyTextInput
+                    label="Password"
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                />
 
-        <MyTextInput
-          label="Confirm password"
-          name="passwordConfirmation"
-          type="password"
-          placeholder="Password"
-        />
+                <MyTextInput
+                    label="Confirm password"
+                    name="passwordConfirmation"
+                    type="password"
+                    placeholder="Password"
+                />
 
-        <ReCAPTCHA
-          sitekey="6Lfi5MgcAAAAAJc4WWRAZdcmwgY_RJgCPIwDGXK1"
-          onChange={onRecaptchaSubmission}
-          css={[tw`mt-6 pl-2`]}
-        />
-        {!isRecaptchaCompleted && trySubmitting ?
-          (
-            <div css={[tw`text-xs text-red-600 ml-2`]}>Please verify you're not a bot</div>
-          ) :
-          (
-            null
-          )
-        }
+                <ReCAPTCHA
+                    sitekey="6Lfi5MgcAAAAAJc4WWRAZdcmwgY_RJgCPIwDGXK1"
+                    onChange={onRecaptchaSubmission}
+                    css={[tw`mt-6 pl-2`]}
+                />
 
-        <SubmitButton type="submit" onClick={() => { setTrySubmitting(true) }}>
-          <SubmitButtonIcon className="icon" />
-          <span className="text">{submitButtonText}</span>
-        </SubmitButton>
+                {!isRecaptchaCompleted && trySubmitting ?
+                    (
+                        <div css={[tw`text-xs text-red-600 ml-2`]}>Please verify you're not a bot</div>
+                    ) :
+                    (
+                        null
+                    )
+                }
 
-        <p tw="mt-6 text-xs text-gray-600 text-center">
-          I agree to abide by treact's{" "}
-          <a href={tosUrl} tw="border-b border-gray-500 border-dotted">
-            Terms of Service
-          </a>{" "}
-          and its{" "}
-          <a href={privacyPolicyUrl} tw="border-b border-gray-500 border-dotted">
-            Privacy Policy
-          </a>
-        </p>
+                <SubmitButton type="submit" onClick={() => { setTrySubmitting(true); }}>
+                    <SubmitButtonIcon className="icon" />
+                    <span className="text">{submitButtonText}</span>
+                </SubmitButton>
 
-        <p tw="mt-8 text-sm text-gray-600 text-center">
-          Already have an account?{" "}
-          <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
-            Sign In
-          </a>
-        </p>
-      </Form>
-    </Formik >
-  )
-}
+                <p tw="mt-6 text-xs text-gray-600 text-center">
+                    I agree to abide by treact's{" "}
+                    <a href={tosUrl} tw="border-b border-gray-500 border-dotted">
+                        Terms of Service
+                    </a>{" "}
+                    and its{" "}
+                    <a href={privacyPolicyUrl} tw="border-b border-gray-500 border-dotted">
+                        Privacy Policy
+                    </a>
+                </p>
+
+                <p tw="mt-8 text-sm text-gray-600 text-center">
+                    Already have an account?{" "}
+                    <a href={signInUrl} tw="border-b border-gray-500 border-dotted">
+                        Sign In
+                    </a>
+                </p>
+            </Form>
+        </Formik >
+    );
+};
 
 const StepTwo = () => {
-  const signinUrl = "http://localhost:3004/login";
+    const signinUrl = "http://localhost:3004/login";
 
-  return (
-    <>
-      <div>
-        <Subheading css={[tw`text-center`]}>
-          All done! An email has been sent for you to verify your account.
-        </Subheading>
-        <DividerTextContainer>
-          <DividerText css={[tw`leading-normal`]}>
-            Verified and ready to go?{" "}
-            <a href={signinUrl} tw="border-b border-gray-500 border-dotted">
-              Sign in
-            </a>
-          </DividerText>
-        </DividerTextContainer>
-      </div>
-    </>
-  )
-}
+    return (
+        <>
+            <div>
+                <Subheading css={[tw`text-center`]}>
+                    All done! An email has been sent for you to verify your account.
+                </Subheading>
+                <DividerTextContainer>
+                    <DividerText css={[tw`leading-normal`]}>
+                        Verified and ready to go?{" "}
+                        <a href={signinUrl} tw="border-b border-gray-500 border-dotted">
+                            Sign in
+                        </a>
+                    </DividerText>
+                </DividerTextContainer>
+            </div>
+        </>
+    );
+};
 
 export default function Signup() {
-  // links
-  const tosUrl = "#";
-  const logoLinkUrl = "#";
-  const privacyPolicyUrl = "#";
-  const signInUrl = "http://localhost:3004/login";
+    // links
+    const tosUrl = "#";
+    const logoLinkUrl = "#";
+    const privacyPolicyUrl = "#";
+    const signInUrl = "http://localhost:3004/login";
 
-  // Pre defined
-  const submitButtonText = "Sign Up";
-  const SubmitButtonIcon = SignUpIcon;
-  const headingText = "Sign Up For Treact";
-  const illustrationImageSrc = illustration;
+    // Pre defined
+    const submitButtonText = "Sign Up";
+    const SubmitButtonIcon = SignUpIcon;
+    const headingText = "Sign Up For Treact";
+    const illustrationImageSrc = illustration;
 
-  // Team's Defined Variables
-  const [publicKey, setPublicKey] = useState();
-  const [currentStep, setCurrentStep] = React.useState(0);
+    // Team's Defined Variables
+    const [publicKey, setPublicKey] = useState();
+    const [currentStep, setCurrentStep] = React.useState(0);
 
-  React.useEffect(() => {
-    axios.get(`${config.baseUrl}/keys`)
-      .then((response) => {
-        let key = response.data.publicKey
-        console.log(response.data.publicKey);
-        setPublicKey(key);
-        console.log(publicKey)
-      });
-  });
+    React.useEffect(() => {
+        axios.get(`${config.baseUrl}/keys`)
+            .then((response) => {
+                let key = response.data.publicKey;
+                console.log(response.data.publicKey);
+                setPublicKey(key);
+                console.log(publicKey);
+            });
+    });
 
-  const steps = [
-    <StepOne
-      setCurrentStep={setCurrentStep}
-      publicKey={publicKey}
-    />,
-    <StepTwo />
-  ];
+    const steps = [
+        <StepOne
+            setCurrentStep={setCurrentStep}
+            publicKey={publicKey}
+        />,
+        <StepTwo />
+    ];
 
-  return (
-    <AnimationRevealPage>
-      <Container>
-        <Content>
-          <MainContainer>
-            <LogoLink href={logoLinkUrl}>
-              <LogoImage src={logo} />
-            </LogoLink>
-            <MainContent>
-              <Heading>{headingText}</Heading>
-              <FormContainer>
-                {steps[currentStep]}
-              </FormContainer>
-            </MainContent>
-          </MainContainer>
-          <IllustrationContainer>
-            <IllustrationImage imageSrc={illustrationImageSrc} />
-          </IllustrationContainer>
-        </Content>
-      </Container>
-    </AnimationRevealPage >
-  );
+    return (
+        <AnimationRevealPage>
+            <Container>
+                <Content>
+                    <MainContainer>
+                        <LogoLink href={logoLinkUrl}>
+                            <LogoImage src={logo} />
+                        </LogoLink>
+                        <MainContent>
+                            <Heading>{headingText}</Heading>
+                            <FormContainer>
+                                {steps[currentStep]}
+                            </FormContainer>
+                        </MainContent>
+                    </MainContainer>
+                    <IllustrationContainer>
+                        <IllustrationImage imageSrc={illustrationImageSrc} />
+                    </IllustrationContainer>
+                </Content>
+            </Container>
+        </AnimationRevealPage >
+    );
 }

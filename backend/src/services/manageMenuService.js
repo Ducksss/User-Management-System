@@ -14,7 +14,7 @@ module.exports.getMenuCategory = () => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -22,9 +22,9 @@ module.exports.getMenuCategory = () => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.getMenuProduct = () => {
     try {
@@ -39,7 +39,7 @@ module.exports.getMenuProduct = () => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -47,9 +47,9 @@ module.exports.getMenuProduct = () => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.getMenuProduct = (category) => {
     try {
@@ -74,7 +74,7 @@ module.exports.getMenuProduct = (category) => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -82,9 +82,9 @@ module.exports.getMenuProduct = (category) => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.addMenuProduct = (productTitle, bDescription, dDescription, costPrice, retailPrice, stockQuantity) => {
     try {
@@ -102,7 +102,7 @@ module.exports.addMenuProduct = (productTitle, bDescription, dDescription, costP
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -110,9 +110,9 @@ module.exports.addMenuProduct = (productTitle, bDescription, dDescription, costP
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.deleteMenuProduct = (productId) => {
     try {
@@ -127,7 +127,7 @@ module.exports.deleteMenuProduct = (productId) => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -135,9 +135,9 @@ module.exports.deleteMenuProduct = (productId) => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.updateMenuProduct = (productTitle, bDescription, dDescription, costPrice, retailPrice, stockQuantity, productId) => {
     try {
@@ -154,7 +154,7 @@ module.exports.updateMenuProduct = (productTitle, bDescription, dDescription, co
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -162,9 +162,9 @@ module.exports.updateMenuProduct = (productTitle, bDescription, dDescription, co
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.addMenuCategory = (catname, description) => {
     try {
@@ -182,7 +182,7 @@ module.exports.addMenuCategory = (catname, description) => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -190,9 +190,9 @@ module.exports.addMenuCategory = (catname, description) => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.deleteMenuCategory = (categoryId) => {
     try {
@@ -207,7 +207,7 @@ module.exports.deleteMenuCategory = (categoryId) => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -215,9 +215,9 @@ module.exports.deleteMenuCategory = (categoryId) => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.updateMenuCategory = (catname, description, categoryId) => {
     try {
@@ -234,7 +234,7 @@ module.exports.updateMenuCategory = (catname, description, categoryId) => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -242,9 +242,9 @@ module.exports.updateMenuCategory = (catname, description, categoryId) => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.addProductCategory = (product, category) => {
     try {
@@ -262,7 +262,7 @@ module.exports.addProductCategory = (product, category) => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -270,9 +270,9 @@ module.exports.addProductCategory = (product, category) => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};
 
 module.exports.removeProductCategory = (product, category) => {
     try {
@@ -287,7 +287,7 @@ module.exports.removeProductCategory = (product, category) => {
                         if (err) {
                             reject(err);
                         } else {
-                            resolve(result)
+                            resolve(result);
                         }
                         connection.release();
                     });
@@ -295,6 +295,6 @@ module.exports.removeProductCategory = (product, category) => {
             });
         });
     } catch (error) {
-        reject(error)
+        reject(error);
     }
-}
+};

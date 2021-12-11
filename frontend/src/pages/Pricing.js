@@ -15,7 +15,7 @@ export default () => {
         heading="Our Paying Customers"
       />
       <FAQ />
-      <Footer/>
+      <Footer />
     </AnimationRevealPage>
   );
 };

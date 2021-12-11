@@ -76,7 +76,8 @@ const httpCodeObj = {
         content: [],
         datetime: moment().utc().format('MMMM Do YYYY, h:mm:ss a')
     },
-}
+};
+
 
 module.exports.codes = (statusCode, message, content, datetime) => {
     let httpCode = httpCodeObj[statusCode]

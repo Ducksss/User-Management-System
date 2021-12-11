@@ -10,7 +10,7 @@ const loginControllerErrorHandler = require('../middlewares/errorHandler')
 // Importing service's layer
 const loginService = require('../services/loginService');
 const manageUsers = require('../services/manageUserService');
-const subscriptionService = require('../services/subscriptionService')
+const subscriptionService = require('../services/subscriptionService');
 
 // Status codes
 const { codes } = require('../config/codes')
@@ -18,10 +18,9 @@ const { InvalidCredentialsError, StatusError } = require('../errors/AuthError');
 
 // Get user information
 exports.processUserLogin = async (req, res, next) => {
-
     try {
         //Decryption, Validation and Sanitization
-        let data = {}
+        let data = {};
         try {
             validators.validateEmail(req.body.email);
             validators.validatePassword(req.body.password);
@@ -29,7 +28,7 @@ exports.processUserLogin = async (req, res, next) => {
             data = {
                 email: validators.validateEmail(req.body.email),
                 password: validators.validatePassword(req.body.password),
-            }
+            };
         } catch (error) {
             // console.log(error.message);
             // return res.status(406).send(codes(406, 'Not Acceptable'));
@@ -86,9 +85,9 @@ exports.processUserLogin = async (req, res, next) => {
                 {
                     expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
                 }
-            )
+            );
 
-            let insertRefreshToken = await manageUsers.addRefreshToken(results[0].user_guid, refresh_token)
+            let insertRefreshToken = await manageUsers.addRefreshToken(results[0].user_guid, refresh_token);
 
             if (insertRefreshToken) {
                 let customerInformation = await subscriptionService.getCustomerInformation(results[0].user_id);
@@ -99,7 +98,7 @@ exports.processUserLogin = async (req, res, next) => {
                     signed: true,
                     maxAge: 60 * 60 * 24 * 3 * 1000, //3 days
                     sameSite: "none",
-                })
+                });
 
                 res.cookie('customer', customerInformation[0].customer_stripe_id, {
                     maxAge: 60 * 60 * 24 * 3 * 1000, httpOnly: true
@@ -118,6 +117,8 @@ exports.processUserLogin = async (req, res, next) => {
             throw new InvalidCredentialsError();
         }
     } catch (error) {
+        console.log(error);
+
         if (error == "User does not exist") {
             // return res.status(401).send(codes(401, 'Login failed.', 'Your email or password is invalid.'));
             next(new InvalidCredentialsError());
@@ -126,4 +127,4 @@ exports.processUserLogin = async (req, res, next) => {
         // return res.status(500).send(codes(500, 'Internal error', 'Please contact an administrator for help.'));
         next(error);
     }
-}
+};

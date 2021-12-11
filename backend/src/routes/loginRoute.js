@@ -1,5 +1,5 @@
 // imports
-const limiter = require('../middlewares/rateLimiter')
+const limiter = require('../middlewares/rateLimiter');
 // controllers
 const loginController = require('../controllers/loginController');
 const { errorHandler } = require('../middlewares/errorHandler');

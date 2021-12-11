@@ -1,6 +1,6 @@
 // imports
 config = require('../config/config');
-const pool = require('../config/database')
+const pool = require('../config/database');
 
 // verify if email has been taken and translating email to UUID
 module.exports.insertVerificationCode = (user_id, token) => {
@@ -17,16 +17,16 @@ module.exports.insertVerificationCode = (user_id, token) => {
                             `;
                 connection.query(query, [user_id, token], (err, results) => {
                     if (err) {
-                        reject('Insertion of OTP has failed')
+                        reject('Insertion of OTP has failed');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.fetchInsertedVerificationCode = (user_id, verificationCode) => {
     return new Promise((resolve, reject) => {
@@ -45,16 +45,16 @@ module.exports.fetchInsertedVerificationCode = (user_id, verificationCode) => {
                             `;
                 connection.query(query, [user_id, verificationCode], (err, results) => {
                     if (err) {
-                        reject('Insertion of OTP has failed')
+                        reject('Insertion of OTP has failed');
                     } else {
-                        console.log(results)
-                        resolve(results)
+                        console.log(results);
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
+        });
+    });
 };
 
 module.exports.verifyToken = (user_id, verificationCode) => {
@@ -76,16 +76,16 @@ module.exports.verifyToken = (user_id, verificationCode) => {
                             `;
                 connection.query(query, [verificationCode, user_id], (err, results) => {
                     if (err) {
-                        reject(err)
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.retriveUserPasswordHistory = (user_id) => {
     return new Promise((resolve, reject) => {
@@ -105,16 +105,16 @@ module.exports.retriveUserPasswordHistory = (user_id) => {
                             `;
                 connection.query(query, [user_id], (err, results) => {
                     if (err) {
-                        reject('none found')
+                        reject('none found');
                     } else {
-                        resolve(results[0])
+                        resolve(results[0]);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.updateCurrentPassword = (user_id, hashedIncomingPassword, currentPassword, oldPassword1) => {
     return new Promise((resolve, reject) => {
@@ -134,16 +134,16 @@ module.exports.updateCurrentPassword = (user_id, hashedIncomingPassword, current
                             `;
                 connection.query(query, [hashedIncomingPassword, currentPassword, oldPassword1, user_id], (err, results) => {
                     if (err) {
-                        reject('cannot update')
+                        reject('cannot update');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.verificationCompleted = (verification_id) => {
     return new Promise((resolve, reject) => {
@@ -161,13 +161,13 @@ module.exports.verificationCompleted = (verification_id) => {
                             `;
                 connection.query(query, [verification_id], (err, results) => {
                     if (err) {
-                        reject('cannot update')
+                        reject('cannot update');
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};

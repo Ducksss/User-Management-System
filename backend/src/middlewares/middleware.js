@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require('../config/config');
-const { codes } = require('../config/codes')
+const { codes } = require('../config/codes');
 
 const manageUserService = require('../services/manageUserService');
 const { InvalidTokenError, NoTokenError } = require("../errors/TokenError");
@@ -20,7 +20,7 @@ exports.isLoggedIn = async (req, res, next) => {
         // return res.status(401).send(codes(401));
         throw new NoTokenError();
 
-        let { user_guid, email } = payload
+        let { user_guid, email } = payload;
         let getLoggedInData = await manageUserService.isLoggedIn(user_guid);
         if (getLoggedInData.length == 1) {
             let getSuspendedAccount = await manageUserService.isSuspended(getLoggedInData[0].user_id);
@@ -49,4 +49,4 @@ exports.isLoggedIn = async (req, res, next) => {
             // return res.status(400).send(codes(400));
             next(error);
     }
-}
+};

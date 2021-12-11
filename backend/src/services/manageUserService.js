@@ -1,6 +1,6 @@
 // imports
 config = require('../config/config');
-const pool = require('../config/database')
+const pool = require('../config/database');
 
 // verify if email has been taken and translating email to UUID
 module.exports.getEmail = (email) => {
@@ -19,16 +19,16 @@ module.exports.getEmail = (email) => {
                             `;
                 connection.query(query, [email], (err, results) => {
                     if (err) {
-                        reject(err)
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 // verify if number has been taken and translating number to UUID
 module.exports.getNumber = (number) => {
@@ -46,16 +46,16 @@ module.exports.getNumber = (number) => {
                             `;
                 connection.query(query, [number], (err, results) => {
                     if (err) {
-                        reject(err)
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 // adding user information to the database
 module.exports.addUser = (firstName, lastName, email, contact, privilege) => {
@@ -74,7 +74,7 @@ module.exports.addUser = (firstName, lastName, email, contact, privilege) => {
                         if (err) {
                             reject(err);
                         } else {
-                            console.log(results)
+                            console.log(results);
                             resolve(results);
                         }
                         connection.release();
@@ -84,7 +84,7 @@ module.exports.addUser = (firstName, lastName, email, contact, privilege) => {
                 }
             }
         });
-    })
+    });
 };
 
 // adding user login information to the database
@@ -103,7 +103,7 @@ module.exports.addUserLogin = (user_id, password_hash) => {
                         if (err) {
                             reject(err);
                         } else {
-                            console.log(results)
+                            console.log(results);
                             resolve(results);
                         }
                         connection.release();
@@ -113,7 +113,7 @@ module.exports.addUserLogin = (user_id, password_hash) => {
                 }
             }
         });
-    })
+    });
 };
 
 module.exports.addTwoFactorAuthentication = (user_id, temporary_secret) => {
@@ -131,7 +131,7 @@ module.exports.addTwoFactorAuthentication = (user_id, temporary_secret) => {
                         if (err) {
                             reject(err);
                         } else {
-                            console.log(results)
+                            console.log(results);
                             resolve(results);
                         }
                         connection.release();
@@ -141,7 +141,7 @@ module.exports.addTwoFactorAuthentication = (user_id, temporary_secret) => {
                 }
             }
         });
-    })
+    });
 };
 
 // adding speakeasy secret after adding user information - to be removed
@@ -164,7 +164,7 @@ module.exports.add2FA = (user_guid, secret) => {
                         if (err) {
                             reject(err);
                         } else {
-                            console.log(results)
+                            console.log(results);
                             resolve(results);
                         }
                         connection.release();
@@ -174,8 +174,8 @@ module.exports.add2FA = (user_guid, secret) => {
                 }
             }
         });
-    })
-}
+    });
+};
 
 // updating the number of login attempts
 module.exports.updateLoginAttempts = (login_attempt, user_id) => {
@@ -198,7 +198,7 @@ module.exports.updateLoginAttempts = (login_attempt, user_id) => {
                         if (err) {
                             reject(err);
                         } else {
-                            console.log(results)
+                            console.log(results);
                             resolve(results);
                         }
                         connection.release();
@@ -208,8 +208,8 @@ module.exports.updateLoginAttempts = (login_attempt, user_id) => {
                 }
             }
         });
-    })
-}
+    });
+};
 
 // for dynamically displaying header functionality
 module.exports.isLoggedIn = (user_guid) => {
@@ -230,20 +230,20 @@ module.exports.isLoggedIn = (user_guid) => {
                                 `;
                     connection.query(query, [user_guid], (err, results) => {
                         if (err) {
-                            console.log(err)
-                            reject(err)
+                            console.log(err);
+                            reject(err);
                         } else {
-                            resolve(results)
+                            resolve(results);
                         }
-                        connection.release()
-                    })
+                        connection.release();
+                    });
                 } catch (error) {
                     reject(error);
                 }
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.isSuspended = (user_guid) => {
     return new Promise((resolve, reject) => {
@@ -261,17 +261,17 @@ module.exports.isSuspended = (user_guid) => {
 
                 connection.query(query, [user_guid], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.getRole = (user_id) => {
     return new Promise((resolve, reject) => {
@@ -288,17 +288,17 @@ module.exports.getRole = (user_id) => {
                             `;
                 connection.query(query, [user_id], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.verifyVerificationEmailToken = (user_guid, created_at) => {
     return new Promise((resolve, reject) => {
@@ -316,17 +316,17 @@ module.exports.verifyVerificationEmailToken = (user_guid, created_at) => {
                             `;
                 connection.query(query, [user_guid], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.updateLoginStatus = (user_guid, status) => {
     return new Promise((resolve, reject) => {
@@ -344,17 +344,17 @@ module.exports.updateLoginStatus = (user_guid, status) => {
                             `;
                 connection.query(query, [status, user_guid], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 //add refresh token into db
 module.exports.addRefreshToken = (userid, token) => {
@@ -371,7 +371,7 @@ module.exports.addRefreshToken = (userid, token) => {
                                         (user_guid, refresh_token, created_at)   
                                 VALUES 
                                     (?,?, UTC_TIMESTAMP())         
-                                `
+                                `;
                     connection.query(query, [userid, token], (err, result) => {
                         if (err) {
                             console.log(err);
@@ -383,12 +383,12 @@ module.exports.addRefreshToken = (userid, token) => {
                     });
                 } catch (error) {
                     console.log(error);
-                    reject(error)
+                    reject(error);
                 }
             }
-        })
-    })
-}
+        });
+    });
+};
 
 //get refresh token 
 module.exports.findUserToken = (token) => {
@@ -410,17 +410,17 @@ module.exports.findUserToken = (token) => {
                             `;
                 connection.query(query, [token], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 //lock user  
 module.exports.lockUser = (userid) => {
@@ -446,17 +446,17 @@ module.exports.lockUser = (userid) => {
                             `;
                 connection.query(query, [userid], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 //lock user  
 module.exports.updateTimesUsed = (token, used) => {
@@ -474,17 +474,17 @@ module.exports.updateTimesUsed = (token, used) => {
                             `;
                 connection.query(query, [used, token], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 //delete token
 module.exports.deleteRefreshToken = (token) => {
@@ -500,23 +500,23 @@ module.exports.deleteRefreshToken = (token) => {
                             `;
                 connection.query(query, [token], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};
 
 module.exports.getAllUserInformation = (user_id) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
-                resolve(err)
+                resolve(err);
             } else {
                 let query = `
                 SELECT 
@@ -527,17 +527,17 @@ module.exports.getAllUserInformation = (user_id) => {
                     where 
                     users.user_id = logins.user_id 
                     and users.user_id = ?;
-                `
+                `;
                 connection.query(query, [user_id], (err, results) => {
                     if (err) {
-                        console.log(err)
-                        reject(err)
+                        console.log(err);
+                        reject(err);
                     } else {
-                        resolve(results)
+                        resolve(results);
                     }
-                    connection.release()
-                })
+                    connection.release();
+                });
             }
-        })
-    })
-}
+        });
+    });
+};

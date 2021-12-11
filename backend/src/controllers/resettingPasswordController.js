@@ -22,7 +22,7 @@ let transporter = nodeMailer.createTransport({
         user: config.GMAIL_USER,
         pass: config.GMAIL_PASS,
     }
-})
+});
 
 /**
  * Forgot Password
@@ -31,7 +31,7 @@ exports.generateOTP = async (req, res, next) => {
     try {
         const { email } = req.params;
 
-        const userInformation = await loginService.authenticateUser(email)
+        const userInformation = await loginService.authenticateUser(email);
 
         // if no user, break and don't send any email
         if (userInformation.length != 1) {
@@ -303,7 +303,7 @@ exports.generateOTP = async (req, res, next) => {
         // return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
         next(error);
     }
-}
+};
 
 exports.verifyResetPasswordParamToken = async (req, res, next) => {
     try {
@@ -313,7 +313,7 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
 
         // Translator
         let getUserData = await manageUsers.isLoggedIn(user_guid);
-        let result = await resettingPasswordService.verifyToken(getUserData[0].user_id, verificationCode)
+        let result = await resettingPasswordService.verifyToken(getUserData[0].user_id, verificationCode);
 
         if (result.length !== 1) 
             // return res.status(403).send(codes(403));
@@ -348,7 +348,7 @@ exports.verifyResetPasswordParamToken = async (req, res, next) => {
         //return res.status(500).send(codes(500, 'Unable to complete update (users) operation'))
         next(error);
     }
-}
+};
 
 exports.verifyPasswordUniquness = async (req, res, next) => {
     try {
@@ -400,7 +400,7 @@ exports.verifyPasswordUniquness = async (req, res, next) => {
         // return res.status(500).send(codes(500));
         next(error);
     }
-}
+};
 
 exports.updateNewPassword = async (req, res, next) => {
     try {
@@ -423,7 +423,7 @@ exports.updateNewPassword = async (req, res, next) => {
         // return res.status(500).send(codes(500));
         next(error);
     }
-}
+};
 
 /**
  * Reset Password
@@ -465,7 +465,7 @@ exports.verifyCurrentAndOld = async (req, res, next) => {
         // return res.status(500).send(codes(500));
         next(error);
     }
-}
+};
 
 exports.verifyResetPasswordUniqueness = async (req, res, next) => {
     try {
@@ -504,7 +504,7 @@ exports.verifyResetPasswordUniqueness = async (req, res, next) => {
             }
 
             if (part === "store") {
-                console.log("ENTERING HERE")
+                console.log("ENTERING HERE");
                 next();
             } else {
                 return res.status(200).send(codes(200));
@@ -519,11 +519,10 @@ exports.verifyResetPasswordUniqueness = async (req, res, next) => {
         // return res.status(500).send(codes(500));
         next(error);
     }
-}
+};
 
 exports.updateResetNewPassword = async (req, res, next) => {
     try {
-        // console.log("please end me here")
         const { incomingPassword } = req.body;
         const { user_id, currentPassword, oldPassword1 } = req;
         const hashedIncomingPassword = await bcrypt.hash(incomingPassword, 10);
@@ -542,4 +541,4 @@ exports.updateResetNewPassword = async (req, res, next) => {
         // return res.status(500).send(codes(500));
         next(error);
     }
-}
+};
