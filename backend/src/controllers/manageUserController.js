@@ -433,19 +433,6 @@ exports.refreshToken = async (req, res) => {
             }
 
             let getUser = await manageUsers.findUserToken(refreshToken);
-
-            if (getUser.length == 1) { // if token is same 
-                if (getUser[0].times_used > 0) {
-                    // lock user out 
-                    // delete token
-                    await manageUsers.lockUser(userId)
-                    await manageUsers.deleteRefreshToken(refreshToken)
-
-                    return res.status(401).send(codes(401, 'locked out.')) // outdated
-                } else {
-                    await manageUsers.updateTimesUsed(refreshToken, (getUser[0].times_used + 1));
-                }
-
                 //create access token
                 const token = jwt.sign({
                     user_guid: getUser[0].user_guid,
@@ -461,7 +448,7 @@ exports.refreshToken = async (req, res) => {
                     expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
                 });
 
-                await manageUsers.addRefreshToken(getUser[0].user_guid, refresh_token);
+                await manageUsers.UpdateRefreshToken(getUser[0].user_guid, refresh_token);
 
                 res.cookie('refreshToken', refresh_token, {
                     httpOnly: true,

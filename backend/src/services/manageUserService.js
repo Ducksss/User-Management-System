@@ -390,6 +390,35 @@ module.exports.addRefreshToken = (userid, token) => {
     });
 };
 
+module.exports.UpdateRefreshToken = (userId, refreshToken) => {
+    let sql = `UPDATE 
+    refresh_tokens
+    SET
+        refresh_token = ?
+    WHERE
+        user_guid = ?
+    `;
+
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                console.log('Database connection error ', err);
+                resolve(err);
+            } else {
+                connection.query(sql, [refreshToken, userId], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    } else {
+                        resolve(results);
+                    }
+                    connection.release();
+                });
+            }
+        });
+    });
+};
+
 //get refresh token 
 module.exports.findUserToken = (token) => {
     return new Promise((resolve, reject) => {
@@ -398,7 +427,7 @@ module.exports.findUserToken = (token) => {
                 resolve(err);
             } else {
                 let query = `SELECT 
-                                u.user_guid, u.email, u.privilege, rt.refresh_token, rt.times_used 
+                                u.user_guid, u.email, u.privilege, rt.refresh_token
                             FROM 
                                 refresh_tokens rt
                             JOIN
@@ -445,34 +474,6 @@ module.exports.lockUser = (userid) => {
                             ;
                             `;
                 connection.query(query, [userid], (err, results) => {
-                    if (err) {
-                        console.log(err);
-                        reject(err);
-                    } else {
-                        resolve(results);
-                    }
-                    connection.release();
-                });
-            }
-        });
-    });
-};
-
-//lock user  
-module.exports.updateTimesUsed = (token, used) => {
-    return new Promise((resolve, reject) => {
-        pool.getConnection((err, connection) => {
-            if (err) {
-                resolve(err);
-            } else {
-                let query = `UPDATE 
-                                refresh_tokens
-                            SET
-                                times_used = ?
-                            WHERE 
-                                refresh_token = ?;
-                            `;
-                connection.query(query, [used, token], (err, results) => {
                     if (err) {
                         console.log(err);
                         reject(err);
