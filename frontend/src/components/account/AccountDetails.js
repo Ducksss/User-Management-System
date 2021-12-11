@@ -122,12 +122,11 @@ export default function AccountDetails(location) {
                 })
                 .catch((error) => {
                     console.log(error);
-                });
-
+                })
+            
             await axios.get(`${config.baseUrl}/u/user/information`, { withCredentials: true })
                 .then((response) => {
-                    setUserInformation(response.data.content[0]);
-                    console.log(response.data.content[0]);
+                    setUserInformation(response.data.content[0])
                 })
                 .catch((error) => {
                     console.log(error);
@@ -171,13 +170,16 @@ export default function AccountDetails(location) {
                     <Content>{subscription.default_payment_method?.card?.last4}</Content>
                 </InfoRow>
 
-                <InfoRowLast>
+                <InfoRow>
                     <Header>Current period end:</Header>
                     <Content> {(new Date(subscription.current_period_end * 1000).toString())}</Content>
+                </InfoRow>
+                <InfoRowLast>
+                    <Header>Cancel Subscription:</Header>
+                    <Content><button variant="primary" onClick={(e) => { handleClick(e, subscription.id) }}>Cancel Subscription</button></Content>
                 </InfoRowLast>
-
                 {/* <Link to={{pathname: '/change-plan', state: {subscription: subscription.id }}}>Change plan</Link><br /> */}
-                <button onClick={(e) => { handleClick(e, subscription.id); }}>Cancel Subscription</button>
+                
             </DetailRow>
         );
     };

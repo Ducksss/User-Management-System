@@ -13,6 +13,9 @@ const validators = require('../middlewares/validators');
 
 // services
 const manageUsers = require('../services/manageUserService');
+const { ExpiredSessionError, NoTokenError, InvalidTokenError } = require('../errors/TokenError');
+const { DuplicateError, ValidationError } = require('../errors/ParamError');
+const { VerificationError } = require('../errors/AuthError');
 
 // configs
 const transporter = nodeMailer.createTransport({
@@ -30,13 +33,15 @@ exports.checkDuplicateEmails = async (req, res, next) => {
         let results = await manageUsers.getEmail(email);
 
         if (results.length === 1) {
-            return res.status(409).send(codes(409, null, "The email has already been taken."));
+            // return res.status(409).send(codes(409, null, "The email has already been taken."))
+            throw new DuplicateError("email");
         } else {
             return res.status(200).send(codes(200, null, results));
         }
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(codes(500));
+        // console.log(error)
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
 
@@ -47,13 +52,15 @@ exports.checkDuplicateNumbers = async (req, res, next) => {
         let results = await manageUsers.getNumber(number);
 
         if (results.length === 1) {
-            return res.status(409).send(codes(409, null, "The number has already been taken."));
+            // return res.status(409).send(codes(409, null, "The number has already been taken."))
+            throw new DuplicateError("number");
         } else {
             return res.status(200).send(codes(200, null, results));
         }
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(codes(500));
+        // console.log(error)
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
 
@@ -72,8 +79,9 @@ exports.addUser = async (req, res, next) => {
                 contact: validators.validateInt(req.body.contact)
             };
         } catch (error) {
-            console.log(error.message);
-            return res.status(406).send(codes(406, 'Not Acceptable'));
+            // console.log(error.message);
+            // return res.status(406).send(codes(406, 'Not Acceptable'));
+            throw new ValidationError();
         }
 
         let { firstName, lastName, email, password, contact, privilege } = data;
@@ -97,8 +105,9 @@ exports.addUser = async (req, res, next) => {
         req.user_id = insertedUserInformation.insertId;
         next();
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(codes(500));
+        // console.log(error)
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
 
@@ -120,7 +129,7 @@ exports.generateVerificationEmail = async (req, res, next) => {
             )
         };
 
-        transporter.sendMail({
+        await transporter.sendMail({
             //Insert admin email here
             from: 'User Management System <noreply@UMS.com>',
             to: `${email}`,
@@ -348,7 +357,8 @@ exports.generateVerificationEmail = async (req, res, next) => {
 
         return res.status(200).send(codes(200));
     } catch (error) {
-        return res.status(500).send(codes(500));
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
 
@@ -363,23 +373,27 @@ exports.verifyVerificationEmail = async (req, res, next) => {
 
         let result = await manageUsers.verifyVerificationEmailToken(user_id)
             .catch((error) => {
-                console.log(error);
-                return res.status(401).send(codes(401, 'Failed to verify.'));
+                // console.log(error);
+                // return res.status(401).send(codes(401, 'Failed to verify.'));
+                next(new VerificationError());
             });
 
         if (result.length !== 1) {
-            return res.status(403).send(codes(403));
+            // return res.status(403).send(codes(403));
+            throw new InvalidTokenError();
         }
 
         await manageUsers.updateLoginStatus(user_id, 0)
             .catch((error) => {
-                console.log(error);
-                return res.status(401).send(codes(401, 'Failed to verify.'));
+                // console.log(error);
+                // return res.status(401).send(codes(401, 'Failed to verify.'));
+                next(new VerificationError());
             });
 
         return res.status(200).send(codes(200));
     } catch (error) {
-        return res.status(500).send(codes(500));
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
 
@@ -396,8 +410,9 @@ exports.generate2FA = async (req, res, next) => {
 
         return res.status(200).send(codes(200, { qrcodeURL: qrcodeURL }));
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(codes(500));
+        // console.log(error)
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
 
@@ -418,8 +433,6 @@ exports.refreshToken = async (req, res) => {
             }
 
             let getUser = await manageUsers.findUserToken(refreshToken);
-
-            if (getUser.length == 1) {
                 //create access token
                 const token = jwt.sign({
                     user_guid: getUser[0].user_guid,
@@ -451,17 +464,17 @@ exports.refreshToken = async (req, res) => {
             }
 
         } catch (error) {
-            console.log(error);
-            res.clearCookie('refreshToken');
-            return res.status(500).send(codes(500));
+            // console.log(error);
+            // return res.status(500).send(codes(500));
+            next(error);
         }
     } else {
-        res.clearCookie('refreshToken');
-        return res.status(401).send(codes(401, 'No token is detected.'));
+        // return res.status(401).send(codes(401, 'No token is detected.'))
+        next(new NoTokenError());
     }
 };
 
-exports.logout = async (req, res) => {
+exports.logout = async (req, res, next) => {
     const { signedCookies = {} } = req;
     const { refreshToken } = signedCookies;
 
@@ -475,14 +488,17 @@ exports.logout = async (req, res) => {
                 return res.status(204).send();
             } else {
                 res.clearCookie('refreshToken');
-                return res.status(500).send(codes(500));
+                // return res.status(500).send(codes(500));
+                next(error);
             }
         } catch (error) {
-            console.log(error);
-            return res.status(500).send(codes(500));
+            // console.log(error);
+            // return res.status(500).send(codes(500));
+            next(error);
         }
     } else {
-        return res.status(500).send(codes(500));
+        // return res.status(500).send(codes(500));
+        next(new NoTokenError());
     }
 };
 
@@ -494,8 +510,9 @@ exports.getUserPrivilege = async (req, res, next) => {
 
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(codes(500));
+        // console.log(error);
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
 
@@ -507,8 +524,9 @@ exports.getUserPrivilege = async (req, res, next) => {
 
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(codes(500));
+        // console.log(error)
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
 
@@ -519,7 +537,8 @@ exports.getUserInformation = async (req, res, next) => {
 
         return res.status(200).send(codes(200, null, results));
     } catch (error) {
-        console.log(error);
-        return res.status(500).send(codes(500));
+        // console.log(error)
+        // return res.status(500).send(codes(500));
+        next(error);
     }
 };
