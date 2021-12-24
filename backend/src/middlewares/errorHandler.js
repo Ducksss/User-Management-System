@@ -7,6 +7,7 @@ module.exports.errorHandler = (error, req, res, next) => {
  
     // custom errors
     if (error instanceof BaseError) return res.status(error.code).send(error.toJSON());
+    
     // other errors
     return res.status(500).send(codes(500, 'Internal Error', 'Please contact an administrator for help.')); // fallback
 };

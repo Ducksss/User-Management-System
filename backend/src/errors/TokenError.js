@@ -4,7 +4,7 @@ class TokenError extends BaseError {
     constructor(){
     super();
     this.name = "Refresh Token Error";
-    this.message = "Refresh Token Error";
+    this.description = "Refresh Token Error";
     this.summary = "Refresh Token Error";
     this.code = 401
     }
@@ -14,7 +14,7 @@ class ExpiredTokenError extends TokenError {
     constructor(){
         super();
         this.name = "Expired Token Error";
-        this.message = "Your token has expired.";
+        this.description = "Your token has expired.";
     }
 }
 
@@ -22,7 +22,7 @@ class InvalidTokenError extends TokenError {
     constructor(){
         super();
         this.name = "Invalid Token Error";
-        this.message = "The token is invalid."
+        this.description = "The token is invalid."
     }
 }
 
@@ -30,7 +30,7 @@ class NoTokenError extends TokenError {
     constructor(){
         super();
         this.name = "No Token Error";
-        this.message = "There is no token detected.";
+        this.description = "There is no token detected.";
     }
 }
 

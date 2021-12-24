@@ -6,7 +6,7 @@ class BaseError extends Error {
         this.code = 400;
         this.error = true;
         this.name = "BaseErrors";
-        this.message = "Errors";
+        this.description = "Errors";
         this.summary = "Errors";
     }
  
@@ -14,7 +14,7 @@ class BaseError extends Error {
         return {
             code: this.code,
             error: true,
-            message: this.message,
+            description: this.message,
             name: this.name,
             summary: this.summary,
             content: [],
