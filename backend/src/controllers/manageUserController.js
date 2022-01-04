@@ -445,7 +445,7 @@ exports.refreshToken = async (req, res) => {
                 });
 
                 const refresh_token = jwt.sign({ _id: userId }, config.REFRESH_TOKEN_SECRET, {
-                    expiresIn: eval(config.REFRESH_TOKEN_EXPIRY) 
+                    expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
                 });
 
                 await manageUsers.UpdateRefreshToken(getUser[0].user_guid, refresh_token);
