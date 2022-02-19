@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 
 let app = express();
 const corsOptions = {
-    origin: "http://18.139.131.27:3004",
+    origin: "http://localhost:3004",
     optionsSuccessStatus: 200,
     credentials: true
 };

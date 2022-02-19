@@ -433,6 +433,8 @@ exports.refreshToken = async (req, res) => {
             }
 
             let getUser = await manageUsers.findUserToken(refreshToken);
+
+            if (getUser.length == 1) {
                 //create access token
                 const token = jwt.sign({
                     user_guid: getUser[0].user_guid,
@@ -472,7 +474,7 @@ exports.refreshToken = async (req, res) => {
         // return res.status(401).send(codes(401, 'No token is detected.'))
         next(new NoTokenError());
     }
-};
+}
 
 exports.logout = async (req, res, next) => {
     const { signedCookies = {} } = req;
