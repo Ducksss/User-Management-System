@@ -32,8 +32,7 @@
     "stripe": "^8.179.0",
     "util.promisify": "^1.1.1",
     "uuid": "^8.3.2",
-    "validator": "^13.6.0",
-    "winston": "^3.6.0"
+    "validator": "^13.6.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.6"

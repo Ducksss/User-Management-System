@@ -417,7 +417,7 @@ exports.generate2FA = async (req, res, next) => {
 };
 
 //refresh token
-exports.refreshToken = async (req, res, next) => {
+exports.refreshToken = async (req, res) => {
     const { signedCookies = {} } = req; //get the cookie from the request header
     const { refreshToken } = signedCookies; //get the cookie by key
 
