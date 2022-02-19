@@ -91,33 +91,33 @@ import { css } from "styled-components/macro"; //eslint-disable-line
 // import AgencyLandingPage from "demos/AgencyLandingPage.js";
 // import SaaSProductLandingPage from "demos/SaaSProductLandingPage.js";
 // import RestaurantLandingPage from "demos/RestaurantLandingPage.js";
-import ServiceLandingPage from "./demos/ServiceLandingPage.js";
+import ServiceLandingPage from "demos/ServiceLandingPage.js";
 // import HostingCloudLandingPage from "demos/HostingCloudLandingPage.js";
 
 /* Inner Pages */
-// import PricingPage from "pages/Pricing.js";
+import PricingPage from "pages/Pricing.js";
 // import AboutUsPage from "pages/AboutUs.js";
 // import ContactUsPage from "pages/ContactUs.js";
 // import BlogIndexPage from "pages/BlogIndex.js";
 // import TermsOfServicePage from "pages/TermsOfService.js";
 // import PrivacyPolicyPage from "pages/PrivacyPolicy.js";
 
-import ComponentRenderer from "./ComponentRenderer";
-import MainLandingPage from "./MainLandingPage.js";
-import ThankYouPage from "./ThankYouPage.js";
+import ComponentRenderer from "ComponentRenderer.js";
+import MainLandingPage from "MainLandingPage.js";
+import ThankYouPage from "ThankYouPage.js";
 
-import LoginPage from "./pages/Login.js";
-import SignupPage from "./pages/Signup.js";
-import VerifyEmail from "./pages/account/VerifyEmail"
+import LoginPage from "pages/Login.js";
+import SignupPage from "pages/Signup.js";
+import VerifyEmail from "pages/account/VerifyEmail"
 
-import ForgotPassword from "./pages/ForgotPassword"
-import ResetPassword from "./pages/ResetPassword"
-import Account from './pages/Account.js'
-import Subscribe from './pages/Subscribe.js'
+import ForgotPassword from "pages/ForgotPassword"
+import ResetPassword from "pages/ResetPassword"
+import Account from 'pages/Account.js'
+import Subscribe from 'pages/Subscribe.js'
 // import Subscribe from 'pages/Subscribe.js'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { ToastRefreshToken } from "./shared/swal";
-import TokenManager from "./shared/TokenManager";
+import { ToastRefreshToken } from "shared/swal";
+import TokenManager from "shared/TokenManager";
 
 export default function App(props) {
   // If you want to disable the animation just use the disabled `prop` like below on your page's component
