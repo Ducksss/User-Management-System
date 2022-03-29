@@ -6,15 +6,10 @@ module.exports = {
     databasePassword: process.env.DB_PASSWORD,
     databaseName: process.env.DB_DATABASE_NAME,
 
-    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
-    cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
-    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
     JWTKey: process.env.JWTKEY,
 
     GMAIL_USER: process.env.GMAIL_USER,
     GMAIL_PASS: process.env.GMAIL_PASS,
-
-    EMAIL_SECRET: process.env.EMAIL_SECRET,
 
     REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY,
     COOKIE_SECRET: process.env.COOKIE_SECRET,
