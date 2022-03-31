@@ -7,6 +7,9 @@ To run this project, make sure to download and run the SQL, followed by cloning 
 Create a .env file under the <code>backend</code> folder details as follows:<br>
 See .env.example (Fill in your own KEYS & Credentials)
 
+Create a .env file under the <code>frontend</code> folder details as follows:<br>
+Add REACT_APP_STRIPE_PUBLISHABLE_KEY=<Your Stripe publishable key>
+
 ### Stripe Introduction & Installation guide:
 Refer to "Stripe Subscription.docx" (to request file)
 <br><br>
