@@ -7,14 +7,8 @@ To run this project, make sure to download and run the SQL, followed by cloning 
 Create a .env file under the <code>backend</code> folder details as follows:<br>
 See .env.example (Fill in your own KEYS & Credentials)
 
-### Cloudinary Setup:
-File name can be any to your liking. 
-Under the upload preset:
-1. Disable Unsigned Uploading
-2. Create a new upload preset
-3. Upload preset name MUST be `upload_to_ADES`
-4. Remember to link your File to the upload preset
-5. Be sure to key in your keys/secrets in the .ENV file 
+### Stripe Introduction & Setup:
+Refer to "Stripe Subscription.docx" (to request file)
 <br><br>
 ### Starting the Servers :
 
