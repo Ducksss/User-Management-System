@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import axios from "axios";
 import * as Yup from "yup";
-import config from "../../Config";
+// import config from "../../Config";
 import tw, { css } from "twin.macro";
 import styled from "styled-components";
 import { Formik, Form, useField } from 'formik';
@@ -53,7 +53,7 @@ const Question = ({ header, content }) => {
             .test('Unique Password', 'New password can\'t be your old password.', // <- key, message
                 function (value, context) {
                     return new Promise((resolve, reject) => {
-                        axios.post(`${config.baseUrl}/u/user/account/reset-password/verify-password-uniqueness`, {
+                        axios.post(`/u/user/account/reset-password/verify-password-uniqueness`, {
                             incomingPassword: value
                         })
                             .then((res) => {
@@ -76,7 +76,7 @@ const Question = ({ header, content }) => {
 
     const updateUserPassword = (values) => {
         axios
-            .post(`${config.baseUrl}/u/user/account/reset-password/change-password`, {
+            .post(`/u/user/account/reset-password/change-password`, {
                 incomingCurrent: values.currentPassword,
                 incomingPassword: values.password,
                 part: "store"

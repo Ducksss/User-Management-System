@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link, withRouter } from 'react-router-dom';
 import { Pencil } from 'react-bootstrap-icons';
 import tw from 'twin.macro';
-import config from "../../Config.js";
+// import config from "../../Config.js";
 import axios from "axios";
 //component
 import Slider from './Slider';
@@ -93,7 +93,7 @@ export default function AccountDetails(location) {
     const [subscriptions, setSubscriptions] = useState([]);
     const handleClick = async (e, subscriptionID) => {
         e.preventDefault();
-        await axios.post(`${config.baseUrl}/u/subscription/cancel`, {
+        await axios.post(`/u/subscription/cancel`, {
             subscriptionId: subscriptionID
         })
             .then((response) => {
@@ -116,7 +116,7 @@ export default function AccountDetails(location) {
     //     
     useEffect(() => {
         const fetchData = async () => {
-            await axios.get(`${config.baseUrl}/u/subscription/subscriptions`, { withCredentials: true })
+            await axios.get(`/u/subscription/subscriptions`, { withCredentials: true })
                 .then((response) => {
                     setSubscriptions(Object.values(response.data.subscriptions)[1]);
                 })
@@ -124,7 +124,7 @@ export default function AccountDetails(location) {
                     console.log(error);
                 })
             
-            await axios.get(`${config.baseUrl}/u/user/information`, { withCredentials: true })
+            await axios.get(`/u/user/information`, { withCredentials: true })
                 .then((response) => {
                     setUserInformation(response.data.content[0])
                 })

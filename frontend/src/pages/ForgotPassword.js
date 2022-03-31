@@ -16,7 +16,7 @@ import { ReactComponent as LoginIcon } from "feather-icons/dist/icons/log-in.svg
 import axios from "axios";
 import * as Yup from "yup";
 import Swal from 'sweetalert2';
-import config from "../Config.js";
+// import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { useHistory } from "react-router-dom";
 import { SearchOutline } from 'react-ionicons';
@@ -102,7 +102,7 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
         setIsSubmitted(true);
 
         axios
-            .post(`${config.baseUrl}/u/user/begin-reset-password/${values.email}`)
+            .post(`/u/user/begin-reset-password/${values.email}`)
             .catch((error) => {
                 // handleClick();
                 if (error.response.data.code === 500) {

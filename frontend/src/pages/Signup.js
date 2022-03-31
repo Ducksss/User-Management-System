@@ -16,7 +16,7 @@ import { ReactComponent as SignUpIcon } from "feather-icons/dist/icons/user-plus
 // imports
 import axios from "axios";
 import * as Yup from "yup";
-import config from "../Config.js";
+// import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { resEncrypt } from '../RsaEncryption';
 import { useHistory } from "react-router-dom";
@@ -153,7 +153,7 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
             .test('Unique Number', 'The number has already been taken', // <- key, message
                 function (value) {
                     return new Promise((resolve, reject) => {
-                        axios.get(`${config.baseUrl}/u/user/number/${value}/available`)
+                        axios.get(`/u/user/number/${value}/available`)
                             .then((res) => {
                                 resolve(true);
                             })
@@ -169,7 +169,7 @@ const StepOne = ({ publicKey, setCurrentStep }) => {
 
     const registerUserInformation = (values) => {
         axios
-            .post(`${config.baseUrl}/u/user/create-account`, {
+            .post(`/u/user/create-account`, {
                 firstName: resEncrypt(values.firstName, publicKey),
                 lastName: resEncrypt(values.lastName, publicKey),
                 email: resEncrypt(values.email, publicKey),
@@ -342,7 +342,7 @@ export default function Signup() {
     const [currentStep, setCurrentStep] = React.useState(0);
 
     React.useEffect(() => {
-        axios.get(`${config.baseUrl}/keys`)
+        axios.get(`/keys`)
             .then((response) => {
                 let key = response.data.publicKey;
                 console.log(response.data.publicKey);

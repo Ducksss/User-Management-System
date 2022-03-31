@@ -7,7 +7,7 @@ import { ReactComponent as MenuIcon } from "feather-icons/dist/icons/menu.svg";
 
 // imports
 import axios from "axios";
-import config from "../../Config";
+// import config from "../../Config";
 import { motion } from "framer-motion";
 import { useHistory } from "react-router-dom";
 
@@ -91,7 +91,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
 
   const getList = async () => {
     await axios
-      .get(`${config.baseUrl}/u/user/role`, { withCredentials: true })
+      .get(`/u/user/role`, { withCredentials: true })
       .then((result) => {
         console.log(result);
         setIsLoggedIn(true);
@@ -122,7 +122,7 @@ export default ({ roundedHeaderButton = false, logoLink, links, className, colla
   }, [syncLogout])
 
   const logoutHandler = () => {
-    axios.get(`${config.baseUrl}/u/user/logout`, {
+    axios.get(`/u/user/logout`, {
       withCredentials: true,
     }).then(() => {
       // setToken(false)

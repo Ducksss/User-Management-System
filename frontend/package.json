@@ -2,6 +2,7 @@
   "name": "treact",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8003/api/",
   "dependencies": {
     "@hookform/resolvers": "^2.8.1",
     "@owaiswiz/use-in-view": "^1.0.16",

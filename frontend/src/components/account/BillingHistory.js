@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
 import tw from 'twin.macro';
-import config from "../../Config.js";
+// import config from "../../Config.js";
 import axios from "axios";
 
 
@@ -22,7 +22,7 @@ export default function AccountDetails(location) {
     const [subscriptions, setSubscriptions] = useState([]);
     useEffect(() => {
         const fetchData = async () => {
-            await axios.get(`${config.baseUrl}/u/subscription/invoice`, { withCredentials: true })
+            await axios.get(`/u/subscription/invoice`, { withCredentials: true })
                 .then((response) => {
                     console.log(response.data.content.invoiceData);
                     setSubscriptions(response.data.content.invoiceData);

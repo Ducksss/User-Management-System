@@ -10,7 +10,7 @@ import illustration from "images/login-illustration.svg";
 
 // imports
 import axios from "axios";
-import config from "../../Config.js";
+// import config from "../../Config.js";
 import tw, { css } from "twin.macro";
 import { SyncLoader } from "react-spinners";
 import { Container as ContainerBase } from "components/misc/Layouts";
@@ -36,7 +36,7 @@ export default function VerifyEmail() {
     React.useState(() => {
         const token = window.location.href.split("/").slice(-1);
         axios
-            .post(`${config.baseUrl}/u/verify-email-verification`, {
+            .post(`/u/verify-email-verification`, {
                 token: token
             })
             .then((results) => {

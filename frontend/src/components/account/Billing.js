@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
-import config from "../../Config.js";
+// import config from "../../Config.js";
 import tw from 'twin.macro';
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -33,14 +33,14 @@ export default function Billing() {
     const [subscriptionData, setSubscriptionData] = useState(null);
     useEffect(() => {
         const fetchPrices = async () => {
-            const { prices } = await fetch(`${config.baseUrl}/u/subscription/config`).then(r => r.json());
+            const { prices } = await fetch(`/u/subscription/config`).then(r => r.json());
             setPrices(prices);
         };
         fetchPrices();
     }, []);
 
     const createSubscription = async (priceId) => {
-        await axios.get(`${config.baseUrl}/u/subscription/active-subscriptions`, { withCredentials: true })
+        await axios.get(`/u/subscription/active-subscriptions`, { withCredentials: true })
             .then(async(response) => {
                 if (response.data.content.length != 0) {
                     Toast.fire({
@@ -49,7 +49,7 @@ export default function Billing() {
                         text: "You currently have an active subscription, please cancel it if you want to get a different subscription",
                     });
                 } else {
-                    await axios.post(`${config.baseUrl}/u/subscription/create`, {
+                    await axios.post(`/u/subscription/create`, {
                         priceId: priceId,
                     }, { withCredentials: true }
                     )

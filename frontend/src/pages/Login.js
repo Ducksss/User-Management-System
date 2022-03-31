@@ -15,7 +15,7 @@ import { ReactComponent as LoginIcon } from "feather-icons/dist/icons/log-in.svg
 import axios from "axios";
 import * as Yup from "yup";
 import Swal from 'sweetalert2';
-import config from "../Config.js";
+// import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { resEncrypt } from '../RsaEncryption';
 import { SyncLoader } from "react-spinners";
@@ -75,7 +75,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
     const [publicKey, setPublicKey] = useState();
 
     useEffect(() => {
-        axios.get(`${config.baseUrl}/keys`)
+        axios.get(`/keys`)
             .then((response) => {
                 let key = response.data.publicKey;
                 console.log(response.data.publicKey);
@@ -97,7 +97,7 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
 
     const validateLogininformation = (values) => {
         axios
-            .post(`${config.baseUrl}/u/user/signin`, {
+            .post(`/u/user/signin`, {
                 email: resEncrypt(values.email, publicKey),
                 password: resEncrypt(values.password, publicKey),
             }, { withCredentials: true })

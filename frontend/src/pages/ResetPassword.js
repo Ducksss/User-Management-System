@@ -12,7 +12,7 @@ import illustration from "images/login-illustration.svg";
 import axios from "axios";
 import * as Yup from "yup";
 import Swal from 'sweetalert2';
-import config from "../Config.js";
+// import config from "../Config.js";
 import tw, { css } from "twin.macro";
 import { resEncrypt } from '../RsaEncryption';
 import { useHistory } from "react-router-dom";
@@ -75,7 +75,7 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
     const [publicKey, setPublicKey] = useState();
 
     useEffect(() => {
-        axios.get(`${config.baseUrl}/keys`)
+        axios.get(`/keys`)
             .then((response) => {
                 let key = response.data.publicKey;
                 console.log(response.data.publicKey);
@@ -129,7 +129,7 @@ const StepOne = ({ setMessage, setCurrentStep }) => {
     const updateUserPassword = (values) => {
         setIsSubmitted(true);
         axios
-            .post(`${config.baseUrl}/u/user/account/reset-password`, {
+            .post(`/u/user/account/reset-password`, {
                 token: token[0],
                 incomingPassword: values.password,
                 part: "store"
@@ -206,7 +206,7 @@ export default function ResetPassword() {
     const token = window.location.href.split("/").slice(-1);
     React.useEffect(() => {
         axios
-            .post(`${config.baseUrl}/u/user/reset-password/verify-reset-token`, {
+            .post(`/u/user/reset-password/verify-reset-token`, {
                 token: token[0]
             })
             .catch((error) => {

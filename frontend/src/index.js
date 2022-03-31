@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import Routes from "./Routes";
 import Modal from "react-modal";
 import axios from "axios";
-import config from "Config";
+// import config from "Config";
 import TokenManager from "shared/TokenManager";
 
 Modal.setAppElement("#root");
@@ -18,7 +18,7 @@ function Index() {
   const [isLoading, setisLoading] = useState(true)
 
   const verifyUser = useCallback(() => {
-    axios.get(`${config.baseUrl}/u/user/refresh-token`, { withCredentials: true })
+    axios.get(`/u/user/refresh-token`, { withCredentials: true })
       .then(response => {
         console.log(response.data);
         if (response.status == 200) {
