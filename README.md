@@ -4,9 +4,8 @@ For ESDE and ESDE
 # Installation:
 To run this project, make sure to download and run the SQL, followed by cloning this repository. Be sure to input your information in a .ENV file as well as the database.
 
-Create a .ENV file under the <code>backend</code> folder details as follows:<br>
-Any details covered are of your own values
-
+Create a .env file under the <code>backend</code> folder details as follows:<br>
+See .env.example (Fill in your own KEYS & Credentials)
 
 ### Cloudinary Setup:
 File name can be any to your liking. 
