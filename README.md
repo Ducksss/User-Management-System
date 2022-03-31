@@ -7,8 +7,6 @@ To run this project, make sure to download and run the SQL, followed by cloning 
 Create a .ENV file under the <code>backend</code> folder details as follows:<br>
 Any details covered are of your own values
 
-![ENV](./images/env.jpg)
-
 
 ### Cloudinary Setup:
 File name can be any to your liking. 
