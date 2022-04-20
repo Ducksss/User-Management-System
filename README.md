@@ -19,11 +19,11 @@ Refer to "Stripe Subscription.docx" (to request file)
 ```   
 $ cd backend
 $ npm i
-$ npm start
+$ npm run start
 ```
 2. to start frontend server:
 ```
 $ cd frontend
 $ npm i
-$ npm start
+$ npm run start
 ```
