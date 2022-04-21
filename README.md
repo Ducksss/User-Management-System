@@ -13,7 +13,7 @@ Add REACT_APP_STRIPE_PUBLISHABLE_KEY=<Your Stripe publishable key>
 Restore the database using "data_dump.sql" file provided in this repo to complete the database setup.
 
 ### Stripe Introduction & Installation guide:
-Refer to "Stripe Subscription.docx" (to request file)
+Refer to "Stripe Subscription.docx" (Find under MS TEAM > General > Class Materials > PET Projects)
 <br><br>
 ### Starting the Servers :
 
