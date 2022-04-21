@@ -422,55 +422,69 @@ exports.refreshToken = async (req, res, next) => {
     const { refreshToken } = signedCookies; //get the cookie by key
 
     if (refreshToken) {
+        let { _id } = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
         try {
             const payload = jwt.verify(refreshToken, config.REFRESH_TOKEN_SECRET);
             const userId = payload._id;
-            const now = Date.now().valueOf();
-
-            if (payload && (payload.exp * 1000 <= now)) {
-                res.clearCookie('refreshToken');
-                return res.status(401).send(codes(401, 'Session Expired'));
-            }
 
             let getUser = await manageUsers.findUserToken(refreshToken);
 
             if (getUser.length == 1) {
-                //create access token
-                const token = jwt.sign({
-                    user_guid: getUser[0].user_guid,
-                    email: getUser[0].email,
-                    privilege: getUser[0].privilege
-                },
-                    config.JWTKey, {
-                    expiresIn: 60 * 3
-                    // 3 minutes expiry
-                });
+                let userData = getUser[0]
+                let userToken = userData.refresh_token;
 
-                const refresh_token = jwt.sign({ _id: userId }, config.REFRESH_TOKEN_SECRET, {
-                    expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
-                });
+                if(userToken == refreshToken) {
+                    const data = jwt.sign({
+                            user_guid: userData.user_guid,
+                            email: userData.email,
+                            privilege: userData.privilege
+                        },
+                            config.JWTKey, {
+                            expiresIn: 3 * 60 * 60 //Expires in 3 mins
+                        })
+                    
+                    //refresh token
+                    const new_refresh_token = jwt.sign(
+                        {
+                            _id: userData.user_guid
+                        }, config.REFRESH_TOKEN_SECRET,
+                        {
+                            expiresIn: eval(config.REFRESH_TOKEN_EXPIRY)
+                        }
+                    ); 
 
-                await manageUsers.UpdateRefreshToken(getUser[0].user_guid, refresh_token);
-
-                res.cookie('refreshToken', refresh_token, {
-                    httpOnly: true,
-                    secure: true,
-                    signed: true,
-                    maxAge: 60 * 60 * 24 * 3 * 1000,
-                    sameSite: "none",
-                });
-                return res.status(200).send(token);
+                    await manageUsers.UpdateRefreshToken(userData.user_guid, new_refresh_token);
+                    res.cookie('refreshToken', new_refresh_token, {
+                        httpOnly: true,
+                        secure: true,
+                        signed: true,
+                        maxAge: 60 * 60 * 24 * 3 * 1000,
+                        sameSite: "none",
+                    });
+                    return res.status(200).send(data);
+                } else {
+                    await manageUsers.deleteRefreshToken(refreshToken);
+                    res.clearCookie('refreshToken');
+                    return res.status(500).send(codes(500));
+                }
             } else {
+                console.log('here1');
+                await manageUsers.deleteRefreshToken(_id);
                 res.clearCookie('refreshToken');
                 return res.status(401).send(codes(401));
             }
 
         } catch (error) {
-            // console.log(error);
+            console.log(error);
+            await manageUsers.deleteRefreshToken(_id);
+            res.clearCookie('refreshToken');
             // return res.status(500).send(codes(500));
             next(error);
         }
     } else {
+        console.log('here2');
+        res.clearCookie('refreshToken');
         // return res.status(401).send(codes(401, 'No token is detected.'))
         next(new NoTokenError());
     }

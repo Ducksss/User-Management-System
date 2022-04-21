@@ -8,17 +8,16 @@ const { StatusError } = require("../errors/AuthError");
 
 exports.isLoggedIn = async (req, res, next) => {
     let auth = req.headers.authorization;
-    if (!auth) 
-    // return res.status(400).send(codes(400, 'Invalid Request'));
-    throw new InvalidTokenError();
-
+    if (!auth) return res.status(400).send(codes(400, 'Invalid Request'));
+   
     try {
         let token = auth.split(' ')[1];
-        let payload = jwt.verify(token, config.JWTKey);
-
-        if (!payload)
+        if (!token)
         // return res.status(401).send(codes(401));
         throw new NoTokenError();
+
+        let payload = jwt.verify(token, config.JWTKey);
+        if (!payload) return res.status(401).send(codes(401))
 
         let { user_guid, email } = payload;
         let getLoggedInData = await manageUserService.isLoggedIn(user_guid);
@@ -40,12 +39,8 @@ exports.isLoggedIn = async (req, res, next) => {
             throw new StatusError("Locked Out");
         }
     } catch (error) {
-        console.log(error)
-        console.log(req.originalUrl)
-        if (error.expiredAt) {
-            // return res.status(401).send(codes(401));
-            next(error);
-        }
+        if (error instanceof jwt.TokenExpiredError) return res.status(401).send(codes(401, 'Token Expired'));
+        
             // return res.status(400).send(codes(400));
             next(error);
     }

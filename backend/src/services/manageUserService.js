@@ -488,7 +488,7 @@ module.exports.lockUser = (userid) => {
 };
 
 //delete token
-module.exports.deleteRefreshToken = (token) => {
+module.exports.deleteRefreshToken = (uuid) => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err) {
@@ -497,9 +497,9 @@ module.exports.deleteRefreshToken = (token) => {
                 let query = `DELETE FROM 
                                 refresh_tokens
                             WHERE 
-                                refresh_token = ?;
+                                user_guid = ?;
                             `;
-                connection.query(query, [token], (err, results) => {
+                connection.query(query, [uuid], (err, results) => {
                     if (err) {
                         console.log(err);
                         reject(err);

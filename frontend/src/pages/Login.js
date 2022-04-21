@@ -107,6 +107,8 @@ const StepOne = ({ setMessage, setCurrentStep, ...props }) => {
                 // localStorage.setItem('token', results.data.token);
 
                 localStorage.setItem('displayName', results.data.displayName);
+                axios.defaults.headers.common = { 'Authorization': `bearer ${results.data.token}` }
+
                 history.push({ pathname: "/" });
                 window.location.reload();
             })
