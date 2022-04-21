@@ -9,6 +9,8 @@ See .env.example (Fill in your own KEYS & Credentials)
 
 Create a .env file under the <code>frontend</code> folder details as follows:<br>
 Add REACT_APP_STRIPE_PUBLISHABLE_KEY=<Your Stripe publishable key>
+  
+Restore the database using "data_dump.sql" file provided in this repo to complete the database setup.
 
 ### Stripe Introduction & Installation guide:
 Refer to "Stripe Subscription.docx" (to request file)
